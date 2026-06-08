@@ -1,12 +1,16 @@
-export default function Navbar() {
+interface NavbarProps {
+  onSignUpClick?: () => void;
+}
+
+export default function Navbar({ onSignUpClick }: NavbarProps) {
   return (
     <div
       className="absolute"
       style={{
-        width: '1568px',
-        height: '92px',
-        left: '352px',
-        top: '39px',
+        width: 'calc(100vw - min(22vw, 352px))',
+        height: 'min(8vh, 92px)',
+        left: 'min(22vw, 352px)',
+        top: 'min(3.5vh, 39px)',
         background: '#191C25',
       }}
     >
@@ -14,11 +18,11 @@ export default function Navbar() {
       <div
         className="absolute"
         style={{
-          left: '50px',
-          top: '35px',
+          left: 'min(3vw, 50px)',
+          top: 'min(2.5vh, 35px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '50px',
+          gap: 'min(3vw, 50px)',
         }}
       >
         {/* Coinflip */}
@@ -38,8 +42,8 @@ export default function Navbar() {
           <span
             style={{
               fontFamily: 'Proxima Nova, sans-serif',
-              fontSize: '17px',
-              lineHeight: '17px',
+              fontSize: 'min(1.3vw, 17px)',
+              lineHeight: '1',
               color: '#286DFF',
               fontWeight: '700',
             }}
@@ -125,25 +129,28 @@ export default function Navbar() {
       {/* Sign Up button */}
       <div
         className="absolute"
+        onClick={onSignUpClick}
         style={{
-          width: '159px',
-          height: '50px',
-          left: '1259px',
-          top: '21px',
+          width: 'min(10vw, 159px)',
+          height: 'min(4.5vh, 50px)',
+          right: 'min(2vw, 20px)',
+          top: 'min(2vh, 21px)',
           background: '#006EFF',
           borderRadius: '13px',
+          cursor: 'pointer',
         }}
       >
         <span
           style={{
             position: 'absolute',
-            width: '66px',
-            height: '26px',
-            left: '48px',
-            top: '11px',
+            width: 'auto',
+            height: 'auto',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
             fontFamily: 'Poppins, sans-serif',
-            fontSize: '17px',
-            lineHeight: '26px',
+            fontSize: 'min(1.3vw, 17px)',
+            lineHeight: '1',
             color: '#FFFFFF',
             fontWeight: '600',
           }}
@@ -156,10 +163,10 @@ export default function Navbar() {
       <div
         className="absolute"
         style={{
-          width: '159px',
-          height: '50px',
-          left: '1070px',
-          top: '21px',
+          width: 'min(10vw, 159px)',
+          height: 'min(4.5vh, 50px)',
+          right: 'min(16vw, 200px)',
+          top: 'min(2vh, 21px)',
           background: '#242737',
           borderRadius: '13px',
         }}
@@ -167,13 +174,14 @@ export default function Navbar() {
         <span
           style={{
             position: 'absolute',
-            width: '51px',
-            height: '26px',
-            left: '54px',
-            top: '11px',
+            width: 'auto',
+            height: 'auto',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
             fontFamily: 'Poppins, sans-serif',
-            fontSize: '17px',
-            lineHeight: '26px',
+            fontSize: 'min(1.3vw, 17px)',
+            lineHeight: '1',
             color: '#4A4F6F',
             fontWeight: '600',
           }}

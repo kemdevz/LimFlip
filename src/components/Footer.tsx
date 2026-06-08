@@ -51,15 +51,17 @@ export default function Footer() {
             top: '144px',
             border: '1px solid #252A32',
             borderRadius: '3px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div
+          <img
+            src="/footerdiscord.svg"
+            alt="Discord"
             style={{
               width: '29px',
               height: '23px',
-              left: '11px',
-              top: '14px',
-              background: '#565F6F',
             }}
           />
         </div>
@@ -72,15 +74,17 @@ export default function Footer() {
             top: '144px',
             border: '1px solid #252A32',
             borderRadius: '3px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div
+          <img
+            src="/footertwitter.svg"
+            alt="Twitter"
             style={{
               width: '28px',
               height: '23px',
-              left: '11px',
-              top: '14px',
-              background: '#565F6F',
             }}
           />
         </div>

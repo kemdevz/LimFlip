@@ -1,7 +1,91 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
 import Subnavbar from '@/components/Subnavbar';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
+import SignUpModal from '@/components/SignUpModal';
+
+function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
+  const styleRef = useRef<HTMLStyleElement>(null);
+
+  useEffect(() => {
+    if (!styleRef.current) {
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(0.98) translateY(-20px);
+          }
+        }
+        .logo-animate {
+          animation: pulse 2s ease-in-out infinite;
+        }
+      `;
+      document.head.appendChild(style);
+      styleRef.current = style;
+    }
+
+    return () => {
+      if (styleRef.current) {
+        document.head.removeChild(styleRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: '#131721',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        opacity: isFadingOut ? 0 : 1,
+        transition: 'opacity 0.2s ease-in-out',
+      }}
+    >
+      <div
+        className="logo-animate"
+        style={{
+          position: 'relative',
+        }}
+      >
+        <img
+          src="/logo.svg"
+          alt="Loading"
+          style={{
+            width: '300px',
+            height: '162px',
+          }}
+        />
+      </div>
+
+      <div
+        className="logo-animate"
+        style={{
+          position: 'absolute',
+          width: '276px',
+          height: '65px',
+          background: 'rgba(2, 118, 255, 0.13)',
+          filter: 'blur(45.65px)',
+          borderRadius: '66px',
+        }}
+      />
+    </div>
+  );
+}
 
 function MaintenancePage() {
   return (
@@ -101,7 +185,7 @@ function MaintenancePage() {
   );
 }
 
-function NotFoundPage() {
+function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
       {/* Background image with luminosity blend mode */}
@@ -147,39 +231,148 @@ function NotFoundPage() {
       />
 
       <Subnavbar />
-      <Navbar />
+      <Navbar onSignUpClick={onSignUpClick} />
       <Sidebar />
       
       {/* 404 graphic */}
       <div
         className="absolute"
         style={{
-          left: 'calc(352px + (1568px - 606px) / 2)',
-          top: 'calc(50% - 518px / 2)',
+          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
         }}
       >
         <img
           src="/assets/svg/404.svg"
           alt="404"
           style={{
-            width: '546px',
-            height: '318px',
+            width: 'min(45vw, 546px)',
+            height: 'min(26vw, 318px)',
             filter: 'drop-shadow(0px 4px 75.1px rgba(2, 118, 255, 0.38))',
           }}
         />
       </div>
-      
+
+      {/* Error text */}
+      <div
+        className="absolute"
+        style={{
+          width: 'auto',
+          height: 'auto',
+          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
+          top: 'calc(50% + min(26vw, 318px) / 2 + 20px)',
+          transform: 'translateX(-50%)',
+          fontFamily: 'Poppins, sans-serif',
+          fontStyle: 'normal',
+          fontWeight: 700,
+          fontSize: 'min(2.5vw, 25px)',
+          lineHeight: '1.2',
+          color: '#FFFFFF',
+        }}
+      >
+        Error
+      </div>
+
+      {/* Description text */}
+      <div
+        className="absolute"
+        style={{
+          width: 'min(50vw, 642px)',
+          height: 'auto',
+          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
+          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px)',
+          transform: 'translateX(-50%)',
+          fontFamily: 'Poppins, sans-serif',
+          fontStyle: 'normal',
+          fontWeight: 600,
+          fontSize: 'min(1.2vw, 16px)',
+          lineHeight: '1.5',
+          color: '#505A71',
+          textAlign: 'center',
+        }}
+      >
+        We can't seem to find page you're looking for. Try going back to the homepage.
+      </div>
+
+      {/* Goto Home-Page button */}
+      <div
+        className="absolute"
+        style={{
+          width: 'min(12vw, 151px)',
+          height: 'min(3vw, 36px)',
+          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
+          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px + min(1.2vw, 16px) * 1.5 + 20px)',
+          transform: 'translateX(-50%)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            left: '0px',
+            top: '0px',
+            background: '#0276FF',
+            borderRadius: '7px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            left: '0px',
+            top: '0px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'Poppins, sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 600,
+            fontSize: 'min(1vw, 13px)',
+            lineHeight: '1',
+            color: '#FFFFFF',
+          }}
+        >
+          Goto Home-Page
+        </div>
+      </div>
+
       <Footer />
     </div>
   );
 }
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const isMaintenance = process.env.MAINTENANCE === 'true';
 
-  if (isMaintenance) {
-    return <MaintenancePage />;
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFadingOut(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 200);
+    }, 3000);
 
-  return <NotFoundPage />;
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
+      {isMaintenance ? (
+        <MaintenancePage />
+      ) : (
+        <NotFoundPage onSignUpClick={() => setIsSignUpModalOpen(true)} />
+      )}
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+      />
+    </>
+  );
 }

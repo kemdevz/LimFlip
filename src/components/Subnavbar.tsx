@@ -3,9 +3,9 @@ export default function Subnavbar() {
     <div
       className="absolute"
       style={{
-        width: '1568px',
-        height: '39px',
-        left: '352px',
+        width: 'calc(100vw - min(22vw, 352px))',
+        height: 'min(3.5vh, 39px)',
+        left: 'min(22vw, 352px)',
         top: '0px',
         background: '#14161D',
       }}
@@ -14,20 +14,20 @@ export default function Subnavbar() {
       <div
         className="absolute"
         style={{
-          width: '431px',
-          height: '15px',
-          left: '20px',
-          top: '11px',
+          width: 'auto',
+          height: 'auto',
+          left: 'min(1.5vw, 20px)',
+          top: 'min(1vh, 11px)',
           display: 'flex',
-          gap: '14px',
+          gap: 'min(1vw, 14px)',
           alignItems: 'center',
         }}
       >
         <span
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: '14px',
-            lineHeight: '17px',
+            fontSize: 'min(1vw, 14px)',
+            lineHeight: '1.2',
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
@@ -38,8 +38,8 @@ export default function Subnavbar() {
         <span
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: '14px',
-            lineHeight: '17px',
+            fontSize: 'min(1vw, 14px)',
+            lineHeight: '1.2',
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
@@ -50,8 +50,8 @@ export default function Subnavbar() {
         <span
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: '14px',
-            lineHeight: '17px',
+            fontSize: 'min(1vw, 14px)',
+            lineHeight: '1.2',
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
@@ -62,8 +62,8 @@ export default function Subnavbar() {
         <span
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: '14px',
-            lineHeight: '17px',
+            fontSize: 'min(1vw, 14px)',
+            lineHeight: '1.2',
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
@@ -74,8 +74,8 @@ export default function Subnavbar() {
         <span
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: '14px',
-            lineHeight: '17px',
+            fontSize: 'min(1vw, 14px)',
+            lineHeight: '1.2',
             color: '#006EFF',
             fontWeight: '600',
             whiteSpace: 'nowrap',
@@ -89,18 +89,18 @@ export default function Subnavbar() {
       <div
         className="absolute"
         style={{
-          right: '140px',
-          top: '11px',
+          right: 'min(2vw, 20px)',
+          top: 'min(1vh, 11px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'min(0.5vw, 8px)',
         }}
       >
         {/* Social icons */}
         <div
           style={{
             display: 'flex',
-            gap: '7px',
+            gap: 'min(0.5vw, 7px)',
           }}
         >
           <img
@@ -143,8 +143,8 @@ export default function Subnavbar() {
           <span
             style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: '11.25px',
-              lineHeight: '18px',
+              fontSize: 'min(0.9vw, 11.25px)',
+              lineHeight: '1.5',
               color: '#006EFF',
               fontWeight: '700',
             }}

@@ -1,10 +1,12 @@
+import MessageChat from './MessageChat';
+
 export default function Sidebar() {
   return (
     <div
       className="absolute"
       style={{
-        width: '352px',
-        height: '1080px',
+        width: 'min(22vw, 352px)',
+        height: '100vh',
         left: '0px',
         top: '0px',
         background: '#161922',
@@ -14,8 +16,8 @@ export default function Sidebar() {
       <div
         className="absolute"
         style={{
-          width: '352px',
-          height: '132px',
+          width: '100%',
+          height: 'min(12vh, 132px)',
           left: '0px',
           top: '0px',
           background: '#111318',
@@ -25,10 +27,10 @@ export default function Sidebar() {
         <div
           className="absolute"
           style={{
-            width: '300px',
-            height: '162px',
-            left: '26px',
-            top: '-15px',
+            width: 'min(85%, 300px)',
+            height: 'min(12vh, 162px)',
+            left: 'min(7%, 26px)',
+            top: 'min(-1vh, -15px)',
           }}
         >
           <img
@@ -56,23 +58,143 @@ export default function Sidebar() {
         />
       </div>
 
+      {/* Chat messages area */}
+      <div
+        className="absolute"
+        style={{
+          width: '100%',
+          height: 'calc(100vh - min(12vh, 132px) - min(13vh, 136px))',
+          left: '0px',
+          top: 'min(12vh, 132px)',
+          overflowY: 'auto',
+        }}
+      >
+        <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+          <MessageChat
+            username="jakep"
+            message="i gambled my life savings, and won. thank you bloxybet. now im a whale."
+            time="15:24"
+            avatarUrl="/PFPJAKEP.png"
+            isWhale={true}
+          />
+        </div>
+      </div>
+
       {/* Chat input */}
       <div
         className="absolute"
         style={{
-          width: '298px',
-          height: '46px',
+          width: 'min(85%, 298px)',
+          height: 'min(4vh, 46px)',
           left: '0px',
-          bottom: '90px',
+          bottom: 'min(8vh, 90px)',
         }}
       >
         {/* Input box */}
         <div
           className="absolute"
           style={{
-            width: '287px',
-            height: '41px',
-            left: '5px',
+            width: 'min(96%, 287px)',
+            height: 'min(3.8vh, 41px)',
+            left: 'min(2%, 5px)',
             top: '0px',
             border: '1px solid #33394B',
             borderRadius: '8px',
@@ -81,13 +203,13 @@ export default function Sidebar() {
           <span
             style={{
               position: 'absolute',
-              width: '126px',
-              height: '21px',
-              left: '23px',
-              top: '12px',
+              width: 'auto',
+              height: 'auto',
+              left: 'min(8%, 23px)',
+              top: 'min(1vh, 12px)',
               fontFamily: 'Poppins, sans-serif',
-              fontSize: '14px',
-              lineHeight: '21px',
+              fontSize: 'min(1.1vw, 14px)',
+              lineHeight: '1.5',
               color: '#33394B',
               fontWeight: '600',
               textAlign: 'center',
@@ -104,8 +226,10 @@ export default function Sidebar() {
             height={19}
             style={{
               position: 'absolute',
-              right: '10px',
-              top: '11px',
+              right: 'min(3%, 10px)',
+              top: 'min(1vh, 11px)',
+              width: 'min(1.5vw, 19px)',
+              height: 'min(1.5vw, 19px)',
             }}
           />
         </div>
@@ -114,10 +238,10 @@ export default function Sidebar() {
         <div
           className="absolute"
           style={{
-            width: '41px',
-            height: '41px',
-            left: '303px',
-            top: '-1px',
+            width: 'min(3.8vh, 41px)',
+            height: 'min(3.8vh, 41px)',
+            left: 'min(86%, 303px)',
+            top: 'min(-0.1vh, -1px)',
             background: '#33394B',
             borderRadius: '11px',
           }}
@@ -130,8 +254,10 @@ export default function Sidebar() {
             height={19}
             style={{
               position: 'absolute',
-              left: '13px',
-              top: '11px',
+              left: 'min(32%, 13px)',
+              top: 'min(1vh, 11px)',
+              width: 'min(1.5vw, 19px)',
+              height: 'min(1.5vw, 19px)',
             }}
           />
         </div>

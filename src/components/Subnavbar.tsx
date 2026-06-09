@@ -1,4 +1,12 @@
-export default function Subnavbar() {
+interface SubnavbarProps {
+  onTermsClick?: () => void;
+  onSupportClick?: () => void;
+  onProvablyFairClick?: () => void;
+  onFaqClick?: () => void;
+  onAffiliatesClick?: () => void;
+}
+
+export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick }: SubnavbarProps) {
   return (
     <div
       className="absolute"
@@ -24,6 +32,7 @@ export default function Subnavbar() {
         }}
       >
         <span
+          onClick={onTermsClick}
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
             fontSize: 'min(1vw, 14px)',
@@ -31,11 +40,13 @@ export default function Subnavbar() {
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           Terms of Service
         </span>
         <span
+          onClick={onSupportClick}
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
             fontSize: 'min(1vw, 14px)',
@@ -43,11 +54,13 @@ export default function Subnavbar() {
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           Support
         </span>
         <span
+          onClick={onProvablyFairClick}
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
             fontSize: 'min(1vw, 14px)',
@@ -55,11 +68,13 @@ export default function Subnavbar() {
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           Provably Fair
         </span>
         <span
+          onClick={onFaqClick}
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
             fontSize: 'min(1vw, 14px)',
@@ -67,11 +82,13 @@ export default function Subnavbar() {
             color: '#313749',
             fontWeight: '600',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           Frequently Asked
         </span>
         <span
+          onClick={onAffiliatesClick}
           style={{
             fontFamily: 'Proxima Nova, sans-serif',
             fontSize: 'min(1vw, 14px)',
@@ -79,6 +96,7 @@ export default function Subnavbar() {
             color: '#006EFF',
             fontWeight: '600',
             whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           Affiliates

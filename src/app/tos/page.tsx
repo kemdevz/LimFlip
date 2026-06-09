@@ -1,11 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import Subnavbar from '@/components/Subnavbar';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
+import SignUpModal from '@/components/SignUpModal';
 
 export default function TOSPage() {
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
       {/* Background image with luminosity blend mode */}
@@ -38,8 +42,13 @@ export default function TOSPage() {
         }}
       />
 
-      <Subnavbar />
-      <Navbar />
+      <Subnavbar 
+        onTermsClick={() => window.location.href = '/tos'}
+      />
+      <Navbar 
+        onSignUpClick={() => setIsSignUpModalOpen(true)}
+        onLogInClick={() => setIsSignUpModalOpen(true)}
+      />
       <Sidebar />
 
       {/* Scrollable Content Area */}
@@ -130,6 +139,11 @@ export default function TOSPage() {
       </div>
 
       <Footer />
+      
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+      />
     </div>
   );
 }

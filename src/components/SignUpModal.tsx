@@ -35,7 +35,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         justifyContent: 'center',
         zIndex: 10000,
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.3s ease-in-out',
+        transition: 'opacity 0.15s ease-in-out',
       }}
       onClick={onClose}
     >
@@ -45,7 +45,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           width: '939px',
           height: '689px',
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
-          transition: 'transform 0.3s ease-in-out',
+          transition: 'transform 0.15s ease-in-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -191,7 +191,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   color: 'rgba(0, 0, 0, 0.5)',
                 }}
               >
-                duel
+                bash
               </span>
               <span
                 style={{

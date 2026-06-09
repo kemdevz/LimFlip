@@ -1,9 +1,15 @@
+'use client';
+
+import { useState } from 'react';
 import Subnavbar from '@/components/Subnavbar';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
+import SignUpModal from '@/components/SignUpModal';
 
 export default function NotFound() {
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
       {/* Background image with luminosity blend mode */}
@@ -48,8 +54,13 @@ export default function NotFound() {
         }}
       />
 
-      <Subnavbar />
-      <Navbar />
+      <Subnavbar 
+        onTermsClick={() => window.location.href = '/tos'}
+      />
+      <Navbar 
+        onSignUpClick={() => setIsSignUpModalOpen(true)}
+        onLogInClick={() => setIsSignUpModalOpen(true)}
+      />
       <Sidebar />
 
       {/* 404 graphic */}
@@ -158,6 +169,11 @@ export default function NotFound() {
       </div>
       
       <Footer />
+      
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+      />
     </div>
   );
 }

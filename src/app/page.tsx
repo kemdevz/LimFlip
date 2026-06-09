@@ -230,112 +230,393 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         }}
       />
 
-      <Subnavbar />
-      <Navbar onSignUpClick={onSignUpClick} />
+      <Subnavbar
+        onTermsClick={() => window.location.href = '/tos'}
+      />
+      <Navbar
+        onSignUpClick={onSignUpClick}
+        onLogInClick={onSignUpClick}
+      />
       <Sidebar />
-      
-      {/* 404 graphic */}
+
+      {/* Bet Input */}
       <div
-        className="absolute"
         style={{
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: 'absolute',
+          width: '246px',
+          height: '44px',
+          left: 'calc(min(22vw, 352px) + 20px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
+          background: '#191D29',
+          borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 15px',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'Poppins, sans-serif',
+            fontStyle: 'normal',
+            fontWeight: '500',
+            fontSize: '18px',
+            lineHeight: '27px',
+            color: '#006EFF',
+            marginRight: '10px',
+          }}
+        >
+          $
+        </span>
+        <input
+          type="text"
+          placeholder="Enter bet amount ..."
+          style={{
+            width: '156px',
+            height: '24px',
+            fontFamily: 'Poppins, sans-serif',
+            fontStyle: 'normal',
+            fontWeight: '500',
+            fontSize: '16px',
+            lineHeight: '24px',
+            color: '#525D7D',
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+          }}
+        />
+      </div>
+
+      {/* Place Bet Button */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '141px',
+          height: '42px',
+          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '121px',
+            height: '42px',
+            left: '9px',
+            top: '-2px',
+            background: '#0276FF',
+            borderRadius: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Proxima Nova, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '700',
+              fontSize: '17px',
+              lineHeight: '17px',
+              color: '#FFFFFF',
+            }}
+          >
+            PLACE BET
+          </span>
+        </div>
+      </div>
+
+      {/* Heads/Tails Selection */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '86px',
+          height: '42px',
+          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '0px',
+          gap: '2px',
         }}
       >
         <img
-          src="/assets/svg/404.svg"
-          alt="404"
+          src="/heads.png"
+          alt="Heads"
           style={{
-            width: 'min(45vw, 546px)',
-            height: 'min(26vw, 318px)',
-            filter: 'drop-shadow(0px 4px 75.1px rgba(2, 118, 255, 0.38))',
+            width: '42px',
+            height: '42px',
+            flex: 'none',
+            order: 0,
+            flexGrow: 0,
+            cursor: 'pointer',
+          }}
+        />
+        <img
+          src="/tails.png"
+          alt="Tails"
+          style={{
+            width: '42px',
+            height: '42px',
+            flex: 'none',
+            order: 1,
+            flexGrow: 0,
+            cursor: 'pointer',
           }}
         />
       </div>
 
-      {/* Error text */}
+      {/* Bet Items Button */}
       <div
-        className="absolute"
         style={{
-          width: 'auto',
-          height: 'auto',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px)',
-          transform: 'translateX(-50%)',
-          fontFamily: 'Poppins, sans-serif',
-          fontStyle: 'normal',
-          fontWeight: 700,
-          fontSize: 'min(2.5vw, 25px)',
-          lineHeight: '1.2',
-          color: '#FFFFFF',
-        }}
-      >
-        Error
-      </div>
-
-      {/* Description text */}
-      <div
-        className="absolute"
-        style={{
-          width: 'min(50vw, 642px)',
-          height: 'auto',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px)',
-          transform: 'translateX(-50%)',
-          fontFamily: 'Poppins, sans-serif',
-          fontStyle: 'normal',
-          fontWeight: 600,
-          fontSize: 'min(1.2vw, 16px)',
-          lineHeight: '1.5',
-          color: '#505A71',
-          textAlign: 'center',
-        }}
-      >
-        We can't seem to find page you're looking for. Try going back to the homepage.
-      </div>
-
-      {/* Goto Home-Page button */}
-      <div
-        className="absolute"
-        style={{
-          width: 'min(12vw, 151px)',
-          height: 'min(3vw, 36px)',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px + min(1.2vw, 16px) * 1.5 + 20px)',
-          transform: 'translateX(-50%)',
+          position: 'absolute',
+          width: '141px',
+          height: '42px',
+          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 30px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
         }}
       >
         <div
           style={{
             position: 'absolute',
-            width: '100%',
-            height: '100%',
-            left: '0px',
-            top: '0px',
+            width: '121px',
+            height: '42px',
+            left: '9px',
+            top: '-2px',
             background: '#0276FF',
-            borderRadius: '7px',
+            borderRadius: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
           }}
-        />
+        >
+          <span
+            style={{
+              fontFamily: 'Proxima Nova, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '700',
+              fontSize: '17px',
+              lineHeight: '17px',
+              color: '#FFFFFF',
+            }}
+          >
+            BET ITEMS
+          </span>
+        </div>
+      </div>
+
+      {/* Stats Display */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '245px',
+          height: '22px',
+          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 30px + 141px + 100px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 15px)',
+        }}
+      >
+        {/* Players count */}
         <div
           style={{
             position: 'absolute',
-            width: '100%',
-            height: '100%',
+            width: '59px',
+            height: '22px',
             left: '0px',
             top: '0px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'Poppins, sans-serif',
-            fontStyle: 'normal',
-            fontWeight: 600,
-            fontSize: 'min(1vw, 13px)',
-            lineHeight: '1',
-            color: '#FFFFFF',
+            gap: '5px',
           }}
         >
-          Goto Home-Page
+          <img
+            src="/assets/svg/home/dice.svg"
+            alt="Players"
+            style={{
+              width: '27px',
+              height: '22px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '400',
+              fontSize: '18px',
+              lineHeight: '27px',
+              color: '#FFFFFF',
+            }}
+          >
+            36
+          </span>
+        </div>
+
+        {/* Total bets */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '77px',
+            height: '22px',
+            left: '81px',
+            top: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+          }}
+        >
+          <img
+            src="/assets/svg/home/wallet.svg"
+            alt="Total Bets"
+            style={{
+              width: '20px',
+              height: '16px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '400',
+              fontSize: '18px',
+              lineHeight: '27px',
+              color: '#0276FF',
+            }}
+          >
+            R$1.59m
+          </span>
+        </div>
+
+        {/* Your bets */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '77px',
+            height: '22px',
+            left: '198px',
+            top: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+          }}
+        >
+          <img
+            src="/assets/svg/home/wallet.svg"
+            alt="Your Bets"
+            style={{
+              width: '20px',
+              height: '16px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '400',
+              fontSize: '18px',
+              lineHeight: '27px',
+              color: '#0276FF',
+            }}
+          >
+            $56.13
+          </span>
+        </div>
+      </div>
+
+      {/* Price Sort Dropdown */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '279px',
+          height: '53px',
+          right: 'calc(20px + 53px + 10px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '266px',
+            height: '53px',
+            left: '0px',
+            top: '0px',
+            boxSizing: 'border-box',
+            border: '1px solid #333845',
+            borderRadius: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 15px',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src="/assets/svg/home/down.svg"
+            alt="Sort"
+            style={{
+              width: '28px',
+              height: '21px',
+              marginRight: '10px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              fontSize: '15px',
+              lineHeight: '22px',
+              color: '#FFFFFF',
+            }}
+          >
+            Price sort low to high
+          </span>
+          <img
+            src="/assets/svg/home/arrow.svg"
+            alt="Sort"
+            style={{
+              width: '17px',
+              height: '9px',
+              marginLeft: 'auto',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Sort Button */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '53px',
+          height: '53px',
+          right: '20px',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '53px',
+            height: '53px',
+            left: '0px',
+            top: '0px',
+            background: '#181B22',
+            border: '1px solid #0276FF',
+            boxShadow: 'inset 0px 0px 58.9px rgba(2, 118, 255, 0.25)',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src="/assets/svg/home/sort.svg"
+            alt="Sort"
+            style={{
+              width: '20px',
+              height: '18px',
+            }}
+          />
         </div>
       </div>
 

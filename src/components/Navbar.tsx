@@ -1,8 +1,12 @@
 interface NavbarProps {
   onSignUpClick?: () => void;
+  onLogInClick?: () => void;
+  onCoinflipClick?: () => void;
+  onDiceDuelClick?: () => void;
+  onJackpotClick?: () => void;
 }
 
-export default function Navbar({ onSignUpClick }: NavbarProps) {
+export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, onDiceDuelClick, onJackpotClick }: NavbarProps) {
   return (
     <div
       className="absolute"
@@ -27,10 +31,12 @@ export default function Navbar({ onSignUpClick }: NavbarProps) {
       >
         {/* Coinflip */}
         <div
+          onClick={onCoinflipClick}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            cursor: 'pointer',
           }}
         >
           <img
@@ -54,10 +60,12 @@ export default function Navbar({ onSignUpClick }: NavbarProps) {
 
         {/* Dice Duel */}
         <div
+          onClick={onDiceDuelClick}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            cursor: 'pointer',
           }}
         >
           <img
@@ -81,10 +89,12 @@ export default function Navbar({ onSignUpClick }: NavbarProps) {
 
         {/* Jackpot */}
         <div
+          onClick={onJackpotClick}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            cursor: 'pointer',
           }}
         >
           <img
@@ -162,6 +172,7 @@ export default function Navbar({ onSignUpClick }: NavbarProps) {
       {/* Log In button */}
       <div
         className="absolute"
+        onClick={onLogInClick}
         style={{
           width: 'min(10vw, 159px)',
           height: 'min(4.5vh, 50px)',
@@ -169,6 +180,7 @@ export default function Navbar({ onSignUpClick }: NavbarProps) {
           top: 'min(2vh, 21px)',
           background: '#242737',
           borderRadius: '13px',
+          cursor: 'pointer',
         }}
       >
         <span

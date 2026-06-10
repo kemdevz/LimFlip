@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Subnavbar from '@/components/Subnavbar';
-import Navbar from '@/components/Navbar';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
-import SignUpModal from '@/components/SignUpModal';
+import Subnavbar from '@/components/layout/Subnavbar';
+import Navbar from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
+import Footer from '@/components/layout/Footer';
+import SignUpModal from '@/components/auth/SignUpModal';
 
 export default function NotFound() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function NotFound() {
           height: '1248px',
           left: '-371px',
           top: '-84px',
-          backgroundImage: 'url(/mainbg.png)',
+          backgroundImage: 'url(/assets/images/backgrounds/mainbg.png)',
           backgroundSize: 'cover',
           mixBlendMode: 'luminosity',
         }}
@@ -73,7 +73,7 @@ export default function NotFound() {
         }}
       >
         <img
-          src="/assets/svg/404.svg"
+          src="/assets/svg/errors/404.svg"
           alt="404"
           style={{
             width: 'min(45vw, 546px)',

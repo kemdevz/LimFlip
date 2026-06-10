@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import MessageChat from './MessageChat';
-import ChatInput from './ChatInput';
-import SendButton from './SendButton';
+import MessageChat from '../chat/MessageChat';
+import ChatInput from '../chat/ChatInput';
+import SendButton from '../chat/SendButton';
 import Link from 'next/link';
 
 interface Message {
@@ -21,7 +21,7 @@ export default function Sidebar() {
       username: 'jakep',
       message: 'i gambled my life savings, and won. thank you bloxybet. now im a whale.',
       time: '15:24',
-      avatarUrl: '/PFPJAKEP.png',
+      avatarUrl: '/assets/images/auth/PFPJAKEP.png',
       isWhale: true,
     },
   ]);
@@ -76,7 +76,7 @@ export default function Sidebar() {
       username: user.username || 'Anonymous',
       message: inputMessage,
       time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      avatarUrl: '/1SIDE.png',
+      avatarUrl: '/assets/images/coinflip/1SIDE.png',
       isWhale: false,
     };
 
@@ -119,7 +119,7 @@ export default function Sidebar() {
             }}
           >
             <img
-              src="/logo.svg"
+              src="/assets/svg/ui/logo.svg"
               alt="bloxbash logo"
               style={{
                 width: '100%',

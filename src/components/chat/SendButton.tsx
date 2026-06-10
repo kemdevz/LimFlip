@@ -21,7 +21,7 @@ export default function SendButton({ onSend }: SendButtonProps) {
     >
       {/* Send icon */}
       <img
-        src="/assets/svg/send.svg"
+        src="/assets/svg/chat/send.svg"
         alt="Send"
         width={19}
         height={19}

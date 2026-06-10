@@ -135,7 +135,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             height: '41px',
             left: '774px',
             top: '647px',
-            background: 'url(/tails.png)',
+            background: 'url(/assets/images/coinflip/tails.png)',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
@@ -149,7 +149,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             height: '41px',
             left: '821px',
             top: '647px',
-            background: 'url(/heads.png)',
+            background: 'url(/assets/images/coinflip/heads.png)',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
@@ -579,7 +579,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                 }}
               />
               <img
-                src="/knife.png"
+                src="/assets/images/coinflip/knife.png"
                 alt="Item"
                 style={{
                   position: 'absolute',
@@ -587,18 +587,6 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                   height: '118px',
                   left: '22px',
                   top: '20px',
-                }}
-              />
-              <img
-                src="/assets/svg/coinflip/coin.svg"
-                alt="Coin"
-                width={54}
-                height={54}
-                style={{
-                  position: 'absolute',
-                  left: '10px',
-                  top: '20px',
-                  filter: 'drop-shadow(0px 0px 50px rgba(0, 110, 255, 0.25))',
                 }}
               />
               <span

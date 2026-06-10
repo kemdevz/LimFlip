@@ -32,7 +32,7 @@ export default function Footer() {
           }}
         >
           <img
-            src="/logo.svg"
+            src="/assets/svg/ui/logo.svg"
             alt="bloxbash logo"
             style={{
               width: '100%',
@@ -57,7 +57,7 @@ export default function Footer() {
           }}
         >
           <img
-            src="/footerdiscord.svg"
+            src="/assets/svg/social/footerdiscord.svg"
             alt="Discord"
             style={{
               width: '29px',
@@ -80,7 +80,7 @@ export default function Footer() {
           }}
         >
           <img
-            src="/footertwitter.svg"
+            src="/assets/svg/social/footertwitter.svg"
             alt="Twitter"
             style={{
               width: '28px',

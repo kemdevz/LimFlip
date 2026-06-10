@@ -140,13 +140,13 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           }}
         >
           <img
-            src="/assets/svg/twitter.svg"
+            src="/assets/svg/social/twitter.svg"
             alt="Twitter"
             width={16}
             height={13}
           />
           <img
-            src="/assets/svg/discord.svg"
+            src="/assets/svg/social/discord.svg"
             alt="Discord"
             width={16}
             height={13}
@@ -171,7 +171,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           }}
         >
           <img
-            src="/assets/svg/online.svg"
+            src="/assets/svg/ui/online.svg"
             alt="Online"
             width={18}
             height={18}

@@ -16,7 +16,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
-      setIsVisible(true);
+      setTimeout(() => setIsVisible(true), 10);
       setCountdown(5);
       setProgress(100);
       
@@ -235,7 +235,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                   height: '125px',
                   left: '20px',
                   top: '34px',
-                  background: 'url(/rightside.png)',
+                  background: 'url(/assets/images/ui/rightside.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   borderRadius: '140px',
@@ -258,7 +258,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                   height: '137px',
                   left: '0px',
                   top: '-4px',
-                  background: 'url(/cornerpng.png)',
+                  background: 'url(/assets/images/ui/cornerpng.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
@@ -309,7 +309,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                   height: '129px',
                   left: '15px',
                   top: '29px',
-                  background: 'url(/cornerpng.png)',
+                  background: 'url(/assets/images/ui/cornerpng.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   borderRadius: '140px',
@@ -322,7 +322,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                   height: '127px',
                   left: '16px',
                   top: '31px',
-                  background: 'url(/1SIDE.png)',
+                  background: 'url(/assets/images/coinflip/1SIDE.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   borderRadius: '1000px',
@@ -631,7 +631,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                 R$90K
               </span>
               <img
-                src="/knife.png"
+                src="/assets/images/coinflip/knife.png"
                 alt="Knife"
                 style={{
                   position: 'absolute',
@@ -703,7 +703,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                 R$90K
               </span>
               <img
-                src="/knife.png"
+                src="/assets/images/coinflip/knife.png"
                 alt="Knife"
                 style={{
                   position: 'absolute',
@@ -723,12 +723,12 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               position: 'absolute',
               width: '276px',
               height: '65px',
-              left: '395px',
+              left: '390px',
               top: '0px',
             }}
           >
             <img
-              src="/logo.svg"
+              src="/assets/svg/ui/logo.svg"
               alt="bloxbash logo"
               style={{
                 position: 'absolute',
@@ -744,7 +744,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                 width: '276px',
                 height: '65px',
                 left: '0px',
-                top: '-200px',
+                top: '-90px',
                 background: 'rgba(2, 118, 255, 0.07)',
                 filter: 'blur(45.65px)',
                 borderRadius: '66px',
@@ -758,12 +758,12 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               position: 'absolute',
               width: '276px',
               height: '65px',
-              left: '395px',
+              left: '390px',
               top: '0px',
             }}
           >
             <img
-              src="/logo.svg"
+              src="/assets/svg/ui/logo.svg"
               alt="bloxbash logo"
               style={{
                 position: 'absolute',
@@ -779,7 +779,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
                 width: '276px',
                 height: '65px',
                 left: '0px',
-                top: '-200px',
+                top: '-180px',
                 background: 'rgba(2, 118, 255, 0.07)',
                 filter: 'blur(45.65px)',
                 borderRadius: '66px',

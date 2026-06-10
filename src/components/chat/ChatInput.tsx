@@ -61,7 +61,7 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
 
       {/* Emoji icon */}
       <img
-        src="/assets/svg/emoji.svg"
+        src="/assets/svg/ui/emoji.svg"
         alt="Emoji"
         width={19}
         height={19}

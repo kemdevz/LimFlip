@@ -57,9 +57,12 @@ export default function MessageChat({
             height: '19px',
             left: '5px',
             top: '5px',
-            background: avatarUrl ? `url(${avatarUrl})` : '#464A58',
+            backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
+            backgroundColor: avatarUrl ? 'transparent' : '#464A58',
             borderRadius: '43px',
             backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         />
       </div>
@@ -137,7 +140,7 @@ export default function MessageChat({
               </span>
               {isWhale && (
                 <img
-                  src="/whale.svg"
+                  src="/assets/svg/ui/whale.svg"
                   alt="whale"
                   style={{
                     width: '17px',

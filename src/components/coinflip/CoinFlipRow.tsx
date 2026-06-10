@@ -21,9 +21,9 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
     return () => clearTimeout(timer);
   }, []);
 
-  const winnerImage = winner === 'heads' ? '/HEADSs.png' : '/tails.png';
-  const winnerCoin = winner === 'heads' ? '/heads.png' : '/tails.png';
-  const loserCoin = winner === 'heads' ? '/tails.png' : '/heads.png';
+  const winnerImage = winner === 'heads' ? '/assets/images/coinflip/HEADSs.png' : '/assets/images/coinflip/tails.png';
+  const winnerCoin = winner === 'heads' ? '/assets/images/coinflip/heads.png' : '/assets/images/coinflip/tails.png';
+  const loserCoin = winner === 'heads' ? '/assets/images/coinflip/tails.png' : '/assets/images/coinflip/heads.png';
 
   return (
     <div
@@ -71,7 +71,7 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
               left: '116px',
               top: '2px',
               borderRadius: '50%',
-              background: 'url(/1SIDE.png)',
+              background: 'url(/assets/images/coinflip/1SIDE.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
@@ -161,7 +161,7 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
                   height: '66px',
                   left: '1px',
                   top: '0px',
-                  background: 'url(/1SIDE.png)',
+                  background: 'url(/assets/images/coinflip/1SIDE.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   borderRadius: '43px',
@@ -258,7 +258,7 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
                   height: '41px',
                   left: '6px',
                   top: '6px',
-                  background: 'url(/knife.png)',
+                  background: 'url(/assets/images/coinflip/knife.png)',
                   backgroundSize: 'contain',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
@@ -274,7 +274,7 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
                   height: '41px',
                   left: '6px',
                   top: '6px',
-                  background: 'url(/knife.png)',
+                  background: 'url(/assets/images/coinflip/knife.png)',
                   backgroundSize: 'contain',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',

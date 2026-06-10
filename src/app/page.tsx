@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Subnavbar from '@/components/Subnavbar';
-import Navbar from '@/components/Navbar';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
-import SignUpModal from '@/components/SignUpModal';
+import Subnavbar from '@/components/layout/Subnavbar';
+import Navbar from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
+import Footer from '@/components/layout/Footer';
+import SignUpModal from '@/components/auth/SignUpModal';
 import CoinFlipRow from '@/components/coinflip/CoinFlipRow';
-import CoinflipViewModal from '@/components/CoinflipViewModal';
-import CoinflipCreateModal from '@/components/CoinflipCreateModal';
+import CoinflipViewModal from '@/components/coinflip/CoinflipViewModal';
+import CoinflipCreateModal from '@/components/coinflip/CoinflipCreateModal';
 
 function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
   const styleRef = useRef<HTMLStyleElement>(null);
@@ -66,7 +66,7 @@ function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
         }}
       >
         <img
-          src="/logo.svg"
+          src="/assets/svg/ui/logo.svg"
           alt="Loading"
           style={{
             width: '300px',
@@ -101,7 +101,7 @@ function MaintenancePage() {
           height: '1205px',
           left: '-13px',
           top: '-84px',
-          backgroundImage: 'url(/background.png)',
+          backgroundImage: 'url(/assets/images/backgrounds/background.png)',
           backgroundSize: 'cover',
           mixBlendMode: 'color-dodge',
         }}
@@ -118,7 +118,7 @@ function MaintenancePage() {
         }}
       >
         <img
-          src="/logo.svg"
+          src="/assets/svg/ui/logo.svg"
           alt="bloxbash logo"
           width={459}
           height={248}
@@ -202,7 +202,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
           height: '1248px',
           left: '-371px',
           top: '-84px',
-          backgroundImage: 'url(/mainbg.png)',
+          backgroundImage: 'url(/assets/images/backgrounds/mainbg.png)',
           backgroundSize: 'cover',
           mixBlendMode: 'luminosity',
         }}
@@ -348,7 +348,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         }}
       >
         <img
-          src="/heads.png"
+          src="/assets/images/coinflip/heads.png"
           alt="Heads"
           style={{
             width: '42px',
@@ -360,7 +360,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
           }}
         />
         <img
-          src="/tails.png"
+          src="/assets/images/coinflip/tails.png"
           alt="Tails"
           style={{
             width: '42px',

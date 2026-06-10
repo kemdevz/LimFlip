@@ -5,5 +5,12 @@
     "email": "josh.devsgit@gmail.com",
     "password": "$2a$10$Apn/afq9eY1/kKXhhhAPm.JKxe5kbSOJ3nqTfCGjkhKn1laqJgZM.",
     "createdAt": "2026-06-10T17:52:42.962Z"
+  },
+  {
+    "id": "1781123738685",
+    "username": "Richer",
+    "email": "radovanladygaga@gmail.com",
+    "password": "$2a$10$FY0yrS.2N2rvAGqml27yl.KUVK41cYZvpB2uVIn.5VxfzPa5ThwkW",
+    "createdAt": "2026-06-10T20:35:38.685Z"
   }
 ]

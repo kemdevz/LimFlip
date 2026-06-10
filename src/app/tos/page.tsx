@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Subnavbar from '@/components/Subnavbar';
-import Navbar from '@/components/Navbar';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
-import SignUpModal from '@/components/SignUpModal';
+import Subnavbar from '@/components/layout/Subnavbar';
+import Navbar from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
+import Footer from '@/components/layout/Footer';
+import SignUpModal from '@/components/auth/SignUpModal';
 
 export default function TOSPage() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function TOSPage() {
           height: '1248px',
           left: '-371px',
           top: '-84px',
-          backgroundImage: 'url(/background.png)',
+          backgroundImage: 'url(/assets/images/backgrounds/background.png)',
           backgroundSize: 'cover',
           mixBlendMode: 'luminosity',
           opacity: '0.5',

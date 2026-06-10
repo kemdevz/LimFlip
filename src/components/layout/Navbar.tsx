@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import WalletModal from './WalletModal';
+import WalletModal from '../wallet/WalletModal';
 
 interface NavbarProps {
   onSignUpClick?: () => void;
@@ -336,7 +336,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
             style={{
               width: '38px',
               height: '38px',
-              background: 'url(/1SIDE.png)',
+              background: 'url(/assets/images/coinflip/1SIDE.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               borderRadius: '43px',

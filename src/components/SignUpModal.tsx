@@ -10,16 +10,63 @@ interface SignUpModalProps {
 export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProps) {
   const [isRegister, setIsRegister] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setIsVisible(true);
+      setShouldRender(true);
+      setTimeout(() => setIsVisible(true), 10);
     } else {
       setIsVisible(false);
+      setTimeout(() => setShouldRender(false), 150);
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const endpoint = isRegister ? 'http://localhost:3001/auth/signup' : 'http://localhost:3001/auth/login';
+      const body = isRegister ? { username, email, password } : { email, password };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      // Store token
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Close modal
+      onClose?.();
+      
+      // Reload page to update auth state
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -36,9 +83,11 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         zIndex: 10000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.15s ease-in-out',
+        pointerEvents: isVisible ? 'auto' : 'none',
       }}
       onClick={onClose}
     >
+      <form onSubmit={handleSubmit}>
       <div
         style={{
           position: 'relative',
@@ -379,7 +428,8 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 top: '90px',
               }}
             >
-              {/* Username field */}
+              {/* Username field - only show for register */}
+              {isRegister && (
               <div
                 style={{
                   width: '518px',
@@ -398,31 +448,26 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 >
                   Username
                 </span>
-                <div
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
                   style={{
                     width: '518px',
                     height: '54px',
                     background: '#262937',
                     borderRadius: '9px',
-                    display: 'flex',
-                    alignItems: 'center',
+                    border: 'none',
                     padding: '0 18px',
+                    color: '#FFFFFF',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '13px',
+                    outline: 'none',
                   }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 500,
-                      fontSize: '13px',
-                      lineHeight: '18px',
-                      color: '#6B7289',
-                    }}
-                  >
-                    Enter username
-                  </span>
-                </div>
+                />
               </div>
+              )}
 
               {/* Email field */}
               <div
@@ -448,30 +493,24 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 >
                   Email
                 </span>
-                <div
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email"
                   style={{
                     width: '518px',
                     height: '54px',
                     background: '#262937',
                     borderRadius: '9px',
-                    display: 'flex',
-                    alignItems: 'center',
+                    border: 'none',
                     padding: '0 18px',
+                    color: '#FFFFFF',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '13px',
+                    outline: 'none',
                   }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 500,
-                      fontSize: '13px',
-                      lineHeight: '18px',
-                      color: '#6B7289',
-                    }}
-                  >
-                    Enter email
-                  </span>
-                </div>
+                />
               </div>
 
               {/* Password field */}
@@ -498,31 +537,38 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 >
                   Password
                 </span>
-                <div
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
                   style={{
                     width: '518px',
                     height: '54px',
                     background: '#262937',
                     borderRadius: '9px',
-                    display: 'flex',
-                    alignItems: 'center',
+                    border: 'none',
                     padding: '0 18px',
+                    color: '#FFFFFF',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '13px',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {/* Error display */}
+              {error && (
+                <span
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '13px',
+                    color: '#FF4444',
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 500,
-                      fontSize: '13px',
-                      lineHeight: '18px',
-                      color: '#6B7289',
-                    }}
-                  >
-                    Enter password
-                  </span>
-                </div>
-              </div>
+                  {error}
+                </span>
+              )}
 
               {/* Register button */}
               <div
@@ -531,31 +577,26 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   height: '68px',
                 }}
               >
-                <div
+                <button
+                  type="submit"
+                  disabled={loading}
                   style={{
                     width: '518px',
                     height: '54px',
-                    background: '#0276FF',
+                    background: loading ? '#1a4d8c' : '#0276FF',
                     borderRadius: '9px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '18px',
+                    lineHeight: '27px',
+                    color: '#FFFFFF',
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '18px',
-                      lineHeight: '27px',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    Register
-                  </span>
-                </div>
+                  {loading ? 'Loading...' : (isRegister ? 'Register' : 'Log In')}
+                </button>
               </div>
             </div>
 
@@ -708,6 +749,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           </div>
         </div>
       </div>
+      </form>
     </div>
   );
 }

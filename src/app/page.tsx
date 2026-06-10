@@ -6,6 +6,9 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import SignUpModal from '@/components/SignUpModal';
+import CoinFlipRow from '@/components/coinflip/CoinFlipRow';
+import CoinflipViewModal from '@/components/CoinflipViewModal';
+import CoinflipCreateModal from '@/components/CoinflipCreateModal';
 
 function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
   const styleRef = useRef<HTMLStyleElement>(null);
@@ -33,7 +36,7 @@ function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
     }
 
     return () => {
-      if (styleRef.current) {
+      if (styleRef.current && styleRef.current.parentNode === document.head) {
         document.head.removeChild(styleRef.current);
       }
     };
@@ -186,6 +189,9 @@ function MaintenancePage() {
 }
 
 function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
+  const [isCoinflipViewModalOpen, setIsCoinflipViewModalOpen] = useState(false);
+  const [isCoinflipCreateModalOpen, setIsCoinflipCreateModalOpen] = useState(false);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
       {/* Background image with luminosity blend mode */}
@@ -391,6 +397,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
             justifyContent: 'center',
             cursor: 'pointer',
           }}
+          onClick={() => setIsCoinflipCreateModalOpen(true)}
         >
           <span
             style={{
@@ -620,7 +627,21 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         </div>
       </div>
 
+      <CoinFlipRow topOffset={0} winner="heads" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
+      <CoinFlipRow topOffset={110} winner="heads" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
+      <CoinFlipRow topOffset={220} winner="tails" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
+      <CoinFlipRow topOffset={330} winner="tails" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
+
       <Footer />
+
+      <CoinflipViewModal
+        isOpen={isCoinflipViewModalOpen}
+        onClose={() => setIsCoinflipViewModalOpen(false)}
+      />
+      <CoinflipCreateModal
+        isOpen={isCoinflipCreateModalOpen}
+        onClose={() => setIsCoinflipCreateModalOpen(false)}
+      />
     </div>
   );
 }

@@ -23,7 +23,8 @@ export default function MessageChat({
         padding: '10px 14px',
         position: 'relative',
         width: '333px',
-        height: '81px',
+        minHeight: '81px',
+        height: 'auto',
         borderRadius: '20px',
       }}
     >
@@ -68,7 +69,8 @@ export default function MessageChat({
         style={{
           position: 'absolute',
           width: '239px',
-          height: '76px',
+          minHeight: '76px',
+          height: 'auto',
           left: '33px',
           top: '-18px',
         }}
@@ -125,7 +127,7 @@ export default function MessageChat({
                   fontWeight: 600,
                   fontSize: '16px',
                   lineHeight: '24px',
-                  color: '#006EFF',
+                  color: isWhale ? '#006EFF' : '#FFFFFF',
                   flex: 'none',
                   order: 0,
                   flexGrow: 0,
@@ -155,7 +157,8 @@ export default function MessageChat({
           style={{
             position: 'absolute',
             width: '321px',
-            height: '46px',
+            minHeight: '46px',
+            height: 'auto',
             left: '-36px',
             top: '36px',
             fontFamily: 'Poppins, sans-serif',

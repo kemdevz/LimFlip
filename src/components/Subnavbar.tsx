@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
 interface SubnavbarProps {
   onTermsClick?: () => void;
   onSupportClick?: () => void;
@@ -7,6 +12,19 @@ interface SubnavbarProps {
 }
 
 export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick }: SubnavbarProps) {
+  const [onlineCount, setOnlineCount] = useState(327);
+
+  useEffect(() => {
+    const socket = io('http://localhost:3001');
+
+    socket.on('online-count', (count) => {
+      setOnlineCount(count);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   return (
     <div
       className="absolute"
@@ -167,7 +185,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
               fontWeight: '700',
             }}
           >
-            327
+            {onlineCount}
           </span>
         </div>
       </div>

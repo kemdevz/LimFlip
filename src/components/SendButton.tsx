@@ -1,7 +1,14 @@
-export default function SendButton() {
+'use client';
+
+interface SendButtonProps {
+  onSend: () => void;
+}
+
+export default function SendButton({ onSend }: SendButtonProps) {
   return (
     <div
       className="absolute"
+      onClick={onSend}
       style={{
         width: 'min(3.8vh, 41px)',
         height: 'min(3.8vh, 41px)',
@@ -9,6 +16,7 @@ export default function SendButton() {
         bottom: 'min(8vh, 100px)',
         background: '#33394B',
         borderRadius: '11px',
+        cursor: 'pointer',
       }}
     >
       {/* Send icon */}

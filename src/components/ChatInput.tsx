@@ -1,4 +1,20 @@
-export default function ChatInput() {
+'use client';
+
+import { useState } from 'react';
+
+interface ChatInputProps {
+  onMessageChange: (message: string) => void;
+  message: string;
+  onSend: () => void;
+}
+
+export default function ChatInput({ onMessageChange, message, onSend }: ChatInputProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSend();
+    }
+  };
+
   return (
     <div
       className="absolute"
@@ -20,23 +36,28 @@ export default function ChatInput() {
           position: 'relative',
         }}
       >
-      <span
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => onMessageChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Write something.."
         style={{
           position: 'absolute',
-          width: 'auto',
-          height: 'auto',
+          width: 'calc(100% - 60px)',
+          height: '100%',
           left: 'min(8%, 23px)',
-          top: 'min(1vh, 12px)',
+          top: '0px',
           fontFamily: 'Poppins, sans-serif',
           fontSize: 'min(1.1vw, 14px)',
           lineHeight: '1.5',
-          color: '#33394B',
+          color: '#FFFFFF',
           fontWeight: '600',
-          textAlign: 'center',
+          background: 'transparent',
+          border: 'none',
+          outline: 'none',
         }}
-      >
-        Write something..
-      </span>
+      />
 
       {/* Emoji icon */}
       <img

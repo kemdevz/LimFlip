@@ -77,7 +77,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
         style={{
           position: 'relative',
           width: '1066px',
-          height: '634px',
+          height: '734px',
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'scale(1)' : 'scale(0.9)',
           transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
@@ -89,7 +89,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
           style={{
             position: 'absolute',
             width: '1066px',
-            height: '558px',
+            height: '658px',
             left: '0px',
             top: '76px',
           }}
@@ -100,7 +100,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               boxSizing: 'border-box',
               position: 'absolute',
               width: '1062px',
-              height: '555px',
+              height: '655px',
               left: '0px',
               top: '0px',
               background: '#191B25',
@@ -338,7 +338,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               width: '299px',
               height: '27px',
               left: '379px',
-              top: '445px',
+              top: '545px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
               fontWeight: 600,
@@ -357,7 +357,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               width: '297px',
               height: '42px',
               left: '383px',
-              top: '484px',
+              top: '584px',
             }}
           >
             <div
@@ -399,7 +399,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               width: '297px',
               height: '42px',
               left: '741px',
-              top: '484px',
+              top: '584px',
             }}
           >
             <div

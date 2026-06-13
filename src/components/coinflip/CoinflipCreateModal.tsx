@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import CoinflipItemCard from './CoinflipItemCard';
 
 interface CoinflipCreateModalProps {
   isOpen: boolean;
@@ -265,7 +266,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               }}
             />
             <img
-              src="/search.svg"
+              src="/assets/svg/ui/search.svg"
               alt="Search"
               width={17}
               height={17}
@@ -335,7 +336,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             High to low
           </span>
           <img
-            src="/arrowsort.svg"
+            src="/assets/svg/ui/arrowsort.svg"
             alt="Sort"
             width={12}
             height={7}
@@ -389,7 +390,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             Filter from..
           </span>
           <img
-            src="/arrowsort.svg"
+            src="/assets/svg/ui/arrowsort.svg"
             alt="Filter"
             width={12}
             height={7}
@@ -417,36 +418,29 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
         <div
           style={{
             position: 'absolute',
-            width: '198px',
-            height: '54px',
+            width: '199px',
+            height: '44px',
             left: '875px',
             top: '638px',
+            background: '#202634',
+            borderRadius: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              left: '-1.01%',
-              right: '0.51%',
-              top: '12.96%',
-              bottom: '5.56%',
-              background: '#202634',
-              borderRadius: '5px',
-            }}
-          />
           <span
             style={{
-              position: 'absolute',
-              width: '185px',
+              position: 'relative',
+              width: '165px',
               height: '24px',
-              left: '15px',
-              top: '17px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
               fontWeight: 600,
               fontSize: '16px',
               lineHeight: '24px',
               color: '#FFFFFF',
+              whiteSpace: 'nowrap',
             }}
           >
             Create Game {formatAmount(animatedAmount)}
@@ -536,93 +530,49 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             top: '201px',
           }}
         >
-          {/* Item cards - rendering 12 items */}
-          {[...Array(12)].map((_, index) => (
+          {/* Item cards - rendering 13 items */}
+          {[
+            '/assets/images/coinflip/knife.png',
+            '/assets/images/coinflip/chroma.png',
+            '/assets/images/coinflip/gun.png',
+            '/assets/images/coinflip/candy.png',
+            '/assets/images/coinflip/knife.png',
+            '/assets/images/coinflip/chroma.png',
+            '/assets/images/coinflip/luger.png',
+            '/assets/images/coinflip/gun.png',
+            '/assets/images/coinflip/candy.png',
+            '/assets/images/coinflip/knife.png',
+            '/assets/images/coinflip/chroma.png',
+            '/assets/images/coinflip/luger.png',
+          ].map((imageSrc, index) => (
             <div
               key={index}
               onClick={() => toggleItemSelection(index)}
               style={{
-                boxSizing: 'border-box',
-                width: '161px',
-                height: '206px',
-                border: selectedItems.has(index) ? '1px solid #006EFF' : 'none',
-                borderRadius: '8px',
+                position: 'relative',
+                width: '159.29px',
+                height: '203.81px',
+                cursor: 'pointer',
                 flex: 'none',
                 order: index,
                 flexGrow: 0,
-                position: 'relative',
-                cursor: 'pointer',
               }}
             >
               {selectedItems.has(index) && (
                 <div
                   style={{
                     position: 'absolute',
-                    width: '160px',
-                    height: '205px',
+                    width: '159.29px',
+                    height: '203.81px',
                     left: '0px',
-                    top: '1px',
-                    background: 'rgba(0, 110, 255, 0.27)',
-                    borderRadius: '6px',
+                    top: '0px',
+                    border: '1px solid #006EFF',
+                    borderRadius: '7.91501px',
+                    zIndex: 10,
                   }}
                 />
               )}
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '154px',
-                  height: '154px',
-                  left: '5px',
-                  top: '4px',
-                  background: '#13151E',
-                  borderRadius: '10px',
-                }}
-              />
-              <img
-                src="/assets/images/coinflip/knife.png"
-                alt="Item"
-                style={{
-                  position: 'absolute',
-                  width: '118px',
-                  height: '118px',
-                  left: '22px',
-                  top: '20px',
-                }}
-              />
-              <span
-                style={{
-                  position: 'absolute',
-                  width: '154px',
-                  height: '23px',
-                  left: '7px',
-                  top: '162px',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  color: '#FFFFFF',
-                }}
-              >
-                Knife
-              </span>
-              <span
-                style={{
-                  position: 'absolute',
-                  width: '69px',
-                  height: '23px',
-                  left: '7px',
-                  top: '181px',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  color: '#006EFF',
-                }}
-              >
-                R$43.8K
-              </span>
+              <CoinflipItemCard imageSrc={imageSrc} />
             </div>
           ))}
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useSocket } from '@/context/SocketContext';
 
 interface SubnavbarProps {
   onTermsClick?: () => void;
@@ -12,182 +12,286 @@ interface SubnavbarProps {
 }
 
 export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick }: SubnavbarProps) {
-  const [onlineCount, setOnlineCount] = useState(327);
-
-  useEffect(() => {
-    const socket = io('http://localhost:3001');
-
-    socket.on('online-count', (count) => {
-      setOnlineCount(count);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  const { onlineCount } = useSocket();
   return (
     <div
       className="absolute"
       style={{
-        width: 'calc(100vw - min(22vw, 352px))',
-        height: 'min(3.5vh, 39px)',
+        width: '1568px',
+        height: '39px',
         left: 'min(22vw, 352px)',
         top: '0px',
-        background: '#14161D',
+        background: '#131621',
       }}
     >
       {/* Navigation links */}
       <div
         className="absolute"
         style={{
-          width: 'auto',
-          height: 'auto',
-          left: 'min(1.5vw, 20px)',
-          top: 'min(1vh, 11px)',
+          width: '431px',
+          height: '20px',
+          left: '22px',
+          top: '10px',
           display: 'flex',
-          gap: 'min(1vw, 14px)',
-          alignItems: 'center',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          padding: '0px',
+          gap: '14px',
         }}
       >
-        <span
-          onClick={onTermsClick}
+        {/* Terms of Service */}
+        <div
           style={{
-            fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: 'min(1vw, 14px)',
-            lineHeight: '1.2',
-            color: '#313749',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            width: '135px',
+            height: '20px',
+            flex: 'none',
+            order: 0,
+            flexGrow: 0,
+            position: 'relative',
           }}
         >
-          Terms of Service
-        </span>
-        <span
-          onClick={onSupportClick}
+          <img
+            src="/assets/svg/subnav/tos.svg"
+            alt="Terms"
+            style={{
+              position: 'absolute',
+              left: '0px',
+              top: '0px',
+              width: '15px',
+              height: '18px',
+            }}
+          />
+          <span
+            onClick={onTermsClick}
+            style={{
+              position: 'absolute',
+              width: '108px',
+              height: '20px',
+              left: '21px',
+              top: '0px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#313749',
+              cursor: 'pointer',
+            }}
+          >
+            Terms of Service
+          </span>
+        </div>
+
+        {/* Provably Fair */}
+        <div
           style={{
-            fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: 'min(1vw, 14px)',
-            lineHeight: '1.2',
-            color: '#313749',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            width: '112px',
+            height: '20px',
+            flex: 'none',
+            order: 1,
+            flexGrow: 0,
+            position: 'relative',
           }}
         >
-          Support
-        </span>
-        <span
-          onClick={onProvablyFairClick}
+          <img
+            src="/assets/svg/subnav/fairness.svg"
+            alt="Fairness"
+            style={{
+              position: 'absolute',
+              left: '0px',
+              top: '1px',
+              width: '17px',
+              height: '18px',
+            }}
+          />
+          <span
+            onClick={onProvablyFairClick}
+            style={{
+              position: 'absolute',
+              width: '85px',
+              height: '20px',
+              left: '25px',
+              top: '0px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#313749',
+              cursor: 'pointer',
+            }}
+          >
+            Provably Fair
+          </span>
+        </div>
+
+        {/* Privacy Policy */}
+        <div
           style={{
-            fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: 'min(1vw, 14px)',
-            lineHeight: '1.2',
-            color: '#313749',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            width: '111px',
+            height: '20px',
+            flex: 'none',
+            order: 2,
+            flexGrow: 0,
+            position: 'relative',
           }}
         >
-          Provably Fair
-        </span>
-        <span
-          onClick={onFaqClick}
+          <img
+            src="/assets/svg/subnav/privacy.svg"
+            alt="Privacy"
+            style={{
+              position: 'absolute',
+              left: '0px',
+              top: '1px',
+              width: '13px',
+              height: '16px',
+            }}
+          />
+          <span
+            onClick={onSupportClick}
+            style={{
+              position: 'absolute',
+              width: '90px',
+              height: '20px',
+              left: '20px',
+              top: '0px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#313749',
+              cursor: 'pointer',
+            }}
+          >
+            Privacy Policy
+          </span>
+        </div>
+
+        {/* FAQ */}
+        <div
           style={{
-            fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: 'min(1vw, 14px)',
-            lineHeight: '1.2',
-            color: '#313749',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            width: '48px',
+            height: '20px',
+            flex: 'none',
+            order: 3,
+            flexGrow: 0,
+            position: 'relative',
           }}
         >
-          Frequently Asked
-        </span>
-        <span
-          onClick={onAffiliatesClick}
+          <img
+            src="/assets/svg/subnav/faq.svg"
+            alt="FAQ"
+            style={{
+              position: 'absolute',
+              left: '0px',
+              top: '2px',
+              width: '15px',
+              height: '15px',
+            }}
+          />
+          <span
+            onClick={onFaqClick}
+            style={{
+              position: 'absolute',
+              width: '26px',
+              height: '20px',
+              left: '21px',
+              top: '0px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#313749',
+              cursor: 'pointer',
+            }}
+          >
+            FAQ
+          </span>
+        </div>
+
+        {/* Leaderboard */}
+        <div
           style={{
-            fontFamily: 'Proxima Nova, sans-serif',
-            fontSize: 'min(1vw, 14px)',
-            lineHeight: '1.2',
-            color: '#006EFF',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            width: '106px',
+            height: '20px',
+            flex: 'none',
+            order: 4,
+            flexGrow: 0,
+            position: 'relative',
           }}
         >
-          Affiliates
-        </span>
+          <img
+            src="/assets/svg/subnav/leaderboard.svg"
+            alt="Leaderboard"
+            style={{
+              position: 'absolute',
+              width: '15px',
+              height: '15px',
+              left: '2px',
+              top: '2px',
+            }}
+          />
+          <span
+            onClick={onAffiliatesClick}
+            style={{
+              position: 'absolute',
+              width: '85px',
+              height: '20px',
+              left: '23px',
+              top: '0px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#006EFF',
+              cursor: 'pointer',
+            }}
+          >
+            Leaderboard
+          </span>
+        </div>
       </div>
 
-      {/* Right side elements */}
+      {/* Right side social icons */}
       <div
         className="absolute"
         style={{
-          right: 'min(2vw, 20px)',
-          top: 'min(1vh, 11px)',
+          width: '39px',
+          height: '13px',
+          right: '-300px',
+          top: '12px',
           display: 'flex',
-          alignItems: 'center',
-          gap: 'min(0.5vw, 8px)',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          padding: '0px',
+          gap: '7px',
         }}
       >
-        {/* Social icons */}
-        <div
+        <img
+          src="/assets/svg/subnav/twitter.svg"
+          alt="Twitter"
+          width={16}
+          height={13}
           style={{
-            display: 'flex',
-            gap: 'min(0.5vw, 7px)',
-          }}
-        >
-          <img
-            src="/assets/svg/social/twitter.svg"
-            alt="Twitter"
-            width={16}
-            height={13}
-          />
-          <img
-            src="/assets/svg/social/discord.svg"
-            alt="Discord"
-            width={16}
-            height={13}
-          />
-        </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            width: '1px',
-            height: '17px',
-            background: '#313749',
+            flex: 'none',
+            order: 0,
+            flexGrow: 0,
           }}
         />
-
-        {/* Balance display */}
-        <div
+        <img
+          src="/assets/svg/subnav/discord.svg"
+          alt="Discord"
+          width={16}
+          height={13}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            flex: 'none',
+            order: 1,
+            flexGrow: 0,
           }}
-        >
-          <img
-            src="/assets/svg/ui/online.svg"
-            alt="Online"
-            width={18}
-            height={18}
-          />
-          <span
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 'min(0.9vw, 11.25px)',
-              lineHeight: '1.5',
-              color: '#006EFF',
-              fontWeight: '700',
-            }}
-          >
-            {onlineCount}
-          </span>
-        </div>
+        />
       </div>
     </div>
   );

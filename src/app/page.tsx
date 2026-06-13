@@ -254,7 +254,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
           left: 'calc(min(22vw, 352px) + 20px)',
           top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
           background: '#191D29',
-          borderRadius: '5px',
+          borderRadius: '15px',
           display: 'flex',
           alignItems: 'center',
           padding: '0 15px',
@@ -296,7 +296,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
       <div
         style={{
           position: 'absolute',
-          width: '141px',
+          width: '121px',
           height: '42px',
           left: 'calc(min(22vw, 352px) + 20px + 246px + 5px)',
           top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
@@ -309,19 +309,29 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
             height: '42px',
             left: '9px',
             top: '-2px',
-            background: '#0276FF',
-            borderRadius: '5px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
           }}
         >
+          <div
+            style={{
+              position: 'absolute',
+              left: '0%',
+              right: '0%',
+              top: '0%',
+              bottom: '0%',
+              background: '#0276FF',
+              borderRadius: '15px',
+            }}
+          />
           <span
             style={{
+              position: 'absolute',
+              left: '8%',
+              right: '5%',
+              top: '30.95%',
+              bottom: '33.33%',
               fontFamily: 'Proxima Nova, sans-serif',
               fontStyle: 'normal',
-              fontWeight: '700',
+              fontWeight: 700,
               fontSize: '17px',
               lineHeight: '17px',
               color: '#FFFFFF',
@@ -373,6 +383,19 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         />
       </div>
 
+      {/* Divider */}
+      <img
+        src="/assets/svg/divider.svg"
+        alt="Divider"
+        style={{
+          position: 'absolute',
+          width: '3px',
+          height: '29px',
+          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 15px)',
+          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 10px)',
+        }}
+      />
+
       {/* Bet Items Button */}
       <div
         style={{
@@ -391,7 +414,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
             left: '9px',
             top: '-2px',
             background: '#0276FF',
-            borderRadius: '5px',
+            borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -536,7 +559,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
           position: 'absolute',
           width: '279px',
           height: '53px',
-          right: 'calc(20px + 53px + 10px)',
+          right: '20px',
           top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
         }}
       >
@@ -589,48 +612,12 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         </div>
       </div>
 
-      {/* Sort Button */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '53px',
-          height: '53px',
-          right: '20px',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            width: '53px',
-            height: '53px',
-            left: '0px',
-            top: '0px',
-            background: '#181B22',
-            border: '1px solid #0276FF',
-            boxShadow: 'inset 0px 0px 58.9px rgba(2, 118, 255, 0.25)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-        >
-          <img
-            src="/assets/svg/home/sort.svg"
-            alt="Sort"
-            style={{
-              width: '20px',
-              height: '18px',
-            }}
-          />
-        </div>
-      </div>
-
-      <CoinFlipRow topOffset={0} winner="heads" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
-      <CoinFlipRow topOffset={110} winner="heads" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
-      <CoinFlipRow topOffset={220} winner="tails" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
-      <CoinFlipRow topOffset={330} winner="tails" onViewClick={() => setIsCoinflipViewModalOpen(true)} />
+      {/* CoinFlipRow */}
+      <CoinFlipRow
+        topOffset={0}
+        winner="heads"
+        onViewClick={() => setIsCoinflipViewModalOpen(true)}
+      />
 
       <Footer />
 

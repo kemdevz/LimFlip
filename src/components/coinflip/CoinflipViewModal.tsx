@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CoinflipViewModalProps {
   isOpen: boolean;
@@ -12,6 +12,10 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
   const [shouldRender, setShouldRender] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [progress, setProgress] = useState(100);
+  const [showOrange, setShowOrange] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -25,13 +29,19 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(countdownInterval);
+            setShowOrange(true);
+            // Show video after orange display
+            setTimeout(() => {
+              setShowVideo(true);
+            }, 500);
             return 1;
           }
           return prev - 1;
         });
       }, 1000);
 
-      // Progress bar animation
+      // Progress bar animation - decrease every second starting from 100%
+      setTimeout(() => setProgress(80), 10); // Start decreasing immediately
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
           if (prev <= 0) {
@@ -49,6 +59,9 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
     } else {
       setIsVisible(false);
       setTimeout(() => setShouldRender(false), 200);
+      setShowOrange(false);
+      setShowVideo(false);
+      setVideoEnded(false);
     }
   }, [isOpen]);
 
@@ -112,7 +125,7 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
 
           {/* Close button */}
           <img
-            src="/x.svg"
+            src="/assets/svg/ui/x.svg"
             alt="Close"
             width={18}
             height={18}
@@ -128,15 +141,16 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
           />
 
           {/* Round counter circle */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '120px',
-              height: '120px',
-              left: '464px',
-              top: '75px',
-            }}
-          >
+          {!showVideo && (
+            <div
+              style={{
+                position: 'absolute',
+                width: '120px',
+                height: '120px',
+                left: '464px',
+                top: '75px',
+              }}
+            >
             <svg
               width="120"
               height="120"
@@ -191,6 +205,36 @@ export default function CoinflipViewModal({ isOpen, onClose }: CoinflipViewModal
               {countdown}
             </span>
           </div>
+          )}
+
+        
+        
+          {/* Video animation - plays after orange.png */}
+          {showVideo && (
+            <video
+              ref={videoRef}
+              src="/assets/svg/coinflip/blue.webm"
+              autoPlay
+              muted
+              onEnded={() => {
+                if (videoRef.current) {
+                  videoRef.current.pause();
+                  videoRef.current.currentTime = videoRef.current.duration;
+                }
+                setVideoEnded(true);
+              }}
+              style={{
+                position: 'absolute',
+                width: '300px',
+                height: '300px',
+                left: '374px',
+                top: '-15px',
+                zIndex: 20,
+                objectFit: 'cover',
+                mixBlendMode: 'screen',
+              }}
+            />
+          )}
 
           {/* Right player (Waiting..) */}
           <div

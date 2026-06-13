@@ -13,6 +13,27 @@ const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const USERS_FILE = path.join(__dirname, 'users.json');
 
+// Random word generator for verification codes
+const words = [
+  'crew', 'omit', 'gadget', 'win', 'pond', 'jealous', 'warfare', 'eight',
+  'similar', 'label', 'young', 'negative', 'brave', 'crisp', 'dawn', 'eagle',
+  'flame', 'grace', 'honor', 'ivory', 'jolly', 'knack', 'lemon', 'merry',
+  'noble', 'orbit', 'pride', 'quartz', 'rapid', 'solar', 'tower', 'unity',
+  'vivid', 'whale', 'xenon', 'youth', 'zebra', 'amber', 'bloom', 'civic',
+  'delta', 'eagle', 'frost', 'globe', 'hazel', 'index', 'jolly', 'karma',
+  'lunar', 'magic', 'naval', 'ocean', 'piano', 'quiet', 'radio', 'satin',
+  'tiger', 'ultra', 'vapor', 'waltz', 'xenon', 'yacht', 'zinc'
+];
+
+function generateRandomWords(count = 10) {
+  const selectedWords = [];
+  for (let i = 0; i < count; i++) {
+    const randomIndex = Math.floor(Math.random() * words.length);
+    selectedWords.push(words[randomIndex]);
+  }
+  return selectedWords.join(' ');
+}
+
 // Create HTTP server
 const server = http.createServer(app);
 
@@ -26,6 +47,9 @@ const io = new Server(server, {
 
 // Online users tracking
 let onlineUsers = 0;
+
+// Verification codes storage (in-memory for development)
+const verificationCodes = {};
 
 // Mock Roblox users database
 const mockRobloxUsers = [
@@ -87,6 +111,26 @@ const writeUsers = (users) => {
     console.error('Error writing users file:', error);
   }
 };
+
+// Initialize with a test user if no users exist
+const initializeTestUser = () => {
+  const users = readUsers();
+  if (users.length === 0) {
+    console.log('No users found, creating test user...');
+    const testUser = {
+      id: '1',
+      username: 'test',
+      email: 'test@test.com',
+      password: bcrypt.hashSync('test123', 10),
+      createdAt: new Date().toISOString()
+    };
+    users.push(testUser);
+    writeUsers(users);
+    console.log('Test user created: username=test, password=test123');
+  }
+};
+
+initializeTestUser();
 
 // Middleware
 app.use(cors());
@@ -280,30 +324,103 @@ app.post('/auth/signup', async (req, res) => {
   }
 });
 
+// Check username endpoint - uses Roblox API to verify username exists
+app.post('/auth/check-username', async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+
+    // Use Roblox API to check if username exists
+    const robloxApiUrl = 'https://users.roblox.com/v1/usernames/users';
+    const postData = JSON.stringify({
+      usernames: [username],
+      excludeBannedUsers: false
+    });
+
+    const robloxReq = https.request(robloxApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    }, (robloxRes) => {
+      let data = '';
+
+      robloxRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      robloxRes.on('end', () => {
+        try {
+          const robloxData = JSON.parse(data);
+          
+          // Check if user was found
+          if (robloxData.data && robloxData.data.length > 0) {
+            const foundUser = robloxData.data.find(u => u.name.toLowerCase() === username.toLowerCase());
+            if (foundUser) {
+              // Generate random verification words
+              const verificationCode = generateRandomWords(10);
+              verificationCodes[foundUser.id] = verificationCode;
+              res.json({ exists: true, message: 'Username found', userId: foundUser.id, verificationCode });
+            } else {
+              res.status(404).json({ exists: false, message: 'Username not found' });
+            }
+          } else {
+            res.status(404).json({ exists: false, message: 'Username not found' });
+          }
+        } catch (parseError) {
+          console.error('Error parsing Roblox API response:', parseError);
+          res.status(500).json({ error: 'Error checking username' });
+        }
+      });
+    });
+
+    robloxReq.on('error', (err) => {
+      console.error('Error calling Roblox API:', err);
+      res.status(500).json({ error: 'Error checking username' });
+    });
+
+    robloxReq.write(postData);
+    robloxReq.end();
+  } catch (error) {
+    console.error('Check username error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Login endpoint
 app.post('/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, robloxUserId } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!username || !robloxUserId) {
+      return res.status(400).json({ error: 'Username and Roblox ID are required' });
     }
 
+    // Check if user exists in local database
     const users = readUsers();
-    const user = users.find(u => u.email === email);
+    let user = users.find(u => u.username === username);
 
+    // If user doesn't exist, create them
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      user = {
+        id: robloxUserId.toString(),
+        username: username,
+        email: `${username}@roblox.com`,
+        password: '', // No password for Roblox auth
+        robloxUserId: robloxUserId,
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      writeUsers(users);
+      console.log(`Created new user: ${username} (Roblox ID: ${robloxUserId})`);
     }
 
     // Generate token
-    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, username: user.username, robloxUserId: user.robloxUserId }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       message: 'Login successful',
@@ -311,11 +428,91 @@ app.post('/auth/login', async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        robloxUserId: user.robloxUserId
       }
     });
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Verify description endpoint - verifies user updated their Roblox description
+app.post('/auth/verify-description', async (req, res) => {
+  try {
+    const { username, robloxUserId } = req.body;
+
+    if (!username || !robloxUserId) {
+      return res.status(400).json({ error: 'Username and Roblox ID are required' });
+    }
+
+    console.log(`Verifying description for ${username} (Roblox ID: ${robloxUserId})`);
+
+    // In production, this would verify the user's Roblox profile description
+    // contains the verification code. The Roblox API doesn't provide access to
+    // user descriptions, so this would need to be done through:
+    // 1. A third-party scraping service (unreliable, may violate TOS)
+    // 2. Manual verification by admin
+    // 3. Alternative verification (e.g., joining a specific Roblox group)
+    
+    // For development, we simulate verification with a delay and random failure
+    // to demonstrate the error handling flow
+    const verificationCode = verificationCodes[robloxUserId] || generateRandomWords(10);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // For development: 70% success rate to simulate real verification
+    // In production, this would be an actual check
+    const verificationSuccess = Math.random() > 0.3;
+    
+    if (!verificationSuccess) {
+      console.log(`Verification failed for ${username} - description not updated or incorrect`);
+      return res.status(400).json({
+        error: 'Verification failed. Please make sure you updated your Roblox profile description with: ' + verificationCode
+      });
+    }
+    
+    console.log(`Verification successful for ${username}`);
+    
+    // Check if user exists in local database
+    const users = readUsers();
+    let user = users.find(u => u.username === username);
+
+    // If user doesn't exist, create them
+    if (!user) {
+      user = {
+        id: robloxUserId.toString(),
+        username: username,
+        email: `${username}@roblox.com`,
+        password: '', // No password for Roblox auth
+        robloxUserId: robloxUserId,
+        verifiedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      writeUsers(users);
+      console.log(`Created new user: ${username} (Roblox ID: ${robloxUserId})`);
+    } else {
+      // Update verification timestamp
+      user.verifiedAt = new Date().toISOString();
+      writeUsers(users);
+    }
+
+    // Generate token
+    const token = jwt.sign({ userId: user.id, username: user.username, robloxUserId: user.robloxUserId }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      message: 'Verification successful',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        robloxUserId: user.robloxUserId
+      }
+    });
+  } catch (error) {
+    console.error('Verify description error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -8,18 +8,14 @@ interface SignUpModalProps {
 }
 
 export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProps) {
-  const [isRegister, setIsRegister] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isRobloxMode, setIsRobloxMode] = useState(false);
-  const [robloxUsername, setRobloxUsername] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [step, setStep] = useState(1); // 1 = enter username, 2 = confirm account, 3 = update description
+  const [robloxUserId, setRobloxUserId] = useState<number | null>(null);
+  const [verificationCode, setVerificationCode] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -31,73 +27,67 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
     }
   }, [isOpen]);
 
-  const searchRobloxUsers = async (query: string, forceSearch = false) => {
-    console.log('searchRobloxUsers called:', { query, forceSearch });
-    if (!forceSearch && query.length < 3) {
-      setSearchResults([]);
-      setShowDropdown(false);
-      return;
-    }
-
-    try {
-      console.log('Fetching from backend...');
-      const response = await fetch(`http://localhost:3001/roblox/search?q=${query}`);
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
-      setSearchResults(data);
-      setShowDropdown(true);
-    } catch (err) {
-      console.error('Search error:', err);
-      setSearchResults([]);
-    }
-  };
-
-  const handleRobloxUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRobloxUsername(value);
-    searchRobloxUsers(value);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // Don't submit form in Roblox mode - it's just for search
-      if (isRobloxMode) {
-        setError('Please select a Roblox username from the search results');
-        setLoading(false);
-        return;
+      if (step === 1) {
+        // Step 1: Check if username exists
+        const endpoint = 'http://localhost:3001/auth/check-username';
+        const body = { username };
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Username exists, store userId, verification code and move to confirmation step
+          setRobloxUserId(data.userId);
+          setVerificationCode(data.verificationCode || '');
+          setStep(2);
+        } else {
+          setError(data.message || 'Username not found');
+        }
+      } else if (step === 2) {
+        // Step 2: Confirm and move to step 3
+        setStep(3);
+      } else {
+        // Step 3: Verify description and login/signup
+        const endpoint = 'http://localhost:3001/auth/verify-description';
+        const body = { username, robloxUserId };
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Verification failed. Please make sure you updated your description.');
+        }
+
+        // Store token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Close modal
+        onClose?.();
+        
+        // Reload page to update auth state
+        window.location.reload();
       }
-
-      const endpoint = isRegister ? 'http://localhost:3001/auth/signup' : 'http://localhost:3001/auth/login';
-      const body = isRegister ? { username, email, password } : { email, password };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
-      }
-
-      // Store token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Close modal
-      onClose?.();
-      
-      // Reload page to update auth state
-      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -131,9 +121,9 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         style={{
           position: 'relative',
           width: '939px',
-          height: isRobloxMode ? '400px' : '689px',
+          height: '521px',
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
-          transition: 'transform 0.15s ease-in-out, height 0.3s ease-in-out',
+          transition: 'transform 0.15s ease-in-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -142,16 +132,15 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           style={{
             position: 'absolute',
             width: '362px',
-            height: isRobloxMode ? '400px' : '689px',
+            height: '531px',
             left: 'calc(50% - 362px/2 - 288.5px)',
-            top: isRobloxMode ? 'calc(50% - 400px/2)' : 'calc(50% - 689px/2)',
+            top: 'calc(50% - 531px/2 + 5px)',
             borderRadius: '28px 0px 0px 28px',
             overflow: 'hidden',
-            transition: 'height 0.3s ease-in-out, top 0.3s ease-in-out',
           }}
         >
           <img
-            src="/assets/images/auth/login.png"
+            src="/assets/svg/loginbgg.png"
             alt="Login"
             style={{
               width: '100%',
@@ -159,165 +148,6 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               objectFit: 'cover',
             }}
           />
-
-          {/* Pet image */}
-          <img
-            src="/assets/images/coinflip/pet.png"
-            alt="Pet"
-            style={{
-              position: 'absolute',
-              width: '250px',
-              height: '250px',
-              left: '-80px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              objectFit: 'contain',
-            }}
-          />
-
-          {/* Glassmorphism card */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '20px 17px',
-              gap: '10px',
-              position: 'absolute',
-              width: '328px',
-              height: '134px',
-              left: '17px',
-              bottom: '20px',
-              background: 'rgba(255, 255, 255, 0.2)',
-              backgroundBlendMode: 'plus-lighter',
-              boxShadow: 'inset 0px -4px 2px rgba(0, 0, 0, 0.25), inset 0px 4px 2px rgba(255, 255, 255, 0.25)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-            }}
-          >
-            {/* Sword SVG */}
-            <svg
-              width="85"
-              height="85"
-              viewBox="0 0 85 85"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                position: 'absolute',
-                top: '-4px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              <g filter="url(#filter0_d_991_494)">
-                <path
-                  d="M35.3978 44.0556L40.3968 49.2054L38.3986 51.2647L40.3996 53.3255L38.4 55.3848L34.9001 51.7803L30.8995 55.9004L28.8999 53.8411L32.9005 49.7195L29.4005 46.1164L31.4001 44.057L33.3997 46.1149L35.3978 44.0556ZM29.6734 28.9004L34.6879 28.9048L51.3987 46.1164L53.3997 44.057L55.4007 46.1164L51.9007 49.7209L55.8999 53.8411L53.9003 55.9004L49.8997 51.7803L46.4012 55.3848L44.4002 53.3255L46.3998 51.2647L29.6763 34.0429L29.6734 28.9004ZM50.1175 28.9004L55.1278 28.9048L55.1306 34.0356L49.3991 39.9369L44.3988 34.7886L50.1175 28.9004Z"
-                  fill="black"
-                  fillOpacity="0.5"
-                  shapeRendering="crispEdges"
-                />
-              </g>
-              <defs>
-                <filter
-                  id="filter0_d_991_494"
-                  x="-9.72748e-05"
-                  y="0.000391006"
-                  width="84.8"
-                  height="84.8"
-                  filterUnits="userSpaceOnUse"
-                  colorInterpolationFilters="sRGB"
-                >
-                  <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                  <feColorMatrix
-                    in="SourceAlpha"
-                    type="matrix"
-                    values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                    result="hardAlpha"
-                  />
-                  <feOffset />
-                  <feGaussianBlur stdDeviation="14.45" />
-                  <feComposite in2="hardAlpha" operator="out" />
-                  <feColorMatrix
-                    type="matrix"
-                    values="0 0 0 0 0.184314 0 0 0 0 0.560784 0 0 0 0 1 0 0 0 0.25 0"
-                  />
-                  <feBlend
-                    mode="normal"
-                    in2="BackgroundImageFix"
-                    result="effect1_dropShadow_991_494"
-                  />
-                  <feBlend
-                    mode="normal"
-                    in="SourceGraphic"
-                    in2="effect1_dropShadow_991_494"
-                    result="shape"
-                  />
-                </filter>
-              </defs>
-            </svg>
-
-            {/* Logo */}
-            <div
-              style={{
-                position: 'relative',
-                width: '177px',
-                height: '33px',
-              }}
-            >
-              <span
-                style={{
-                  position: 'absolute',
-                  width: '68px',
-                  height: '45px',
-                  left: '109px',
-                  top: '-6px',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  fontSize: '30px',
-                  lineHeight: '45px',
-                  color: 'rgba(0, 0, 0, 0.5)',
-                }}
-              >
-                bash
-              </span>
-              <span
-                style={{
-                  position: 'absolute',
-                  width: '66px',
-                  height: '45px',
-                  left: '0px',
-                  top: '-6px',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  fontSize: '30px',
-                  lineHeight: '45px',
-                  color: 'rgba(0, 0, 0, 0.5)',
-                }}
-              >
-                blox
-              </span>
-            </div>
-
-            {/* Text */}
-            <span
-              style={{
-                width: '294px',
-                height: '54px',
-                fontFamily: 'Poppins, sans-serif',
-                fontStyle: 'normal',
-                fontWeight: 500,
-                fontSize: '13px',
-                lineHeight: '18px',
-                textAlign: 'center',
-                color: 'rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              By registering in your recognize that you are in agreement to our Terms of Service as-well as being over the age of 18+.
-            </span>
-          </div>
         </div>
 
         {/* Right side - Form */}
@@ -326,136 +156,671 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             boxSizing: 'border-box',
             position: 'absolute',
             width: '577px',
-            height: isRobloxMode ? '400px' : '689px',
+            height: '531px',
             left: 'calc(50% - 577px/2 + 181px)',
-            top: isRobloxMode ? 'calc(50% - 400px/2)' : 'calc(50% - 689px/2)',
+            top: 'calc(50% - 531px/2 + 5px)',
             background: '#191B25',
             border: '1px solid #222530',
             borderRadius: '0px 28px 28px 0px',
-            transition: 'height 0.3s ease-in-out, top 0.3s ease-in-out',
           }}
         >
-          {/* Content frame */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '518px',
-              height: isRobloxMode ? '375px' : '533.36px',
-              left: '30px',
-              top: isRobloxMode ? '12px' : '78px',
-            }}
-          >
-            {!isRobloxMode && (
+          {/* Step 1: Username input */}
+          {step === 1 && (
+            <>
+              {/* Content frame */}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '518px',
+                  height: '329px',
+                  left: '30px',
+                  top: '-12px',
+                }}
+              >
+                {/* Welcome header */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: '0px',
+                    gap: '11px',
+                    position: 'absolute',
+                    width: '473px',
+                    height: '28px',
+                    left: '0px',
+                    top: '46px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0px',
+                      gap: '423px',
+                      width: '473px',
+                      height: '28px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        margin: '0 auto',
+                        width: '473px',
+                        height: '28px',
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 600,
+                        fontSize: '20px',
+                        lineHeight: '28px',
+                        color: '#FFFFFF',
+                      }}
+                    >
+                      Welcome
+                    </span>
+                  </div>
+                </div>
+
+                {/* Form fields */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: '0px',
+                    gap: '11px',
+                    position: 'absolute',
+                    width: '518px',
+                height: '311px',
+                left: '0px',
+                top: '156px',
+              }}
+            >
+              {/* Username field */}
+              <div
+                style={{
+                  width: '518px',
+                  height: '84px',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '116px',
+                    height: '18px',
+                    right: '402px',
+                    top: '0px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    lineHeight: '18px',
+                    color: '#6B7289',
+                  }}
+                >
+                  Username
+                </span>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter roblox username"
+                  style={{
+                    position: 'absolute',
+                    width: '518px',
+                    height: '54px',
+                    left: '0px',
+                    top: '30px',
+                    background: '#262937',
+                    borderRadius: '15px',
+                    border: 'none',
+                    padding: '0 18px',
+                    color: '#6B7289',
+                    fontFamily: 'Poppins',
+                    fontSize: '14px',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {/* Continue button */}
+              <div
+                style={{
+                  width: '518px',
+                  height: '68px',
+                }}
+              >
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '518px',
+                    height: '54px',
+                    background: loading ? '#1a4d8c' : '#0276FF',
+                    borderRadius: '15px',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '18px',
+                    lineHeight: '27px',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  {loading ? 'Loading...' : 'Continue'}
+                </button>
+              </div>
+
+              {/* Welcome text */}
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',
                   padding: '0px',
-                  gap: '5px',
+                  gap: '17px',
                   position: 'absolute',
-                  width: '518px',
-                  height: '77px',
+                  width: '517px',
+                  height: '53px',
                   left: '0px',
-                  top: '-20px',
+                  top: '87px',
                 }}
               >
-                {/* Title */}
                 <span
                   style={{
-                    fontFamily: 'Poppins, sans-serif',
+                    width: '517px',
+                    height: '18px',
+                    fontFamily: 'Poppins',
                     fontStyle: 'normal',
-                    fontWeight: 600,
-                    fontSize: '20px',
-                    lineHeight: '28px',
-                    color: '#FFFFFF',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '18px',
+                    color: '#6B7289',
+                    flex: 'none',
+                    order: 0,
+                    alignSelf: 'stretch',
+                    flexGrow: 0,
                   }}
                 >
-                  {isRegister ? 'Register' : 'Log In'}
+                  Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
                 </span>
+                <span
+                  style={{
+                    width: '517px',
+                    height: '18px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '18px',
+                    color: '#6B7289',
+                    flex: 'none',
+                    order: 1,
+                    alignSelf: 'stretch',
+                    flexGrow: 0,
+                  }}
+                >
+                  Enter your roblox username to get started.
+                </span>
+              </div>
 
-                {/* Toggle buttons */}
+              {/* "or" divider */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: '0px',
+                  gap: '20px',
+                  position: 'absolute',
+                  width: '518px',
+                  height: '17px',
+                  left: '0px',
+                  top: '324px',
+                }}
+              >
                 <div
                   style={{
+                    width: '232.5px',
+                    height: '0px',
+                    mixBlendMode: 'overlay',
+                    border: '1px solid #FFFFFF',
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: 'Proxima Nova, sans-serif',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    lineHeight: '17px',
+                    color: '#6B7289',
+                  }}
+                >
+                  or
+                </span>
+                <div
+                  style={{
+                    width: '232.5px',
+                    height: '0px',
+                    mixBlendMode: 'overlay',
+                    border: '1px solid #FFFFFF',
+                  }}
+                />
+              </div>
+
+              {/* Social login buttons */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  padding: '0px',
+                  gap: '11px',
+                  position: 'absolute',
+                  width: '516px',
+                  height: '54px',
+                  left: '0px',
+                  top: '354px',
+                }}
+              >
+                {/* Google */}
+                <div
+                  onClick={() => window.open('https://accounts.google.com', '_blank')}
+                  style={{
+                    width: '252.5px',
+                    height: '54px',
+                    background: '#262937',
+                    borderRadius: '15px',
                     display: 'flex',
-                    flexDirection: 'row',
                     alignItems: 'center',
-                    padding: '0px',
-                    gap: '10px',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
                   }}
                 >
                   <div
-                    onClick={() => setIsRegister(true)}
                     style={{
                       display: 'flex',
                       flexDirection: 'row',
                       alignItems: 'center',
-                      padding: '5px 14px',
-                      gap: '10px',
-                      background: isRegister ? '#262937' : 'transparent',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
+                      padding: '0px',
+                      gap: '11px',
                     }}
                   >
+                    <img src="/assets/svg/auth/google.svg" alt="Google" style={{ width: '26px', height: '26px' }} />
                     <span
                       style={{
-                        fontFamily: 'Poppins, sans-serif',
+                        fontFamily: 'Poppins',
                         fontStyle: 'normal',
                         fontWeight: 600,
                         fontSize: '15px',
-                        lineHeight: '28px',
-                        color: '#FFFFFF',
+                        lineHeight: '22px',
+                        color: '#BEC2D1',
                       }}
                     >
-                      Register
+                      Google
                     </span>
                   </div>
+                </div>
+
+                {/* Discord */}
+                <div
+                  onClick={() => window.open('https://discord.com', '_blank')}
+                  style={{
+                    width: '252.5px',
+                    height: '54px',
+                    background: '#262937',
+                    borderRadius: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
                   <div
-                    onClick={() => setIsRegister(false)}
                     style={{
                       display: 'flex',
                       flexDirection: 'row',
                       alignItems: 'center',
-                      padding: '5px 14px',
-                      gap: '10px',
-                      background: !isRegister ? '#262937' : 'transparent',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      opacity: !isRegister ? 1 : 0.5,
+                      padding: '0px',
+                      gap: '11px',
                     }}
                   >
+                    <img src="/assets/svg/auth/discord.svg" alt="Discord" style={{ width: '26px', height: '26px' }} />
                     <span
                       style={{
-                        fontFamily: 'Poppins, sans-serif',
+                        fontFamily: 'Poppins',
                         fontStyle: 'normal',
                         fontWeight: 600,
                         fontSize: '15px',
-                        lineHeight: '28px',
-                        color: '#FFFFFF',
+                        lineHeight: '22px',
+                        color: '#BEC2D1',
                       }}
                     >
-                      Log In
+                      Discord
                     </span>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+        </>
+      )}
 
-            {/* Top divider line */}
+      {/* Step 2: Profile confirmation */}
+      {step === 2 && (
+        <>
+          {/* Frame 2131327912 - Header */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '518px',
+              height: '114px',
+              left: '30px',
+              top: '-12px',
+            }}
+          >
+            {/* Frame 23622476 */}
             <div
               style={{
-                position: 'absolute',
-                width: '518px',
-                height: '2px',
-                left: '0px',
-                top: '77px',
-                background: '#FFFFFF',
-                mixBlendMode: 'overlay',
-                borderRadius: '9px',
-              }}
-            />
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        padding: '0px',
+                        gap: '11px',
+                        position: 'absolute',
+                        width: '473px',
+                        height: '28px',
+                        left: '0px',
+                        top: '46px',
+                      }}
+                    >
+                      {/* Frame 23622475 */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0px',
+                          gap: '423px',
+                          width: '473px',
+                          height: '28px',
+                          flex: 'none',
+                          order: 0,
+                          alignSelf: 'stretch',
+                          flexGrow: 0,
+                        }}
+                      >
+                        {/* Is this your account? */}
+                        <span
+                          style={{
+                            margin: '0 auto',
+                            width: '473px',
+                            height: '28px',
+                            fontFamily: 'Poppins',
+                            fontStyle: 'normal',
+                            fontWeight: 600,
+                            fontSize: '20px',
+                            lineHeight: '28px',
+                            color: '#FFFFFF',
+                            flex: 'none',
+                            order: 0,
+                            flexGrow: 1,
+                          }}
+                        >
+                          Is this your account?
+                        </span>
+                      </div>
 
-            {/* Form fields */}
+                      {/* Frame 2131329315 - Welcome text */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          padding: '0px',
+                          gap: '17px',
+                          position: 'absolute',
+                          width: '517px',
+                          height: '18px',
+                          left: '0px',
+                          top: '87px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: '517px',
+                            height: '18px',
+                            fontFamily: 'Poppins',
+                            fontStyle: 'normal',
+                            fontWeight: 500,
+                            fontSize: '14px',
+                            lineHeight: '18px',
+                            color: '#6B7289',
+                            flex: 'none',
+                            order: 0,
+                            alignSelf: 'stretch',
+                            flexGrow: 0,
+                          }}
+                        >
+                          Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Frame 2131329318 - Profile section */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '0px',
+                      gap: '8px',
+                      position: 'absolute',
+                      width: '113px',
+                      height: '177px',
+                      left: '232px',
+                      top: '166px',
+                    }}
+                  >
+                    {/* Profile picture */}
+                    <div
+                      style={{
+                        width: '113px',
+                        height: '113px',
+                        background: `url(https://tr.rbxcdn.com/${robloxUserId}/150/150/AvatarHeadshot/Png), #11151D`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        borderRadius: '999px',
+                        flex: 'none',
+                        order: 0,
+                        alignSelf: 'stretch',
+                        flexGrow: 0,
+                      }}
+                    />
+                    {/* Frame 2131329317 - Username and ID */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: '0px',
+                        width: '113px',
+                        height: '56px',
+                        flex: 'none',
+                        order: 1,
+                        alignSelf: 'stretch',
+                        flexGrow: 0,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '113px',
+                          height: '32px',
+                          fontFamily: 'Poppins',
+                          fontStyle: 'normal',
+                          fontWeight: 600,
+                          fontSize: '17px',
+                          lineHeight: '28px',
+                          textAlign: 'center',
+                          color: '#FFFFFF',
+                          flex: 'none',
+                          order: 0,
+                          alignSelf: 'stretch',
+                          flexGrow: 1,
+                          margin: '-8px 0px',
+                        }}
+                      >
+                        {username}
+                      </span>
+                      <span
+                        style={{
+                          width: '113px',
+                          height: '32px',
+                          fontFamily: 'Poppins',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          fontSize: '14px',
+                          lineHeight: '28px',
+                          textAlign: 'center',
+                          color: '#6B7289',
+                          flex: 'none',
+                          order: 1,
+                          alignSelf: 'stretch',
+                          flexGrow: 1,
+                        }}
+                      >
+                        ID: {robloxUserId}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom text */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      width: '529px',
+                      height: '36px',
+                      left: '30px',
+                      top: '468px',
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                      lineHeight: '18px',
+                      color: '#525F7C',
+                    }}
+                  >
+                    By continuing, you agree to our Terms of Service
+                  </span>
+
+                  {/* Vector overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '90.64%',
+                      right: '6.24%',
+                      top: '6.66%',
+                      bottom: '89.83%',
+                      background: '#FFFFFF',
+                      mixBlendMode: 'overlay',
+                    }}
+                  />
+
+                  {/* Frame 2131329319 - Back button */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: '252.5px',
+                      height: '54px',
+                      left: '30px',
+                      top: '388px',
+                      background: '#262937',
+                      borderRadius: '15px',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      disabled={loading}
+                      style={{
+                        width: '252.5px',
+                        height: '54px',
+                        background: 'transparent',
+                        borderRadius: '15px',
+                        border: 'none',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 600,
+                        fontSize: '15px',
+                        lineHeight: '22px',
+                        color: '#BEC2D1',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '11px',
+                      }}
+                    >
+                      Back
+                    </button>
+                  </div>
+
+                  {/* Frame 2131327917 - Yes, Continue button */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: '252.5px',
+                      height: '54px',
+                      left: '294px',
+                      top: '388px',
+                      background: '#0276FF',
+                      borderRadius: '15px',
+                    }}
+                  >
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      style={{
+                        width: '252.5px',
+                        height: '54px',
+                        background: 'transparent',
+                        borderRadius: '15px',
+                        border: 'none',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 600,
+                        fontSize: '15px',
+                        lineHeight: '22px',
+                        color: '#FFFFFF',
+                      }}
+                    >
+                      {loading ? 'Loading...' : 'Yes, Continue'}
+                    </button>
+                  </div>
+                </>
+              )}
+
+      {/* Step 3: Verification */}
+      {step === 3 && (
+        <>
+          {/* Frame 2131327912 - Header */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '518px',
+              height: '114px',
+              left: '30px',
+              top: '-12px',
+            }}
+          >
+            {/* Frame 23622476 */}
             <div
               style={{
                 display: 'flex',
@@ -464,641 +829,518 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 padding: '0px',
                 gap: '11px',
                 position: 'absolute',
-                width: '518px',
-                height: isRobloxMode ? '350px' : '311px',
+                width: '473px',
+                height: '28px',
                 left: '0px',
-                top: isRobloxMode ? '0px' : '90px',
+                top: '46px',
               }}
             >
-              {!isRobloxMode ? (
-                <>
-                  {/* Username field - only show for register */}
-                  {isRegister && (
-                  <div
-                    style={{
-                      width: '518px',
-                      height: '84px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        lineHeight: '18px',
-                        color: '#6B7289',
-                      }}
-                    >
-                      Username
-                    </span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter username"
-                      style={{
-                        width: '518px',
-                        height: '54px',
-                        background: '#262937',
-                        borderRadius: '9px',
-                        border: 'none',
-                        padding: '0 18px',
-                        color: '#FFFFFF',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '13px',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-                  )}
-
-                  {/* Email field */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      padding: '0px',
-                      gap: '12px',
-                      width: '518px',
-                      height: '84px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        lineHeight: '18px',
-                        color: '#6B7289',
-                      }}
-                    >
-                      Email
-                    </span>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter email"
-                      style={{
-                        width: '518px',
-                        height: '54px',
-                        background: '#262937',
-                        borderRadius: '9px',
-                        border: 'none',
-                        padding: '0 18px',
-                        color: '#FFFFFF',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '13px',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-
-                  {/* Password field */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      padding: '0px',
-                      gap: '12px',
-                      width: '518px',
-                      height: '84px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        lineHeight: '18px',
-                        color: '#6B7289',
-                      }}
-                    >
-                      Password
-                    </span>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
-                      style={{
-                        width: '518px',
-                        height: '54px',
-                        background: '#262937',
-                        borderRadius: '9px',
-                        border: 'none',
-                        padding: '0 18px',
-                        color: '#FFFFFF',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '13px',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-
-                  {/* Error display */}
-                  {error && (
-                    <span
-                      style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '13px',
-                        color: '#FF4444',
-                      }}
-                    >
-                      {error}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* Header */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0px',
-                      width: '518px',
-                      height: '38px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '20px',
-                        lineHeight: '28px',
-                        color: '#FFFFFF',
-                      }}
-                    >
-                      Log In
-                    </span>
-                    <div
-                      onClick={() => setIsRobloxMode(false)}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        padding: '5px 14px',
-                        gap: '10px',
-                        height: '38px',
-                        background: '#262937',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'Poppins, sans-serif',
-                          fontStyle: 'normal',
-                          fontWeight: 600,
-                          fontSize: '15px',
-                          lineHeight: '28px',
-                          color: '#FFFFFF',
-                        }}
-                      >
-                        Log In
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Search input field */}
-                  <div
-                    style={{
-                      position: 'relative',
-                      width: '518px',
-                      height: '93px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: 'absolute',
-                        width: '116px',
-                        height: '18px',
-                        right: '402px',
-                        top: '0px',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        lineHeight: '18px',
-                        color: '#6B7289',
-                      }}
-                    >
-                      Roblox Username
-                    </span>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        width: '518px',
-                        height: '54px',
-                        left: '0px',
-                        top: '29.64px',
-                        background: '#262937',
-                        borderRadius: '9px',
-                      }}
-                    >
-                      <input
-                        type="text"
-                        value={robloxUsername}
-                        onChange={handleRobloxUsernameChange}
-                        placeholder="Search for username"
-                        autoFocus
-                        style={{
-                          position: 'absolute',
-                          width: '399px',
-                          height: '54px',
-                          left: '0px',
-                          top: '0px',
-                          background: 'transparent',
-                          border: 'none',
-                          padding: '0 18px',
-                          color: '#FFFFFF',
-                          fontFamily: 'Poppins, sans-serif',
-                          fontSize: '13px',
-                          outline: 'none',
-                        }}
-                      />
-                      <div
-                        onClick={() => searchRobloxUsers(robloxUsername, true)}
-                        style={{
-                          position: 'absolute',
-                          width: '119px',
-                          height: '54px',
-                          left: '399px',
-                          top: '0px',
-                          background: '#0276FF',
-                          borderRadius: '0px 9px 9px 0px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: 'Poppins, sans-serif',
-                            fontStyle: 'normal',
-                            fontWeight: 600,
-                            fontSize: '16px',
-                            lineHeight: '24px',
-                            color: '#FFFFFF',
-                          }}
-                        >
-                          Search
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Search results grid */}
-                    {showDropdown && searchResults.length > 0 && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'flex-start',
-                          flexWrap: 'wrap',
-                          padding: '0px',
-                          gap: '7px',
-                          position: 'absolute',
-                          width: '518px',
-                          left: '0px',
-                          top: '100px',
-                        }}
-                      >
-                        {searchResults.map((user, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              setRobloxUsername(user.username);
-                              setShowDropdown(false);
-                            }}
-                            style={{
-                              width: '80px',
-                              height: '77px',
-                              borderRadius: '10px',
-                              cursor: 'pointer',
-                              border: robloxUsername === user.username ? '2px solid #0276FF' : 'none',
-                              background: robloxUsername === user.username ? 'rgba(2, 118, 255, 0.1)' : 'transparent',
-                              position: 'relative',
-                            }}
-                            onMouseEnter={(e) => {
-                              if (robloxUsername !== user.username) {
-                                e.currentTarget.style.background = '#333845';
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (robloxUsername !== user.username) {
-                                e.currentTarget.style.background = 'transparent';
-                              }
-                            }}
-                          >
-                            <img
-                              src={user.avatar || '/assets/images/coinflip/1SIDE.png'}
-                              alt="Avatar"
-                              style={{
-                                position: 'absolute',
-                                width: '53px',
-                                height: '54px',
-                                left: '13px',
-                                top: '3px',
-                                borderRadius: '63px',
-                              }}
-                            />
-                            <span
-                              style={{
-                                position: 'absolute',
-                                width: '71px',
-                                height: '17px',
-                                left: '7px',
-                                top: '59px',
-                                fontFamily: 'Poppins, sans-serif',
-                                fontStyle: 'normal',
-                                fontWeight: 600,
-                                fontSize: '11px',
-                                lineHeight: '16px',
-                                color: '#A6A6A6',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {user.username}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Next button */}
-                  <div
-                    style={{
-                      position: 'relative',
-                      width: '518px',
-                      height: '93px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        width: '518px',
-                        height: '54px',
-                        left: '0px',
-                        top: '120px',
-                        background: '#0276FF',
-                        borderRadius: '9px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'Poppins, sans-serif',
-                          fontStyle: 'normal',
-                          fontWeight: 600,
-                          fontSize: '18px',
-                          lineHeight: '27px',
-                          color: '#FFFFFF',
-                        }}
-                      >
-                        Next
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        width: '517px',
-                        height: '2px',
-                        left: '0px',
-                        top: '190px',
-                        background: '#FFFFFF',
-                        mixBlendMode: 'overlay',
-                        borderRadius: '9px',
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: 'absolute',
-                        width: '518px',
-                        height: '36px',
-                        left: '0px',
-                        top: '200px',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 500,
-                        fontSize: '12px',
-                        lineHeight: '18px',
-                        textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                      }}
-                    >
-                      By registering in your recognize that you are in agreement to our Terms of Service as-well as our <span style={{ color: '#0276FF' }}>Privacy Policy</span>.
-                    </span>
-                  </div>
-                </>
-              )}
-
-              {!isRobloxMode && (
-                <>
-                  {/* Register button */}
-                  <div
-                    style={{
-                      width: '518px',
-                      height: '68px',
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      style={{
-                        width: '518px',
-                        height: '54px',
-                        background: loading ? '#1a4d8c' : '#0276FF',
-                        borderRadius: '9px',
-                        border: 'none',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '18px',
-                        lineHeight: '27px',
-                        color: '#FFFFFF',
-                      }}
-                    >
-                      {loading ? 'Loading...' : (isRegister ? 'Register' : 'Log In')}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {!isRobloxMode && (
-              <>
-                {/* "or" divider */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: '0px',
-                    gap: '20px',
-                    position: 'absolute',
-                    width: '518px',
-                    height: '17px',
-                    left: '0px',
-                    top: '447px',
-                  }}
-                >
+              {/* Frame 23622475 */}
               <div
                 style={{
-                  width: '232.5px',
-                  height: '0px',
-                  mixBlendMode: 'overlay',
-                  border: '1px solid #FFFFFF',
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: 'Proxima Nova, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  lineHeight: '17px',
-                  color: '#6B7289',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0px',
+                  gap: '423px',
+                  width: '473px',
+                  height: '28px',
+                  flex: 'none',
+                  order: 0,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
                 }}
               >
-                or
-              </span>
-              <div
-                style={{
-                  width: '232.5px',
-                  height: '0px',
-                  mixBlendMode: 'overlay',
-                  border: '1px solid #FFFFFF',
-                }}
-              />
+                {/* Verify Your Account */}
+                <span
+                  style={{
+                    margin: '0 auto',
+                    width: '473px',
+                    height: '28px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '20px',
+                    lineHeight: '28px',
+                    color: '#FFFFFF',
+                    flex: 'none',
+                    order: 0,
+                    flexGrow: 1,
+                  }}
+                >
+                  Verify Your Account
+                </span>
+              </div>
             </div>
+          </div>
 
-            {/* Social login buttons */}
+          {/* Frame 2131329315 - Instructions */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              padding: '0px',
+              gap: '17px',
+              position: 'absolute',
+              width: '517px',
+              height: '36px',
+              left: '30px',
+              top: '102px',
+            }}
+          >
+            <span
+              style={{
+                width: '517px',
+                height: '36px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                fontSize: '14px',
+                lineHeight: '18px',
+                color: '#6B7289',
+                flex: 'none',
+                order: 0,
+                alignSelf: 'stretch',
+                flexGrow: 0,
+              }}
+            >
+              Copy the verification code and paste it into your Roblox bio
+            </span>
+          </div>
+
+          {/* Step indicators */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              padding: '0px',
+              gap: '5px',
+              position: 'absolute',
+              width: '27px',
+              height: '91px',
+              left: '30px',
+              top: '305px',
+            }}
+          >
+            {/* Step 1 */}
             <div
               style={{
+                width: '27px',
+                height: '27px',
+                background: 'rgba(2, 118, 255, 0.24)',
+                borderRadius: '77px',
+                flex: 'none',
+                order: 0,
+                alignSelf: 'stretch',
+                flexGrow: 0,
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                padding: '0px',
-                gap: '13px',
-                position: 'absolute',
-                width: '518px',
-                height: '54px',
-                left: '0px',
-                top: '477px',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {/* Roblox */}
-              <div
-                onClick={() => setIsRobloxMode(true)}
+              <span
                 style={{
-                  width: '164px',
-                  height: '54px',
-                  background: '#262937',
-                  borderRadius: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
+                  position: 'absolute',
+                  width: '6px',
+                  height: '18px',
+                  left: '10px',
+                  top: '2px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  lineHeight: '22px',
+                  color: '#0276FF',
                 }}
               >
-                <img src="/assets/svg/auth/roblox.svg" alt="Roblox" style={{ width: '117px', height: '31px' }} />
-              </div>
-
-              {/* Google */}
-              <div
-                style={{
-                  width: '164px',
-                  height: '54px',
-                  background: '#262937',
-                  borderRadius: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
-              >
-                <img src="/assets/svg/auth/google.svg" alt="Google" style={{ width: '92px', height: '26px' }} />
-              </div>
-
-              {/* Discord */}
-              <div
-                style={{
-                  width: '164px',
-                  height: '54px',
-                  background: '#262937',
-                  borderRadius: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
-              >
-                <img src="/assets/svg/social/discord.svg" alt="Discord" style={{ width: '95px', height: '26px' }} />
-              </div>
+                1
+              </span>
             </div>
-              </>
-            )}
-
-            {!isRobloxMode && (
-              <>
-                {/* Divider line */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '518px',
-                    height: '2px',
-                    left: '0px',
-                    top: '547px',
-                    background: '#FFFFFF',
-                    mixBlendMode: 'overlay',
-                    borderRadius: '9px',
-                  }}
-                />
-
-                {/* Bottom text */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '534px',
-                    height: '36px',
-                    left: '0px',
-                    top: '567px',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 500,
-                      fontSize: '13px',
-                      lineHeight: '18px',
-                      color: '#525F7C',
-                    }}
-                  >
-                    By registering, you agree to our Terms of Service
-                  </span>
-                </div>
-              </>
-            )}
+            {/* Step 2 */}
+            <div
+              style={{
+                width: '27px',
+                height: '27px',
+                background: 'rgba(2, 118, 255, 0.24)',
+                borderRadius: '77px',
+                flex: 'none',
+                order: 1,
+                alignSelf: 'stretch',
+                flexGrow: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '11px',
+                  height: '18px',
+                  left: '8px',
+                  top: '2px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  lineHeight: '22px',
+                  color: '#0276FF',
+                }}
+              >
+                2
+              </span>
+            </div>
+            {/* Step 3 */}
+            <div
+              style={{
+                width: '27px',
+                height: '27px',
+                background: 'rgba(2, 118, 255, 0.24)',
+                borderRadius: '77px',
+                flex: 'none',
+                order: 2,
+                alignSelf: 'stretch',
+                flexGrow: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '6px',
+                  height: '18px',
+                  left: '9px',
+                  top: '2px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  lineHeight: '22px',
+                  color: '#0276FF',
+                }}
+              >
+                3
+              </span>
+            </div>
           </div>
+
+          {/* Username input */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '518px',
+              height: '54px',
+              left: '30px',
+              top: '127px',
+              background: '#262937',
+              borderRadius: '15px',
+            }}
+          >
+            {/* Profile picture */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '34px',
+                height: '34px',
+                left: '12px',
+                top: '10px',
+                background: `url(https://tr.rbxcdn.com/${robloxUserId}/150/150/AvatarHeadshot/Png), #11151D`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: '999px',
+              }}
+            />
+            {/* Username */}
+            <span
+              style={{
+                position: 'absolute',
+                width: '114px',
+                height: '21px',
+                left: '59px',
+                top: '16px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '14px',
+                lineHeight: '21px',
+                color: '#B0B5CE',
+              }}
+            >
+              {username}
+            </span>
+          </div>
+
+          {/* Code input */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '518px',
+              height: '93px',
+              left: '30px',
+              top: '194px',
+              background: '#262937',
+              borderRadius: '15px',
+            }}
+          >
+            <span
+              style={{
+                position: 'absolute',
+                width: '208px',
+                height: '18px',
+                left: '17px',
+                top: '14px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '12px',
+                lineHeight: '18px',
+                color: '#B0B5CE',
+              }}
+            >
+              PASTE THIS INTO YOUR ROBLOX BIO
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                width: '488px',
+                height: '42px',
+                left: '17px',
+                top: '41px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 700,
+                fontSize: '13px',
+                lineHeight: '20px',
+                color: '#FFFFFF',
+                wordBreak: 'break-all',
+              }}
+            >
+              {verificationCode}
+            </span>
+            {/* Copy button */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '64.31px',
+                height: '33px',
+                left: '445px',
+                top: '6px',
+                background: '#313546',
+                borderRadius: '12.6923px',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                navigator.clipboard.writeText(verificationCode);
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '35px',
+                  height: '19px',
+                  left: 'calc(50% - 35px/2 + 0.42px)',
+                  top: 'calc(50% - 19px/2 + 0.42px)',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '12.6923px',
+                  lineHeight: '19px',
+                  color: '#BEC2D1',
+                }}
+              >
+                Copy
+              </span>
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '355px',
+              height: '82px',
+              left: '66px',
+              top: '310px',
+            }}
+          >
+            <span
+              style={{
+                position: 'absolute',
+                width: '137px',
+                height: '18px',
+                left: '0px',
+                top: '0px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '12px',
+                lineHeight: '18px',
+                color: '#B0B5CE',
+              }}
+            >
+              Copy the words above
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                width: '355px',
+                height: '18px',
+                left: '0px',
+                top: '31px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '12px',
+                lineHeight: '18px',
+                color: '#0276FF',
+              }}
+            >
+              Open your Roblox Profile and paste the words into your bio
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                width: '257px',
+                height: '18px',
+                left: '0px',
+                top: '64px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '12px',
+                lineHeight: '18px',
+                color: '#B0B5CE',
+              }}
+            >
+              Save your profile, then click "Verify" below
+            </span>
+          </div>
+
+          {/* Bottom text */}
+          <span
+            style={{
+              position: 'absolute',
+              width: '505px',
+              height: '18px',
+              left: '36px',
+              top: '479px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              fontSize: '11px',
+              lineHeight: '18px',
+              color: '#525F7C',
+            }}
+          >
+            By continuing, you agree to our Terms of Service
+          </span>
+
+          {/* Vector overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '90.64%',
+              right: '6.24%',
+              top: '6.66%',
+              bottom: '89.83%',
+              background: '#FFFFFF',
+              mixBlendMode: 'overlay',
+            }}
+          />
+
+          {/* Open Profile button */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '252.5px',
+              height: '54px',
+              left: '30px',
+              top: '413px',
+              background: '#262937',
+              borderRadius: '15px',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => window.open(`https://www.roblox.com/users/${robloxUserId}/profile`, '_blank')}
+              style={{
+                width: '252.5px',
+                height: '54px',
+                background: 'transparent',
+                borderRadius: '15px',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '15px',
+                lineHeight: '22px',
+                color: '#BEC2D1',
+              }}
+            >
+              Open Profile
+            </button>
+          </div>
+
+          {/* Verify button */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '252.5px',
+              height: '54px',
+              left: '294px',
+              top: '413px',
+              background: '#0276FF',
+              borderRadius: '15px',
+            }}
+          >
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '252.5px',
+                height: '54px',
+                background: 'transparent',
+                borderRadius: '15px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '15px',
+                lineHeight: '22px',
+                color: '#FFFFFF',
+              }}
+            >
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
+          </div>
+        </>
+      )}
         </div>
+
+        {/* Error display */}
+        {error && (
+          <span
+            style={{
+              position: 'absolute',
+              width: '518px',
+              fontFamily: 'Poppins',
+              fontSize: '13px',
+              color: '#FF4444',
+              left: '30px',
+              top: '500px',
+              textAlign: 'center',
+            }}
+          >
+            {error}
+          </span>
+        )}
       </div>
       </form>
     </div>

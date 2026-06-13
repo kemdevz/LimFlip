@@ -1,4 +1,20 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
 export default function Footer() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsVisible(scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div
       className="absolute"
@@ -6,9 +22,10 @@ export default function Footer() {
         height: '211px',
         left: '348px',
         right: '0px',
-        bottom: '0px',
+        bottom: isVisible ? '0px' : '-211px',
         background: '#191C25',
         boxShadow: '0px -15px 27.2px rgba(24, 27, 34, 0.25)',
+        transition: 'bottom 0.3s ease',
       }}
     >
       {/* Container */}

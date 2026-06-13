@@ -10,27 +10,36 @@ export default function SendButton({ onSend }: SendButtonProps) {
       className="absolute"
       onClick={onSend}
       style={{
-        width: 'min(3.8vh, 41px)',
-        height: 'min(3.8vh, 41px)',
-        left: 'min(85%, 310px)',
-        bottom: 'min(8vh, 100px)',
-        background: '#33394B',
-        borderRadius: '11px',
+        width: '47.55px',
+        height: '46.58px',
+        left: '292px',
+        bottom: '10px',
+        opacity: 0.44,
         cursor: 'pointer',
       }}
     >
-      {/* Send icon */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '47.55px',
+          height: '47.55px',
+          left: '0px',
+          top: '-0.97px',
+          background: '#1F232F',
+          borderRadius: '10.6755px',
+        }}
+      />
       <img
         src="/assets/svg/chat/send.svg"
         alt="Send"
-        width={19}
-        height={19}
         style={{
           position: 'absolute',
-          left: 'min(32%, 13px)',
-          top: 'min(1vh, 11px)',
-          width: 'min(1.5vw, 19px)',
-          height: 'min(1.5vw, 19px)',
+          left: '31.54%',
+          right: '30.72%',
+          top: '30.68%',
+          bottom: '32.12%',
+          width: '18px',
+          height: '18px',
         }}
       />
     </div>

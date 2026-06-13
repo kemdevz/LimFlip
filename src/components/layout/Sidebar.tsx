@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { useSocket } from '@/context/SocketContext';
 import MessageChat from '../chat/MessageChat';
 import ChatInput from '../chat/ChatInput';
 import SendButton from '../chat/SendButton';
@@ -16,6 +16,7 @@ interface Message {
 }
 
 export default function Sidebar() {
+  const { socket, onlineCount } = useSocket();
   const [messages, setMessages] = useState<Message[]>([
     {
       username: 'jakep',
@@ -25,7 +26,6 @@ export default function Sidebar() {
       isWhale: true,
     },
   ]);
-  const [socket, setSocket] = useState<any>(null);
   const [inputMessage, setInputMessage] = useState('');
   const [isMounted, setIsMounted] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -50,12 +50,9 @@ export default function Sidebar() {
   }, [messages, isMounted]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !socket) return;
 
-    const socketInstance = io('http://localhost:3001');
-    setSocket(socketInstance);
-
-    socketInstance.on('chat-message', (data: Message) => {
+    socket.on('chat-message', (data: Message) => {
       setMessages((prev) => {
         const newMessages = [...prev, data];
         localStorage.setItem('chatMessages', JSON.stringify(newMessages));
@@ -64,9 +61,9 @@ export default function Sidebar() {
     });
 
     return () => {
-      socketInstance.disconnect();
+      socket.off('chat-message');
     };
-  }, [isMounted]);
+  }, [isMounted, socket]);
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
@@ -92,18 +89,19 @@ export default function Sidebar() {
         height: '100vh',
         left: '0px',
         top: '0px',
-        background: '#161922',
+        background: '#191D29',
       }}
     >
       {/* Top left header */}
       <div
         className="absolute"
         style={{
-          width: '100%',
-          height: 'min(12vh, 132px)',
+          width: '352px',
+          height: '132px',
           left: '0px',
           top: '0px',
-          background: '#111318',
+          background: '#131621',
+          overflow: 'hidden',
         }}
       >
         {/* Logo container */}
@@ -111,10 +109,10 @@ export default function Sidebar() {
           <div
             className="absolute"
             style={{
-              width: 'min(85%, 300px)',
-              height: 'min(12vh, 162px)',
-              left: 'min(7%, 20px)',
-              top: 'min(1vh, -2px)',
+              width: '194.96px',
+              height: '36px',
+              left: '79px',
+              top: '48px',
               cursor: 'pointer',
             }}
           >
@@ -129,19 +127,526 @@ export default function Sidebar() {
           </div>
         </Link>
 
-        {/* Blur effect */}
+        {/* Blue blur effect left */}
         <div
           className="absolute"
           style={{
-            width: '276px',
-            height: '65px',
-            left: '13.5px',
-            top: '-37px',
-            background: 'rgba(2, 118, 255, 0.22)',
-            filter: 'blur(45.65px)',
-            borderRadius: '66px',
+            width: '302px',
+            height: '91px',
+            left: '-266px',
+            top: '42px',
+            background: 'rgba(2, 118, 255, 0.12)',
+            filter: 'blur(25.4292px)',
+            borderRadius: '36.7651px',
           }}
         />
+
+        {/* Blue blur effect right */}
+        <div
+          className="absolute"
+          style={{
+            width: '302px',
+            height: '91px',
+            left: '243px',
+            top: '-31px',
+            background: 'rgba(2, 118, 255, 0.12)',
+            filter: 'blur(25.4292px)',
+            borderRadius: '36.7651px',
+          }}
+        />
+      </div>
+
+      {/* Chat header section */}
+      <div
+        className="absolute"
+        style={{
+          width: '327px',
+          height: '34px',
+          left: '16px',
+          top: '142px',
+          background: '#191D29',
+        }}
+      >
+        {/* Chat title */}
+        <span
+          style={{
+            position: 'absolute',
+            width: '43px',
+            height: '26px',
+            left: '0px',
+            top: '5px',
+            fontFamily: 'Poppins',
+            fontStyle: 'normal',
+            fontWeight: 600,
+            fontSize: '17px',
+            lineHeight: '26px',
+            color: '#FFFFFF',
+          }}
+        >
+          Chat
+        </span>
+
+        {/* Control buttons */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '150px',
+            height: '34px',
+            left: '177px',
+            top: '0px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0px',
+            gap: '6px',
+          }}
+        >
+          {/* Online count button */}
+          <div
+            style={{
+              width: '70px',
+              height: '34px',
+              flex: 'none',
+              order: 0,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '73px',
+                height: '34px',
+                left: '-3px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '8px',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                height: '21px',
+                left: '45px',
+                top: '6px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '14px',
+                lineHeight: '21px',
+                color: '#FFFFFF',
+                textAlign: 'right',
+              }}
+            >
+              {onlineCount}
+            </span>
+            <div
+              style={{
+                position: 'absolute',
+                width: '7px',
+                height: '7px',
+                left: '33px',
+                top: '13px',
+                background: '#6EFF66',
+                borderRadius: '49px',
+              }}
+            />
+            <img
+              src="/assets/svg/chat/usa.svg"
+              alt="Online"
+              style={{
+                position: 'absolute',
+                width: '23px',
+                height: '16px',
+                left: '5px',
+                top: '9px',
+                borderRadius: '3px',
+              }}
+            />
+          </div>
+
+          {/* Button 1 */}
+          <div
+            style={{
+              width: '34px',
+              height: '34px',
+              flex: 'none',
+              order: 1,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '34px',
+                height: '34px',
+                left: '0px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '8px',
+              }}
+            />
+            <img
+              src="/assets/svg/chat/rules.svg"
+              alt="Rules"
+              style={{
+                position: 'absolute',
+                width: '18px',
+                height: '18px',
+                left: '8px',
+                top: '8px',
+              }}
+            />
+          </div>
+
+          {/* Button 2 */}
+          <div
+            style={{
+              width: '34px',
+              height: '34px',
+              flex: 'none',
+              order: 2,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '34px',
+                height: '34px',
+                left: '0px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '8px',
+              }}
+            />
+            <img
+              src="/assets/svg/chat/gift.svg"
+              alt="Gift"
+              style={{
+                position: 'absolute',
+                width: '18px',
+                height: '18px',
+                left: '8px',
+                top: '8px',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Giveaway component */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '331px',
+          height: '152px',
+          left: '10px',
+          top: '186px',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Main background */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '331px',
+            height: '152px',
+            left: '0px',
+            top: '0px',
+            background: '#131621',
+            border: '1px solid #222738',
+            borderRadius: '17px',
+          }}
+        />
+
+        {/* Blurred image */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '49.35px',
+            height: '49.35px',
+            left: '10px',
+            top: '4px',
+            background: 'url(/assets/wallet/mm2.png)',
+            filter: 'blur(7.88426px)',
+            transform: 'rotate(44.66deg)',
+          }}
+        />
+
+        {/* Sharp image */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '49.35px',
+            height: '49.35px',
+            left: '20.22px',
+            top: '14.22px',
+            background: 'url(/assets/wallet/mm2.png)',
+            backgroundSize: 'cover',
+          }}
+        />
+
+        {/* Info boxes container */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0px',
+            gap: '9px',
+            position: 'absolute',
+            width: '232px',
+            height: '21px',
+            left: '17px',
+            top: '74px',
+          }}
+        >
+          {/* Username box */}
+          <div
+            style={{
+              width: '68px',
+              height: '21px',
+              flex: 'none',
+              order: 0,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '68px',
+                height: '21px',
+                left: '0px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '5px',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                width: '45px',
+                height: '15px',
+                left: '12px',
+                top: '4px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '10px',
+                lineHeight: '15px',
+                color: '#FFFFFF',
+              }}
+            >
+              jakep123
+            </span>
+          </div>
+
+          {/* Entries box */}
+          <div
+            style={{
+              width: '73px',
+              height: '21px',
+              flex: 'none',
+              order: 1,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '73px',
+                height: '21px',
+                left: '0px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '5px',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                width: '53px',
+                height: '15px',
+                left: '12px',
+                top: '4px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '10px',
+                lineHeight: '15px',
+                color: '#FFFFFF',
+              }}
+            >
+              43 entries
+            </span>
+          </div>
+
+          {/* Time box */}
+          <div
+            style={{
+              width: '73px',
+              height: '21px',
+              flex: 'none',
+              order: 2,
+              flexGrow: 0,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '73px',
+                height: '21px',
+                left: '0px',
+                top: '0px',
+                background: '#1E222F',
+                borderRadius: '5px',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                width: '53px',
+                height: '15px',
+                left: '12px',
+                top: '4px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '10px',
+                lineHeight: '15px',
+                color: '#FFFFFF',
+              }}
+            >
+              0h:52m:8s
+            </span>
+          </div>
+        </div>
+
+        {/* Blue glow */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '213px',
+            height: '42px',
+            left: '51px',
+            top: '149px',
+            background: '#0276FF',
+            filter: 'blur(54.7px)',
+            borderRadius: '70px',
+          }}
+        />
+
+        {/* Item name */}
+        <span
+          style={{
+            position: 'absolute',
+            width: '158px',
+            height: '15px',
+            left: '81px',
+            top: '19px',
+            fontFamily: 'Poppins',
+            fontStyle: 'normal',
+            fontWeight: 700,
+            fontSize: '14px',
+            lineHeight: '21px',
+            color: '#FFFFFF',
+          }}
+        >
+          Luger
+        </span>
+
+        {/* Price */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '158px',
+            height: '15px',
+            left: '81px',
+            top: '41px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}
+        >
+          <img
+            src="/assets/svg/navbar/wallet.svg"
+            alt="Wallet"
+            style={{
+              width: '14px',
+              height: '14px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 600,
+              fontSize: '14px',
+              lineHeight: '21px',
+              color: '#FFFFFF',
+            }}
+          >
+            B$1K
+          </span>
+        </div>
+
+        {/* Join button */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '300px',
+            height: '33px',
+            left: '17px',
+            top: '106px',
+            background: '#0276FF',
+            borderRadius: '11px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }}
+        >
+          <img
+            src="/assets/svg/ui/gift.svg"
+            alt="Gift"
+            style={{
+              width: '18px',
+              height: '18px',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 600,
+              fontSize: '14px',
+              lineHeight: '21px',
+              color: '#FFFFFF',
+            }}
+          >
+            Join
+          </span>
+        </div>
+
+        {/* Icon frame */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '52px',
+            height: '52px',
+            left: '19px',
+            top: '11px',
+          }}
+        >
+          {/* Empty frame for gun image */}
+        </div>
       </div>
 
       {/* Chat messages area */}
@@ -150,9 +655,10 @@ export default function Sidebar() {
         className="absolute chat-messages-container"
         style={{
           width: '100%',
-          height: 'calc(100vh - min(12vh, 132px) - min(13vh, 136px))',
+          height: 'calc(100vh - min(12vh, 132px) - 34px - 20px - 152px - 16px - 60px)',
           left: '0px',
-          top: 'min(12vh, 132px)',
+          top: 'calc(min(12vh, 132px) + 34px + 20px + 152px + 16px)',
+          background: '#191D29',
           overflowY: 'auto',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -178,8 +684,19 @@ export default function Sidebar() {
       </div>
 
       {/* Chat input */}
-      <ChatInput onMessageChange={setInputMessage} message={inputMessage} onSend={handleSendMessage} />
-      <SendButton onSend={handleSendMessage} />
+      <div
+        style={{
+          position: 'absolute',
+          width: '100%',
+          left: '0px',
+          bottom: '0px',
+          height: '60px',
+          background: '#191D29',
+        }}
+      >
+        <ChatInput onMessageChange={setInputMessage} message={inputMessage} onSend={handleSendMessage} />
+        <SendButton onSend={handleSendMessage} />
+      </div>
     </div>
   );
 }

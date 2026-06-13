@@ -22,17 +22,17 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
         width: 'min(85%, 298px)',
         height: 'min(4vh, 46px)',
         left: '0px',
-        bottom: 'min(8vh, 90px)',
+        bottom: '10px',
       }}
     >
       <div
         style={{
-          width: 'min(96%, 287px)',
-          height: 'min(3.8vh, 41px)',
-          left: 'min(2%, 5px)',
+          width: '278.53px',
+          height: '46.58px',
+          left: '9px',
           top: '0px',
-          border: '1px solid #33394B',
-          borderRadius: '8px',
+          background: '#1F232F',
+          borderRadius: '7.76401px',
           position: 'relative',
         }}
       >

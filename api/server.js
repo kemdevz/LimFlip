@@ -517,6 +517,101 @@ app.post('/auth/verify-description', async (req, res) => {
   }
 });
 
+// Track Timer State
+let trackTimerState = {
+  status: 'idle', // idle, ready, set, go, running, finished
+  startTime: null,
+  endTime: null,
+  reactionTime: null,
+  randomDelay: null
+};
+
+// Track Timer Endpoints
+app.post('/track-timer/start', (req, res) => {
+  try {
+    if (trackTimerState.status !== 'idle') {
+      return res.status(400).json({ error: 'Timer already in use' });
+    }
+
+    // Generate random delay between 2-5 seconds
+    trackTimerState.randomDelay = Math.floor(Math.random() * 3000) + 2000;
+    trackTimerState.status = 'ready';
+    trackTimerState.startTime = null;
+    trackTimerState.endTime = null;
+    trackTimerState.reactionTime = null;
+
+    // Emit socket event for "on your marks"
+    io.emit('track-timer', { phase: 'on-your-marks' });
+
+    // After 1 second, emit "set"
+    setTimeout(() => {
+      if (trackTimerState.status === 'ready') {
+        trackTimerState.status = 'set';
+        io.emit('track-timer', { phase: 'set' });
+      }
+    }, 1000);
+
+    // After random delay, emit "go" and start timer
+    setTimeout(() => {
+      if (trackTimerState.status === 'set') {
+        trackTimerState.status = 'go';
+        trackTimerState.startTime = Date.now();
+        io.emit('track-timer', { phase: 'go', startTime: trackTimerState.startTime });
+      }
+    }, 1000 + trackTimerState.randomDelay);
+
+    res.json({ message: 'Timer started', randomDelay: trackTimerState.randomDelay });
+  } catch (error) {
+    console.error('Start timer error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/track-timer/finish', (req, res) => {
+  try {
+    if (trackTimerState.status !== 'go' && trackTimerState.status !== 'running') {
+      return res.status(400).json({ error: 'Timer not in go state' });
+    }
+
+    trackTimerState.endTime = Date.now();
+    trackTimerState.reactionTime = trackTimerState.endTime - trackTimerState.startTime;
+    trackTimerState.status = 'finished';
+
+    io.emit('track-timer', { 
+      phase: 'finished', 
+      reactionTime: trackTimerState.reactionTime 
+    });
+
+    res.json({ reactionTime: trackTimerState.reactionTime });
+  } catch (error) {
+    console.error('Finish timer error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/track-timer/reset', (req, res) => {
+  try {
+    trackTimerState = {
+      status: 'idle',
+      startTime: null,
+      endTime: null,
+      reactionTime: null,
+      randomDelay: null
+    };
+
+    io.emit('track-timer', { phase: 'reset' });
+
+    res.json({ message: 'Timer reset' });
+  } catch (error) {
+    console.error('Reset timer error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/track-timer/status', (req, res) => {
+  res.json(trackTimerState);
+});
+
 // Start server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

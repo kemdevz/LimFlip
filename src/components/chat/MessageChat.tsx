@@ -1,9 +1,14 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
 interface MessageChatProps {
   username?: string;
   message?: string;
   time?: string;
   avatarUrl?: string;
   isWhale?: boolean;
+  onProfileClick?: () => void;
 }
 
 export default function MessageChat({
@@ -12,9 +17,42 @@ export default function MessageChat({
   time = '15:24',
   avatarUrl,
   isWhale = true,
+  onProfileClick,
 }: MessageChatProps) {
+  const styleRef = useRef<HTMLStyleElement>(null);
+
+  useEffect(() => {
+    if (!styleRef.current) {
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes messageSlideIn {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .message-animate {
+          animation: messageSlideIn 0.3s ease-out forwards;
+        }
+      `;
+      document.head.appendChild(style);
+      styleRef.current = style;
+    }
+
+    return () => {
+      if (styleRef.current && styleRef.current.parentNode === document.head) {
+        document.head.removeChild(styleRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div
+      className="message-animate chat-message-bubble"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -22,7 +60,6 @@ export default function MessageChat({
         alignItems: 'flex-start',
         padding: '10px 14px',
         position: 'relative',
-        width: '333px',
         minHeight: '81px',
         height: 'auto',
         borderRadius: '20px',
@@ -122,6 +159,7 @@ export default function MessageChat({
               }}
             >
               <span
+                onClick={onProfileClick}
                 style={{
                   width: '46px',
                   height: '24px',
@@ -134,6 +172,7 @@ export default function MessageChat({
                   flex: 'none',
                   order: 0,
                   flexGrow: 0,
+                  cursor: onProfileClick ? 'pointer' : 'default',
                 }}
               >
                 {username}

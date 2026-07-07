@@ -11,19 +11,14 @@ export default function TOSPage() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
+    <div className="page-shell page-shell--fixed bg-[#12151C]">
       {/* Background image with luminosity blend mode */}
       <div
-        className="absolute inset-0"
+        className="page-bg"
         style={{
-          width: '2662px',
-          height: '1248px',
-          left: '-371px',
-          top: '-84px',
           backgroundImage: 'url(/assets/images/backgrounds/background.png)',
-          backgroundSize: 'cover',
           mixBlendMode: 'luminosity',
-          opacity: '0.5',
+          opacity: 0.5,
         }}
       />
 
@@ -53,21 +48,20 @@ export default function TOSPage() {
 
       {/* Scrollable Content Area */}
       <div
+        className="page-content-area hide-scrollbar"
         style={{
-          position: 'absolute',
-          left: 'min(22vw, 352px)',
-          top: 'calc(min(8vh, 92px) + min(3.5vh, 39px) + 20px)',
-          width: 'calc(100vw - min(22vw, 352px))',
-          height: 'calc(100vh - min(8vh, 92px) - min(3.5vh, 39px) - 20px - 60px)',
           overflowY: 'auto',
+          paddingBottom: '60px',
         }}
       >
         {/* Privacy Policy Content */}
         <div
           style={{
-            width: 'calc(100% - 100px)',
-            margin: '0 50px',
+            width: 'calc(100% - 32px)',
+            maxWidth: '900px',
+            margin: '0 auto',
             marginTop: '20px',
+            padding: '0 16px',
             fontFamily: 'Poppins, sans-serif',
             fontStyle: 'normal',
             fontWeight: 600,

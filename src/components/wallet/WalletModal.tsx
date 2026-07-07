@@ -25,17 +25,9 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
   return (
     <div
+      className="responsive-modal-overlay"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
         background: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.2s ease-out',
         pointerEvents: isVisible ? 'auto' : 'none',
@@ -43,6 +35,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
       onClick={onClose}
     >
       <div
+        className="responsive-modal-panel responsive-modal-panel--center"
         style={{
           position: 'relative',
           width: '586px',
@@ -64,8 +57,9 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            left: '62px',
+            left: '50%',
             top: '32px',
+            transform: 'translateX(-50%)',
           }}
         >
           <img
@@ -498,10 +492,10 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
               <div
                 style={{
                   position: 'absolute',
-                  width: '45px',
-                  height: '45px',
-                  left: '18px',
-                  top: '20px',
+                  width: '43px',
+                  height: '43px',
+                  left: '19px',
+                  top: '21px',
                   background: 'url(/assets/wallet/ltc.png)',
                   filter: 'drop-shadow(0px 0px 41.8px rgba(141, 141, 141, 0.25))',
                   backgroundSize: 'cover',
@@ -565,12 +559,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
               <div
                 style={{
                   position: 'absolute',
-                  width: '44px',
-                  height: '44px',
-                  left: '18px',
-                  top: '20px',
+                  width: '43px',
+                  height: '43px',
+                  left: '19px',
+                  top: '21px',
                   background: 'url(/assets/wallet/usdt.png)',
-                  filter: 'drop-shadow(0px 0px 19.5px rgba(83, 174, 148, 0.25))',
+                  filter: 'drop-shadow(0px 0px 41.8px rgba(83, 174, 148, 0.25))',
                   backgroundSize: 'cover',
                 }}
               />
@@ -634,10 +628,10 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   position: 'absolute',
                   width: '43px',
                   height: '43px',
-                  left: '18px',
-                  top: '20px',
+                  left: '19px',
+                  top: '21px',
                   background: 'url(/assets/wallet/sol.png)',
-                  filter: 'drop-shadow(0px 0px 19.5px rgba(126, 123, 217, 0.25))',
+                  filter: 'drop-shadow(0px 0px 41.8px rgba(126, 123, 217, 0.25))',
                   backgroundSize: 'cover',
                   borderRadius: '999px',
                 }}
@@ -733,12 +727,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             <div
               style={{
                 position: 'absolute',
-                width: '60px',
-                height: '42px',
+                width: '43px',
+                height: '43px',
                 left: '19px',
-                top: '22px',
+                top: '21px',
                 background: 'url(/assets/wallet/cards.png)',
-                filter: 'drop-shadow(0px 0px 19.5px rgba(255, 255, 255, 0.25))',
+                filter: 'drop-shadow(0px 0px 41.8px rgba(255, 255, 255, 0.25))',
                 backgroundSize: 'cover',
               }}
             />
@@ -867,12 +861,13 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             <div
               style={{
                 position: 'absolute',
-                left: '9.3%',
-                right: '62.79%',
-                top: '28.24%',
-                bottom: '30.59%',
+                width: '43px',
+                height: '43px',
+                left: '19px',
+                top: '21px',
                 background: '#0276FF',
                 boxShadow: '0px 0px 41.8px rgba(2, 118, 255, 0.25)',
+                borderRadius: '8px',
               }}
             />
             <span

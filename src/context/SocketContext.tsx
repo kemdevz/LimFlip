@@ -6,11 +6,13 @@ import { io, Socket } from 'socket.io-client';
 interface SocketContextType {
   socket: Socket | null;
   onlineCount: number;
+  isConnected: boolean;
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   onlineCount: 0,
+  isConnected: false,
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -18,13 +20,24 @@ export const useSocket = () => useContext(SocketContext);
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const socketInstance = io('http://localhost:3001');
     setSocket(socketInstance);
+    setIsConnected(true);
 
+    // Listen for real online count from server
     socketInstance.on('online-count', (count: number) => {
       setOnlineCount(count);
+    });
+
+    socketInstance.on('disconnect', () => {
+      setIsConnected(false);
+    });
+
+    socketInstance.on('connect', () => {
+      setIsConnected(true);
     });
 
     return () => {
@@ -33,7 +46,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineCount }}>
+    <SocketContext.Provider value={{ socket, onlineCount, isConnected }}>
       {children}
     </SocketContext.Provider>
   );

@@ -20,7 +20,7 @@
     "password": "",
     "robloxUserId": 11076325158,
     "createdAt": "2026-06-11T14:55:53.121Z",
-    "verifiedAt": "2026-06-12T17:26:36.671Z"
+    "verifiedAt": "2026-07-02T18:00:43.347Z"
   },
   {
     "id": "6889",
@@ -37,5 +37,50 @@
     "password": "",
     "robloxUserId": 13685917,
     "createdAt": "2026-06-11T16:11:49.415Z"
+  },
+  {
+    "id": "11186951599",
+    "username": "GAGHder_BB",
+    "email": "GAGHder_BB@roblox.com",
+    "password": "",
+    "robloxUserId": 11186951599,
+    "verifiedAt": "2026-07-02T11:05:12.886Z",
+    "createdAt": "2026-07-02T11:05:12.886Z"
+  },
+  {
+    "id": "131627",
+    "username": "fre",
+    "email": "fre@roblox.com",
+    "password": "",
+    "robloxUserId": 131627,
+    "verifiedAt": "2026-07-05T08:58:03.761Z",
+    "createdAt": "2026-07-05T08:58:03.761Z"
+  },
+  {
+    "id": "436190",
+    "username": "dfghjk",
+    "email": "dfghjk@roblox.com",
+    "password": "",
+    "robloxUserId": 436190,
+    "verifiedAt": "2026-07-05T19:49:11.816Z",
+    "createdAt": "2026-07-05T19:49:11.816Z"
+  },
+  {
+    "id": "1",
+    "username": "Roblox",
+    "email": "Roblox@roblox.com",
+    "password": "",
+    "robloxUserId": 1,
+    "verifiedAt": "2026-07-06T13:02:38.093Z",
+    "createdAt": "2026-07-06T13:02:38.093Z"
+  },
+  {
+    "id": "26822",
+    "username": "Minion",
+    "email": "Minion@roblox.com",
+    "password": "",
+    "robloxUserId": 26822,
+    "verifiedAt": "2026-07-06T21:10:57.465Z",
+    "createdAt": "2026-07-06T21:10:57.465Z"
   }
 ]

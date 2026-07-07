@@ -1,18 +1,21 @@
 'use client';
 
+import { useIsMobile } from '@/hooks/useMediaQuery';
+
 interface SendButtonProps {
   onSend: () => void;
 }
 
 export default function SendButton({ onSend }: SendButtonProps) {
+  const isMobile = useIsMobile();
   return (
     <div
       className="absolute"
       onClick={onSend}
       style={{
-        width: '47.55px',
-        height: '46.58px',
-        left: '292px',
+        width: isMobile ? '50px' : '47.55px',
+        height: isMobile ? '50px' : '46.58px',
+        left: isMobile ? 'calc(100% - 60px)' : '292px',
         bottom: '10px',
         opacity: 0.44,
         cursor: 'pointer',
@@ -21,10 +24,10 @@ export default function SendButton({ onSend }: SendButtonProps) {
       <div
         style={{
           position: 'absolute',
-          width: '47.55px',
-          height: '47.55px',
+          width: '100%',
+          height: '100%',
           left: '0px',
-          top: '-0.97px',
+          top: isMobile ? '0px' : '-0.97px',
           background: '#1F232F',
           borderRadius: '10.6755px',
         }}
@@ -34,12 +37,13 @@ export default function SendButton({ onSend }: SendButtonProps) {
         alt="Send"
         style={{
           position: 'absolute',
-          left: '31.54%',
-          right: '30.72%',
-          top: '30.68%',
-          bottom: '32.12%',
-          width: '18px',
-          height: '18px',
+          left: isMobile ? '50%' : '31.54%',
+          right: isMobile ? 'auto' : '30.72%',
+          top: isMobile ? '50%' : '30.68%',
+          bottom: isMobile ? 'auto' : '32.12%',
+          transform: isMobile ? 'translate(-50%, -50%)' : 'none',
+          width: isMobile ? '20px' : '18px',
+          height: isMobile ? '20px' : '18px',
         }}
       />
     </div>

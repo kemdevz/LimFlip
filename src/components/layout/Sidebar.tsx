@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '@/context/SocketContext';
+import { useMobileLayout } from '@/context/MobileLayoutContext';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 import MessageChat from '../chat/MessageChat';
 import ChatInput from '../chat/ChatInput';
 import SendButton from '../chat/SendButton';
+import ProfileModal from '../chat/ProfileModal';
 import Link from 'next/link';
 
 interface Message {
@@ -17,6 +20,8 @@ interface Message {
 
 export default function Sidebar() {
   const { socket, onlineCount } = useSocket();
+  const { isSidebarOpen, closeSidebar } = useMobileLayout();
+  const isMobile = useIsMobile();
   const [messages, setMessages] = useState<Message[]>([
     {
       username: 'jakep',
@@ -28,12 +33,22 @@ export default function Sidebar() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState('');
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('');
+  const [countdown, setCountdown] = useState({ hours: 0, minutes: 52, seconds: 8 });
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
+  };
+
+  const handleProfileClick = (username: string, avatarUrl: string) => {
+    setSelectedUsername(username);
+    setSelectedAvatarUrl(avatarUrl);
+    setIsProfileModalOpen(true);
   };
 
   useEffect(() => {
@@ -43,6 +58,34 @@ export default function Sidebar() {
     if (saved) {
       setMessages(JSON.parse(saved));
     }
+  }, []);
+
+  // Countdown timer for giveaway
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        let { hours, minutes, seconds } = prev;
+        
+        if (seconds > 0) {
+          seconds--;
+        } else if (minutes > 0) {
+          minutes--;
+          seconds = 59;
+        } else if (hours > 0) {
+          hours--;
+          minutes = 59;
+          seconds = 59;
+        } else {
+          // Timer reached 0, reset or stop
+          clearInterval(timer);
+          return prev;
+        }
+        
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -82,22 +125,21 @@ export default function Sidebar() {
     setInputMessage('');
   };
   return (
-    <div
-      className="absolute"
-      style={{
-        width: 'min(22vw, 352px)',
-        height: '100vh',
-        left: '0px',
-        top: '0px',
-        background: '#191D29',
-      }}
-    >
+    <>
+      {isMobile && (
+        <div
+          className={`sidebar-backdrop ${isSidebarOpen ? 'sidebar-backdrop--visible' : ''}`}
+          onClick={closeSidebar}
+          aria-hidden={!isSidebarOpen}
+        />
+      )}
+      <div className={`sidebar-panel ${isMobile && isSidebarOpen ? 'sidebar-panel--open' : ''}`}>
       {/* Top left header */}
       <div
         className="absolute"
         style={{
-          width: '352px',
-          height: '132px',
+          width: isMobile ? '100%' : '352px',
+          height: isMobile ? '88px' : '132px',
           left: '0px',
           top: '0px',
           background: '#131621',
@@ -160,10 +202,10 @@ export default function Sidebar() {
       <div
         className="absolute"
         style={{
-          width: '327px',
+          width: isMobile ? 'calc(100% - 32px)' : '327px',
           height: '34px',
           left: '16px',
-          top: '142px',
+          top: isMobile ? '98px' : '142px',
           background: '#191D29',
         }}
       >
@@ -341,10 +383,10 @@ export default function Sidebar() {
       <div
         style={{
           position: 'absolute',
-          width: '331px',
+          width: isMobile ? 'calc(100% - 20px)' : '331px',
           height: '152px',
           left: '10px',
-          top: '186px',
+          top: isMobile ? '142px' : '186px',
           overflow: 'hidden',
         }}
       >
@@ -523,7 +565,7 @@ export default function Sidebar() {
                 color: '#FFFFFF',
               }}
             >
-              0h:52m:8s
+              {countdown.hours}h:{countdown.minutes}m:{countdown.seconds}s
             </span>
           </div>
         </div>
@@ -652,24 +694,19 @@ export default function Sidebar() {
       {/* Chat messages area */}
       <div
         ref={messagesContainerRef}
-        className="absolute chat-messages-container"
+        className="absolute chat-messages-container hide-scrollbar"
         style={{
           width: '100%',
-          height: 'calc(100vh - min(12vh, 132px) - 34px - 20px - 152px - 16px - 60px)',
+          height: isMobile
+            ? 'calc(100dvh - 88px - 34px - 152px - 16px - 60px - 20px)'
+            : 'calc(100vh - min(12vh, 132px) - 34px - 20px - 152px - 16px - 60px)',
           left: '0px',
-          top: 'calc(min(12vh, 132px) + 34px + 20px + 152px + 16px)',
+          top: isMobile ? 'calc(88px + 34px + 152px + 16px)' : 'calc(min(12vh, 132px) + 34px + 20px + 152px + 16px)',
           background: '#191D29',
           overflowY: 'auto',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
         }}
       >
-        <style>{`
-          .chat-messages-container::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
-        <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '11px' }}>
           {messages.map((msg, index) => (
             <MessageChat
               key={index}
@@ -678,6 +715,7 @@ export default function Sidebar() {
               time={msg.time}
               avatarUrl={msg.avatarUrl}
               isWhale={msg.isWhale}
+              onProfileClick={() => handleProfileClick(msg.username, msg.avatarUrl)}
             />
           ))}
         </div>
@@ -689,7 +727,7 @@ export default function Sidebar() {
           position: 'absolute',
           width: '100%',
           left: '0px',
-          bottom: '0px',
+          bottom: isMobile ? '67px' : '8px',
           height: '60px',
           background: '#191D29',
         }}
@@ -697,6 +735,15 @@ export default function Sidebar() {
         <ChatInput onMessageChange={setInputMessage} message={inputMessage} onSend={handleSendMessage} />
         <SendButton onSend={handleSendMessage} />
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        username={selectedUsername}
+        avatarUrl={selectedAvatarUrl}
+      />
     </div>
+    </>
   );
 }

@@ -1,36 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
+    if (isMobile) {
+      setIsVisible(true);
+      return;
+    }
+
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsVisible(scrollY > 50);
+      setIsVisible(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
   return (
     <div
-      className="absolute"
+      className="app-footer"
       style={{
-        height: '211px',
-        left: '348px',
-        right: '0px',
         bottom: isVisible ? '0px' : '-211px',
-        background: '#191C25',
-        boxShadow: '0px -15px 27.2px rgba(24, 27, 34, 0.25)',
-        transition: 'bottom 0.3s ease',
       }}
     >
       {/* Container */}
       <div
-        className="absolute"
+        className="absolute app-footer__inner"
         style={{
           width: '1080px',
           height: '324.93px',
@@ -40,7 +40,7 @@ export default function Footer() {
       >
         {/* Logo */}
         <div
-          className="absolute"
+          className="absolute app-footer__logo"
           style={{
             width: '300px',
             height: '162px',
@@ -125,7 +125,7 @@ export default function Footer() {
 
         {/* Home section */}
         <div
-          className="absolute font-semibold"
+          className="absolute font-semibold app-footer__columns"
           style={{
             width: '51px',
             height: '24px',

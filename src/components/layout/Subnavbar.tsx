@@ -9,21 +9,13 @@ interface SubnavbarProps {
   onProvablyFairClick?: () => void;
   onFaqClick?: () => void;
   onAffiliatesClick?: () => void;
+  onLeaderboardClick?: () => void;
 }
 
-export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick }: SubnavbarProps) {
+export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick, onLeaderboardClick }: SubnavbarProps) {
   const { onlineCount } = useSocket();
   return (
-    <div
-      className="absolute"
-      style={{
-        width: '1568px',
-        height: '39px',
-        left: 'min(22vw, 352px)',
-        top: '0px',
-        background: '#131621',
-      }}
-    >
+    <div className="app-subnavbar">
       {/* Navigation links */}
       <div
         className="absolute"
@@ -234,7 +226,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
             }}
           />
           <span
-            onClick={onAffiliatesClick}
+            onClick={onLeaderboardClick}
             style={{
               position: 'absolute',
               width: '85px',
@@ -261,7 +253,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
         style={{
           width: '39px',
           height: '13px',
-          right: '-300px',
+          right: '20px',
           top: '12px',
           display: 'flex',
           flexDirection: 'row',

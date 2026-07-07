@@ -7,8 +7,12 @@ import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
 import CoinFlipRow from '@/components/coinflip/CoinFlipRow';
+import CoinflipToolbar from '@/components/coinflip/CoinflipToolbar';
 import CoinflipViewModal from '@/components/coinflip/CoinflipViewModal';
 import CoinflipCreateModal from '@/components/coinflip/CoinflipCreateModal';
+import Leaderboard from '@/components/leaderboard/Leaderboard';
+import { useSocket } from '@/context/SocketContext';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
   const styleRef = useRef<HTMLStyleElement>(null);
@@ -189,55 +193,36 @@ function MaintenancePage() {
 }
 
 function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
+  const isMobile = useIsMobile();
   const [isCoinflipViewModalOpen, setIsCoinflipViewModalOpen] = useState(false);
   const [isCoinflipCreateModalOpen, setIsCoinflipCreateModalOpen] = useState(false);
+  const [isLeaderboardVisible, setIsLeaderboardVisible] = useState(false);
+
+  const handleLeaderboardClose = () => {
+    setIsLeaderboardVisible(false);
+  };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
+    <div className="page-shell page-shell--fixed">
       {/* Background image with luminosity blend mode */}
+      <div
+        className="page-bg page-bg--main"
+        style={{
+          backgroundImage: 'url(/assets/images/backgrounds/mainbg.png)',
+        }}
+      />
+      
+      {/* Dark overlay */}
       <div
         className="absolute inset-0"
         style={{
-          width: '2662px',
-          height: '1248px',
-          left: '-371px',
-          top: '-84px',
-          backgroundImage: 'url(/assets/images/backgrounds/mainbg.png)',
-          backgroundSize: 'cover',
-          mixBlendMode: 'luminosity',
-        }}
-      />
-
-      {/* Blur effects */}
-      <div
-        className="absolute"
-        style={{
-          width: '358px',
-          height: '372px',
-          left: '1652px',
-          bottom: '702px',
-          background: '#006EFF',
-          opacity: '0.08',
-          filter: 'blur(114px)',
-          borderRadius: '344.22px',
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          width: '358px',
-          height: '372px',
-          left: '241px',
-          bottom: '702px',
-          background: '#006EFF',
-          opacity: '0.08',
-          filter: 'blur(114px)',
-          borderRadius: '344.22px',
+          background: 'rgba(19, 22, 33, 0.3)',
         }}
       />
 
       <Subnavbar
         onTermsClick={() => window.location.href = '/tos'}
+        onLeaderboardClick={() => setIsLeaderboardVisible(!isLeaderboardVisible)}
       />
       <Navbar
         onSignUpClick={onSignUpClick}
@@ -245,372 +230,8 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
       />
       <Sidebar />
 
-      {/* Bet Input */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '246px',
-          height: '44px',
-          left: 'calc(min(22vw, 352px) + 20px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-          background: '#191D29',
-          borderRadius: '15px',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 15px',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'Poppins, sans-serif',
-            fontStyle: 'normal',
-            fontWeight: '500',
-            fontSize: '18px',
-            lineHeight: '27px',
-            color: '#006EFF',
-            marginRight: '10px',
-          }}
-        >
-          $
-        </span>
-        <input
-          type="text"
-          placeholder="Enter bet amount ..."
-          style={{
-            width: '156px',
-            height: '24px',
-            fontFamily: 'Poppins, sans-serif',
-            fontStyle: 'normal',
-            fontWeight: '500',
-            fontSize: '16px',
-            lineHeight: '24px',
-            color: '#525D7D',
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-          }}
-        />
-      </div>
-
-      {/* Place Bet Button */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '121px',
-          height: '42px',
-          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            width: '121px',
-            height: '42px',
-            left: '9px',
-            top: '-2px',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              left: '0%',
-              right: '0%',
-              top: '0%',
-              bottom: '0%',
-              background: '#0276FF',
-              borderRadius: '15px',
-            }}
-          />
-          <span
-            style={{
-              position: 'absolute',
-              left: '8%',
-              right: '5%',
-              top: '30.95%',
-              bottom: '33.33%',
-              fontFamily: 'Proxima Nova, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: 700,
-              fontSize: '17px',
-              lineHeight: '17px',
-              color: '#FFFFFF',
-            }}
-          >
-            PLACE BET
-          </span>
-        </div>
-      </div>
-
-      {/* Heads/Tails Selection */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '86px',
-          height: '42px',
-          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0px',
-          gap: '2px',
-        }}
-      >
-        <img
-          src="/assets/images/coinflip/heads.png"
-          alt="Heads"
-          style={{
-            width: '42px',
-            height: '42px',
-            flex: 'none',
-            order: 0,
-            flexGrow: 0,
-            cursor: 'pointer',
-          }}
-        />
-        <img
-          src="/assets/images/coinflip/tails.png"
-          alt="Tails"
-          style={{
-            width: '42px',
-            height: '42px',
-            flex: 'none',
-            order: 1,
-            flexGrow: 0,
-            cursor: 'pointer',
-          }}
-        />
-      </div>
-
-      {/* Divider */}
-      <img
-        src="/assets/svg/divider.svg"
-        alt="Divider"
-        style={{
-          position: 'absolute',
-          width: '3px',
-          height: '29px',
-          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 15px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 10px)',
-        }}
-      />
-
-      {/* Bet Items Button */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '141px',
-          height: '42px',
-          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 30px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            width: '121px',
-            height: '42px',
-            left: '9px',
-            top: '-2px',
-            background: '#0276FF',
-            borderRadius: '15px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-          onClick={() => setIsCoinflipCreateModalOpen(true)}
-        >
-          <span
-            style={{
-              fontFamily: 'Proxima Nova, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '700',
-              fontSize: '17px',
-              lineHeight: '17px',
-              color: '#FFFFFF',
-            }}
-          >
-            BET ITEMS
-          </span>
-        </div>
-      </div>
-
-      {/* Stats Display */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '245px',
-          height: '22px',
-          left: 'calc(min(22vw, 352px) + 20px + 246px + 5px + 141px + 5px + 86px + 30px + 141px + 100px)',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 15px)',
-        }}
-      >
-        {/* Players count */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '59px',
-            height: '22px',
-            left: '0px',
-            top: '0px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-          }}
-        >
-          <img
-            src="/assets/svg/home/dice.svg"
-            alt="Players"
-            style={{
-              width: '27px',
-              height: '22px',
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '400',
-              fontSize: '18px',
-              lineHeight: '27px',
-              color: '#FFFFFF',
-            }}
-          >
-            36
-          </span>
-        </div>
-
-        {/* Total bets */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '77px',
-            height: '22px',
-            left: '81px',
-            top: '2px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-          }}
-        >
-          <img
-            src="/assets/svg/home/wallet.svg"
-            alt="Total Bets"
-            style={{
-              width: '20px',
-              height: '16px',
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '400',
-              fontSize: '18px',
-              lineHeight: '27px',
-              color: '#0276FF',
-            }}
-          >
-            R$1.59m
-          </span>
-        </div>
-
-        {/* Your bets */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '77px',
-            height: '22px',
-            left: '198px',
-            top: '2px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-          }}
-        >
-          <img
-            src="/assets/svg/home/wallet.svg"
-            alt="Your Bets"
-            style={{
-              width: '20px',
-              height: '16px',
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '400',
-              fontSize: '18px',
-              lineHeight: '27px',
-              color: '#0276FF',
-            }}
-          >
-            $56.13
-          </span>
-        </div>
-      </div>
-
-      {/* Price Sort Dropdown */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '279px',
-          height: '53px',
-          right: '20px',
-          top: 'calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            width: '266px',
-            height: '53px',
-            left: '0px',
-            top: '0px',
-            boxSizing: 'border-box',
-            border: '1px solid #333845',
-            borderRadius: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 15px',
-            cursor: 'pointer',
-          }}
-        >
-          <img
-            src="/assets/svg/home/down.svg"
-            alt="Sort"
-            style={{
-              width: '28px',
-              height: '21px',
-              marginRight: '10px',
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              fontSize: '15px',
-              lineHeight: '22px',
-              color: '#FFFFFF',
-            }}
-          >
-            Price sort low to high
-          </span>
-          <img
-            src="/assets/svg/home/arrow.svg"
-            alt="Sort"
-            style={{
-              width: '17px',
-              height: '9px',
-              marginLeft: 'auto',
-            }}
-          />
-        </div>
-      </div>
+      <div className="page-content-area">
+      <CoinflipToolbar onBetItemsClick={() => setIsCoinflipCreateModalOpen(true)} />
 
       {/* CoinFlipRow */}
       <CoinFlipRow
@@ -620,6 +241,7 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
       />
 
       <Footer />
+      </div>
 
       <CoinflipViewModal
         isOpen={isCoinflipViewModalOpen}
@@ -629,6 +251,8 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         isOpen={isCoinflipCreateModalOpen}
         onClose={() => setIsCoinflipCreateModalOpen(false)}
       />
+
+      {isLeaderboardVisible && <Leaderboard onClose={handleLeaderboardClose} />}
     </div>
   );
 }
@@ -637,18 +261,17 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const { isConnected } = useSocket();
   const isMaintenance = process.env.MAINTENANCE === 'true';
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (isConnected) {
       setIsFadingOut(true);
       setTimeout(() => {
         setIsLoading(false);
       }, 200);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [isConnected]);
 
   return (
     <>

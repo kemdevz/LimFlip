@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface ChatInputProps {
   onMessageChange: (message: string) => void;
@@ -9,6 +10,7 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ onMessageChange, message, onSend }: ChatInputProps) {
+  const isMobile = useIsMobile();
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSend();
@@ -19,16 +21,16 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
     <div
       className="absolute"
       style={{
-        width: 'min(85%, 298px)',
-        height: 'min(4vh, 46px)',
+        width: isMobile ? 'calc(100% - 70px)' : 'min(85%, 298px)',
+        height: isMobile ? '50px' : 'min(4vh, 46px)',
         left: '0px',
         bottom: '10px',
       }}
     >
       <div
         style={{
-          width: '278.53px',
-          height: '46.58px',
+          width: '100%',
+          height: '100%',
           left: '9px',
           top: '0px',
           background: '#1F232F',
@@ -46,10 +48,10 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
           position: 'absolute',
           width: 'calc(100% - 60px)',
           height: '100%',
-          left: 'min(8%, 23px)',
+          left: isMobile ? '15px' : 'min(8%, 23px)',
           top: '0px',
           fontFamily: 'Poppins, sans-serif',
-          fontSize: 'min(1.1vw, 14px)',
+          fontSize: isMobile ? '16px' : 'min(1.1vw, 14px)',
           lineHeight: '1.5',
           color: '#FFFFFF',
           fontWeight: '600',
@@ -63,14 +65,15 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
       <img
         src="/assets/svg/ui/emoji.svg"
         alt="Emoji"
-        width={19}
-        height={19}
+        width={isMobile ? 22 : 19}
+        height={isMobile ? 22 : 19}
         style={{
           position: 'absolute',
-          right: 'min(3%, 10px)',
-          top: 'min(1vh, 11px)',
-          width: 'min(1.5vw, 19px)',
-          height: 'min(1.5vw, 19px)',
+          right: isMobile ? '15px' : 'min(3%, 10px)',
+          top: isMobile ? '50%' : 'min(1vh, 11px)',
+          transform: isMobile ? 'translateY(-50%)' : 'none',
+          width: isMobile ? '22px' : 'min(1.5vw, 19px)',
+          height: isMobile ? '22px' : 'min(1.5vw, 19px)',
         }}
       />
       </div>

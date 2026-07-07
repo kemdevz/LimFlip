@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSocket } from '@/context/SocketContext';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface CoinFlipRowProps {
   topOffset: number;
@@ -10,16 +12,15 @@ interface CoinFlipRowProps {
 
 export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlipRowProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { isConnected } = useSocket();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Trigger animation after 3 sec loading screen - all rows at same time
-    const baseDelay = 3000; // Wait for loading screen
-    const timer = setTimeout(() => {
+    // Trigger animation when socket is connected
+    if (isConnected) {
       setIsVisible(true);
-    }, baseDelay);
-
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [isConnected]);
 
   const winnerImage = winner === 'heads' ? '/assets/images/coinflip/HEADSs.png' : '/assets/images/coinflip/tails.png';
   const winnerCoin = winner === 'heads' ? '/assets/images/coinflip/heads.png' : '/assets/images/coinflip/tails.png';
@@ -27,16 +28,11 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
 
   return (
     <div
+      className={`coinflip-row ${isMobile ? 'coinflip-row__mobile-stack' : ''}`}
       style={{
-        boxSizing: 'border-box',
-        width: 'calc(100vw - min(22vw, 352px) - 40px)',
-        height: '96px',
-        background: '#161A24',
-        border: '1px solid #1D1C2D',
-        borderRadius: '15px',
-        position: 'absolute',
-        left: 'calc(min(22vw, 352px) + 20px)',
-        top: `calc(min(3.5vh, 39px) + min(8vh, 92px) + 20px + 5px + 70px + ${topOffset}px)`,
+        backgroundColor: '#191D29',
+        top: isMobile ? undefined : `calc(20px + 5px + 70px + ${topOffset}px)`,
+        marginTop: isMobile ? `${topOffset === 0 ? 12 : topOffset + 12}px` : undefined,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(-20px)',
         transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
@@ -45,46 +41,84 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
       {/* Left side content */}
       <div
         style={{
-          position: 'absolute',
-          width: '186px',
-          height: '73px',
-          left: '22px',
-          top: '9px',
+          position: isMobile ? 'relative' : 'absolute',
+          width: isMobile ? '100%' : '186px',
+          height: isMobile ? 'auto' : '73px',
+          left: isMobile ? '0' : '22px',
+          top: isMobile ? '0' : '9px',
         }}
       >
         {/* Frame 2131328779 */}
         <div
           style={{
-            position: 'absolute',
-            width: '183px',
-            height: '71px',
-            left: '2px',
-            top: '2px',
+            position: isMobile ? 'relative' : 'absolute',
+            width: isMobile ? '100%' : '183px',
+            height: isMobile ? 'auto' : '71px',
+            left: isMobile ? '0' : '2px',
+            top: isMobile ? '0' : '2px',
+            display: isMobile ? 'flex' : 'block',
+            flexDirection: isMobile ? 'row' : 'row',
+            alignItems: isMobile ? 'center' : 'flex-start',
+            justifyContent: isMobile ? 'center' : 'flex-start',
+            gap: isMobile ? '16px' : '0',
+            padding: isMobile ? '12px' : '0',
           }}
         >
-          {/* Frame 2131327622 - Right avatar */}
+          {/* Frame 2131327614 - Left avatar */}
           <div
             style={{
-              position: 'absolute',
-              width: '66px',
-              height: '66px',
-              left: '116px',
-              top: '2px',
-              borderRadius: '50%',
-              background: 'url(/assets/images/coinflip/1SIDE.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              position: isMobile ? 'relative' : 'absolute',
+              width: '67px',
+              height: '71px',
+              left: isMobile ? '0' : '0px',
+              top: isMobile ? '0' : '0px',
             }}
-          />
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '66px',
+                height: '66px',
+                left: '1px',
+                top: '5px',
+                borderRadius: '132px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '68px',
+                  height: '70px',
+                  left: '-2px',
+                  top: '-4px',
+                  background: '#11151D',
+                  borderRadius: '132px',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '66px',
+                  height: '66px',
+                  left: '1px',
+                  top: '0px',
+                  background: 'url(/assets/images/coinflip/1SIDE.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  borderRadius: '43px',
+                }}
+              />
+            </div>
+          </div>
 
           {/* Frame 2131328530 - VS text */}
           <div
             style={{
-              position: 'absolute',
+              position: isMobile ? 'relative' : 'absolute',
               width: '18px',
               height: '22px',
-              left: '82px',
-              top: '25px',
+              left: isMobile ? '0' : '82px',
+              top: isMobile ? '0' : '25px',
             }}
           >
             <span
@@ -123,14 +157,14 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
             </span>
           </div>
 
-          {/* Frame 2131327614 - Left avatar */}
+          {/* Frame 2131327622 - Right avatar */}
           <div
             style={{
-              position: 'absolute',
+              position: isMobile ? 'relative' : 'absolute',
               width: '67px',
               height: '71px',
-              left: '0px',
-              top: '0px',
+              left: isMobile ? '0' : '116px',
+              top: isMobile ? '0' : '0px',
             }}
           >
             <div
@@ -150,7 +184,7 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
                   height: '70px',
                   left: '-2px',
                   top: '-4px',
-                  background: '#130F22',
+                  background: '#11151D',
                   borderRadius: '132px',
                 }}
               />
@@ -202,12 +236,13 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
       {/* Stacked avatars */}
       <div
         style={{
-          position: 'absolute',
-          width: '351px',
-          height: '54px',
-          left: '300px',
-          top: '50%',
-          transform: 'translateY(-50%)',
+          position: isMobile ? 'relative' : 'absolute',
+          width: isMobile ? '100%' : '351px',
+          height: isMobile ? 'auto' : '54px',
+          left: isMobile ? '0' : '300px',
+          top: isMobile ? '0' : '50%',
+          transform: isMobile ? 'none' : 'translateY(-50%)',
+          marginTop: isMobile ? '12px' : '0',
         }}
       >
         {/* Frame 2131327958 - Avatar container */}
@@ -217,11 +252,11 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
             flexDirection: 'row',
             alignItems: 'flex-start',
             padding: '0px',
-            position: 'absolute',
-            width: '261px',
-            height: '61px',
-            left: '-9px',
-            top: '-3px',
+            position: isMobile ? 'relative' : 'absolute',
+            width: isMobile ? '100%' : '261px',
+            height: isMobile ? 'auto' : '61px',
+            left: isMobile ? '0' : '-9px',
+            top: isMobile ? '0' : '-3px',
           }}
         >
           {[...Array(7)].map((_, i) => (
@@ -308,14 +343,15 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
       {/* Price range */}
       <div
         style={{
-          position: 'absolute',
-          left: '60%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: isMobile ? 'relative' : 'absolute',
+          left: isMobile ? '0' : 'calc(100% - 250px)',
+          top: isMobile ? '0' : '50%',
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'flex-start',
           gap: '6px',
+          marginTop: isMobile ? '12px' : '0',
         }}
       >
         {/* Wallet icon */}
@@ -379,29 +415,32 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
       {/* Winner image */}
       <div
         style={{
-          position: 'absolute',
+          position: isMobile ? 'relative' : 'absolute',
           width: '69px',
           height: '69px',
-          left: 'calc(100% - 250px)',
-          top: '11px',
+          left: isMobile ? '0' : '60%',
+          top: isMobile ? '0' : '50%',
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           background: `url(${winnerImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          marginTop: isMobile ? '12px' : '0',
         }}
       />
 
       {/* Frame 2131328664 */}
       <div
         style={{
-          position: 'absolute',
+          position: isMobile ? 'relative' : 'absolute',
           width: '74px',
           height: '76px',
-          left: 'calc(100% - 100px)',
-          top: '50%',
-          transform: 'translateY(-50%)',
+          left: isMobile ? '0' : 'calc(100% - 100px)',
+          top: isMobile ? '0' : '50%',
+          transform: isMobile ? 'none' : 'translateY(-50%)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: '5px',
+          marginTop: isMobile ? '12px' : '0',
         }}
       >
         {/* Join Button */}
@@ -420,21 +459,21 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
               top: '0%',
               bottom: '0%',
               background: '#0276FF',
-              borderRadius: '9px',
+              borderRadius: '15px',
             }}
           />
           <span
             style={{
               position: 'absolute',
-              width: '34px',
-              height: '11px',
-              left: '20px',
-              top: '10px',
-              fontFamily: 'Proxima Nova, sans-serif',
+              width: '31px',
+              height: '16px',
+              left: '18px',
+              top: '7px',
+              fontFamily: 'Poppins',
               fontStyle: 'normal',
-              fontWeight: '700',
+              fontWeight: '600',
               fontSize: '14px',
-              lineHeight: '14px',
+              lineHeight: '21px',
               color: '#FFFFFF',
             }}
           >
@@ -459,21 +498,21 @@ export default function CoinFlipRow({ topOffset, winner, onViewClick }: CoinFlip
               top: '0%',
               bottom: '0%',
               background: '#202634',
-              borderRadius: '9px',
+              borderRadius: '15px',
             }}
           />
           <span
             style={{
               position: 'absolute',
-              width: '34px',
-              height: '11px',
+              width: '31px',
+              height: '16px',
               left: '18px',
-              top: '10px',
-              fontFamily: 'Proxima Nova, sans-serif',
+              top: '7px',
+              fontFamily: 'Poppins',
               fontStyle: 'normal',
-              fontWeight: '700',
+              fontWeight: '600',
               fontSize: '14px',
-              lineHeight: '14px',
+              lineHeight: '21px',
               color: '#5A6582',
             }}
           >

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface SignUpModalProps {
   isOpen?: boolean;
@@ -8,6 +9,7 @@ interface SignUpModalProps {
 }
 
 export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProps) {
+  const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [username, setUsername] = useState('');
@@ -99,16 +101,9 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
 
   return (
     <div
+      className="responsive-modal-overlay"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
         background: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         zIndex: 10000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.15s ease-in-out',
@@ -118,29 +113,34 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
     >
       <form onSubmit={handleSubmit}>
       <div
+        className="responsive-modal-panel responsive-modal-panel--center signup-modal-panel"
         style={{
           position: 'relative',
-          width: '939px',
-          height: '521px',
-          transform: isVisible ? 'scale(1)' : 'scale(0.95)',
-          transition: 'transform 0.15s ease-in-out',
+          width: isMobile ? '100%' : '939px',
+          height: isMobile ? '100vh' : '521px',
+          transform: isMobile 
+            ? (isVisible ? 'translateY(0)' : 'translateY(100%)')
+            : (isVisible ? 'scale(1)' : 'scale(0.95)'),
+          transition: isMobile ? 'transform 0.3s ease-out' : 'transform 0.15s ease-in-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left side - PNG image */}
         <div
+          className="signup-modal-image"
           style={{
-            position: 'absolute',
-            width: '362px',
-            height: '531px',
-            left: 'calc(50% - 362px/2 - 288.5px)',
-            top: 'calc(50% - 531px/2 + 5px)',
-            borderRadius: '28px 0px 0px 28px',
+            position: isMobile ? 'relative' : 'absolute',
+            width: isMobile ? '100%' : '362px',
+            height: isMobile ? '200px' : '531px',
+            left: isMobile ? '0' : 'calc(50% - 362px/2 - 288.5px)',
+            top: isMobile ? '0' : 'calc(50% - 531px/2 + 5px)',
+            borderRadius: isMobile ? '28px 28px 0 0' : '28px 0px 0px 28px',
             overflow: 'hidden',
+            display: isMobile ? 'none' : 'block',
           }}
         >
           <img
-            src="/assets/svg/loginbgg.png"
+            src="/assets/images/loginbgg.png"
             alt="Login"
             style={{
               width: '100%',
@@ -152,16 +152,18 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
 
         {/* Right side - Form */}
         <div
+          className="signup-modal-form"
           style={{
             boxSizing: 'border-box',
-            position: 'absolute',
-            width: '577px',
-            height: '531px',
-            left: 'calc(50% - 577px/2 + 181px)',
-            top: 'calc(50% - 531px/2 + 5px)',
+            position: isMobile ? 'relative' : 'absolute',
+            width: isMobile ? '100%' : '577px',
+            height: isMobile ? 'auto' : '531px',
+            left: isMobile ? '0' : 'calc(50% - 577px/2 + 181px)',
+            top: isMobile ? '0' : 'calc(50% - 531px/2 + 5px)',
             background: '#191B25',
             border: '1px solid #222530',
-            borderRadius: '0px 28px 28px 0px',
+            borderRadius: isMobile ? '28px' : '0px 28px 28px 0px',
+            padding: isMobile ? '20px' : '0',
           }}
         >
           {/* Step 1: Username input */}
@@ -170,11 +172,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               {/* Content frame */}
               <div
                 style={{
-                  position: 'absolute',
-                  width: '518px',
-                  height: '329px',
-                  left: '30px',
-                  top: '-12px',
+                  position: isMobile ? 'relative' : 'absolute',
+                  width: isMobile ? '100%' : '518px',
+                  height: isMobile ? 'auto' : '329px',
+                  left: isMobile ? '0' : '30px',
+                  top: isMobile ? '0' : '-12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? '20px' : '0',
                 }}
               >
                 {/* Welcome header */}
@@ -182,44 +187,106 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-start',
+                    alignItems: isMobile ? 'center' : 'flex-start',
                     padding: '0px',
                     gap: '11px',
-                    position: 'absolute',
-                    width: '473px',
-                    height: '28px',
-                    left: '0px',
-                    top: '46px',
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '473px',
+                    height: isMobile ? 'auto' : '28px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '0' : '46px',
                   }}
                 >
                   <div
                     style={{
                       display: 'flex',
                       flexDirection: 'row',
-                      justifyContent: 'space-between',
+                      justifyContent: isMobile ? 'center' : 'space-between',
                       alignItems: 'center',
                       padding: '0px',
-                      gap: '423px',
-                      width: '473px',
-                      height: '28px',
+                      gap: isMobile ? '0' : '423px',
+                      width: isMobile ? '100%' : '473px',
+                      height: isMobile ? 'auto' : '28px',
+                      flex: 'none',
+                      order: 0,
+                      alignSelf: 'stretch',
+                      flexGrow: 0,
                     }}
                   >
                     <span
                       style={{
-                        margin: '0 auto',
-                        width: '473px',
-                        height: '28px',
+                        margin: isMobile ? '0 auto' : '0',
+                        width: isMobile ? 'auto' : '473px',
+                        height: isMobile ? 'auto' : '28px',
                         fontFamily: 'Poppins',
                         fontStyle: 'normal',
                         fontWeight: 600,
-                        fontSize: '20px',
+                        fontSize: isMobile ? '18px' : '20px',
                         lineHeight: '28px',
                         color: '#FFFFFF',
+                        flex: 'none',
+                        order: 0,
+                        flexGrow: 1,
                       }}
                     >
                       Welcome
                     </span>
                   </div>
+                </div>
+
+                {/* Welcome text */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: isMobile ? 'center' : 'flex-start',
+                    padding: '0px',
+                    gap: '17px',
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '517px',
+                    height: isMobile ? 'auto' : '53px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '0' : '87px',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: isMobile ? '100%' : '517px',
+                      height: isMobile ? 'auto' : '18px',
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      fontSize: isMobile ? '13px' : '14px',
+                      lineHeight: '18px',
+                      color: '#6B7289',
+                      flex: 'none',
+                      order: 0,
+                      alignSelf: 'stretch',
+                      flexGrow: 0,
+                      textAlign: isMobile ? 'center' : 'left',
+                    }}
+                  >
+                    Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
+                  </span>
+                  <span
+                    style={{
+                      width: isMobile ? '100%' : '517px',
+                      height: isMobile ? 'auto' : '18px',
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      fontSize: isMobile ? '13px' : '14px',
+                      lineHeight: '18px',
+                      color: '#6B7289',
+                      flex: 'none',
+                      order: 1,
+                      alignSelf: 'stretch',
+                      flexGrow: 0,
+                      textAlign: isMobile ? 'center' : 'left',
+                    }}
+                  >
+                    Enter your roblox username to get started.
+                  </span>
                 </div>
 
                 {/* Form fields */}
@@ -230,27 +297,31 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     alignItems: 'flex-start',
                     padding: '0px',
                     gap: '11px',
-                    position: 'absolute',
-                    width: '518px',
-                height: '311px',
-                left: '0px',
-                top: '156px',
-              }}
-            >
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '518px',
+                    height: isMobile ? 'auto' : '311px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '0' : '156px',
+                  }}
+                >
               {/* Username field */}
               <div
                 style={{
-                  width: '518px',
-                  height: '84px',
+                  width: isMobile ? '100%' : '518px',
+                  height: isMobile ? 'auto' : '84px',
+                  flex: 'none',
+                  order: 0,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
                 }}
               >
                 <span
                   style={{
-                    position: 'absolute',
-                    width: '116px',
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '116px',
                     height: '18px',
-                    right: '402px',
-                    top: '0px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '0' : '0px',
                     fontFamily: 'Poppins',
                     fontStyle: 'normal',
                     fontWeight: 600,
@@ -261,42 +332,72 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 >
                   Username
                 </span>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter roblox username"
+                <div
                   style={{
-                    position: 'absolute',
-                    width: '518px',
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '518px',
                     height: '54px',
-                    left: '0px',
-                    top: '30px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '10px' : '30px',
                     background: '#262937',
                     borderRadius: '15px',
-                    border: 'none',
-                    padding: '0 18px',
-                    color: '#6B7289',
-                    fontFamily: 'Poppins',
-                    fontSize: '14px',
-                    outline: 'none',
                   }}
-                />
+                >
+                  <img
+                    src="/assets/svg/auth/user.svg"
+                    alt="User"
+                    style={{
+                      position: 'absolute',
+                      width: '14px',
+                      height: '14px',
+                      left: '18px',
+                      top: '20px',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter roblox username"
+                    style={{
+                      position: 'absolute',
+                      width: isMobile ? 'calc(100% - 63px)' : '518px',
+                      height: '54px',
+                      left: isMobile ? '0' : '0px',
+                      top: '0px',
+                      background: 'transparent',
+                      borderRadius: '15px',
+                      border: 'none',
+                      padding: '0 18px 0 45px',
+                      color: '#6B7289',
+                      fontFamily: 'Poppins',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Continue button */}
               <div
                 style={{
-                  width: '518px',
-                  height: '68px',
+                  width: isMobile ? '100%' : '518px',
+                  height: isMobile ? 'auto' : '68px',
+                  flex: 'none',
+                  order: 1,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
                 }}
               >
                 <button
                   type="submit"
                   disabled={loading}
                   style={{
-                    width: '518px',
+                    position: isMobile ? 'relative' : 'absolute',
+                    width: isMobile ? '100%' : '518px',
                     height: '54px',
+                    left: isMobile ? '0' : '0px',
+                    top: isMobile ? '0' : '100px',
                     background: loading ? '#1a4d8c' : '#0276FF',
                     borderRadius: '15px',
                     border: 'none',
@@ -307,64 +408,15 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     fontSize: '18px',
                     lineHeight: '27px',
                     color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
                   {loading ? 'Loading...' : 'Continue'}
                 </button>
               </div>
-
-              {/* Welcome text */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '0px',
-                  gap: '17px',
-                  position: 'absolute',
-                  width: '517px',
-                  height: '53px',
-                  left: '0px',
-                  top: '87px',
-                }}
-              >
-                <span
-                  style={{
-                    width: '517px',
-                    height: '18px',
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '18px',
-                    color: '#6B7289',
-                    flex: 'none',
-                    order: 0,
-                    alignSelf: 'stretch',
-                    flexGrow: 0,
-                  }}
-                >
-                  Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
-                </span>
-                <span
-                  style={{
-                    width: '517px',
-                    height: '18px',
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '18px',
-                    color: '#6B7289',
-                    flex: 'none',
-                    order: 1,
-                    alignSelf: 'stretch',
-                    flexGrow: 0,
-                  }}
-                >
-                  Enter your roblox username to get started.
-                </span>
-              </div>
+            </div>
 
               {/* "or" divider */}
               <div
@@ -374,39 +426,50 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   alignItems: 'center',
                   padding: '0px',
                   gap: '20px',
-                  position: 'absolute',
-                  width: '518px',
+                  position: isMobile ? 'relative' : 'absolute',
+                  width: isMobile ? '100%' : '518px',
                   height: '17px',
-                  left: '0px',
-                  top: '324px',
+                  left: isMobile ? '0' : '0px',
+                  top: isMobile ? '0' : '338px',
                 }}
               >
                 <div
                   style={{
-                    width: '232.5px',
+                    width: isMobile ? 'calc(50% - 20px)' : '232.5px',
                     height: '0px',
                     mixBlendMode: 'overlay',
                     border: '1px solid #FFFFFF',
+                    flex: 'none',
+                    order: 0,
+                    flexGrow: 1,
                   }}
                 />
                 <span
                   style={{
+                    width: '13px',
+                    height: '17px',
                     fontFamily: 'Proxima Nova, sans-serif',
                     fontStyle: 'normal',
                     fontWeight: 600,
                     fontSize: '14px',
                     lineHeight: '17px',
                     color: '#6B7289',
+                    flex: 'none',
+                    order: 1,
+                    flexGrow: 0,
                   }}
                 >
                   or
                 </span>
                 <div
                   style={{
-                    width: '232.5px',
+                    width: isMobile ? 'calc(50% - 20px)' : '232.5px',
                     height: '0px',
                     mixBlendMode: 'overlay',
                     border: '1px solid #FFFFFF',
+                    flex: 'none',
+                    order: 2,
+                    flexGrow: 1,
                   }}
                 />
               </div>
@@ -418,19 +481,19 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   flexDirection: 'row',
                   alignItems: 'flex-start',
                   padding: '0px',
-                  gap: '11px',
-                  position: 'absolute',
-                  width: '516px',
+                  gap: '13px',
+                  position: isMobile ? 'relative' : 'absolute',
+                  width: isMobile ? '100%' : '518px',
                   height: '54px',
-                  left: '0px',
-                  top: '354px',
+                  left: isMobile ? '0' : '0px',
+                  top: isMobile ? '0' : '368px',
                 }}
               >
                 {/* Google */}
                 <div
                   onClick={() => window.open('https://accounts.google.com', '_blank')}
                   style={{
-                    width: '252.5px',
+                    width: isMobile ? 'calc(50% - 6.5px)' : '252.5px',
                     height: '54px',
                     background: '#262937',
                     borderRadius: '15px',
@@ -438,38 +501,19 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
+                    flex: 'none',
+                    order: 0,
+                    flexGrow: 1,
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: '0px',
-                      gap: '11px',
-                    }}
-                  >
-                    <img src="/assets/svg/auth/google.svg" alt="Google" style={{ width: '26px', height: '26px' }} />
-                    <span
-                      style={{
-                        fontFamily: 'Poppins',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '15px',
-                        lineHeight: '22px',
-                        color: '#BEC2D1',
-                      }}
-                    >
-                      Google
-                    </span>
-                  </div>
+                  <img src="/assets/svg/ui/google.svg" alt="Google" style={{ width: '92px', height: '26px' }} />
                 </div>
 
                 {/* Discord */}
                 <div
                   onClick={() => window.open('https://discord.com', '_blank')}
                   style={{
-                    width: '252.5px',
+                    width: isMobile ? 'calc(50% - 6.5px)' : '252.5px',
                     height: '54px',
                     background: '#262937',
                     borderRadius: '15px',
@@ -477,34 +521,54 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
+                    flex: 'none',
+                    order: 1,
+                    flexGrow: 1,
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: '0px',
-                      gap: '11px',
-                    }}
-                  >
-                    <img src="/assets/svg/auth/discord.svg" alt="Discord" style={{ width: '26px', height: '26px' }} />
-                    <span
-                      style={{
-                        fontFamily: 'Poppins',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        fontSize: '15px',
-                        lineHeight: '22px',
-                        color: '#BEC2D1',
-                      }}
-                    >
-                      Discord
-                    </span>
-                  </div>
+                  <img src="/assets/svg/ui/discord.svg" alt="Discord" style={{ width: '95px', height: '26px' }} />
                 </div>
               </div>
-            </div>
+
+              {/* Sign in or register with Email text */}
+              <span
+                style={{
+                  position: isMobile ? 'relative' : 'absolute',
+                  width: isMobile ? '100%' : '518px',
+                  height: '20px',
+                  left: isMobile ? '0' : '0px',
+                  top: isMobile ? '0' : '432px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: '13px',
+                  lineHeight: '20px',
+                  color: '#6B7289',
+                  textAlign: 'center',
+                }}
+              >
+                Sign in or register with Email
+              </span>
+
+              {/* Terms of Service text */}
+              <span
+                style={{
+                  position: isMobile ? 'relative' : 'absolute',
+                  width: isMobile ? '100%' : '529px',
+                  height: isMobile ? 'auto' : '36px',
+                  left: isMobile ? '0' : '0px',
+                  top: isMobile ? '0' : '468px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: isMobile ? '12px' : '14px',
+                  lineHeight: '18px',
+                  color: '#525F7C',
+                  textAlign: isMobile ? 'center' : 'left',
+                }}
+              >
+                By registering in your recognize that you are in agreement to our <span style={{ color: '#0276FF' }}>Terms of Service</span> as-well as being over the age of <span style={{ color: '#0276FF' }}>18+</span>.
+              </span>
           </div>
         </>
       )}
@@ -515,11 +579,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Frame 2131327912 - Header */}
           <div
             style={{
-              position: 'absolute',
-              width: '518px',
-              height: '114px',
-              left: '30px',
-              top: '-12px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '518px',
+              height: isMobile ? 'auto' : '114px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '-12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '20px' : '0',
             }}
           >
             {/* Frame 23622476 */}
@@ -527,14 +594,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'flex-start',
+                        alignItems: isMobile ? 'center' : 'flex-start',
                         padding: '0px',
                         gap: '11px',
-                        position: 'absolute',
-                        width: '473px',
-                        height: '28px',
-                        left: '0px',
-                        top: '46px',
+                        position: isMobile ? 'relative' : 'absolute',
+                        width: isMobile ? '100%' : '473px',
+                        height: isMobile ? 'auto' : '28px',
+                        left: isMobile ? '0' : '0px',
+                        top: isMobile ? '0' : '46px',
                       }}
                     >
                       {/* Frame 23622475 */}
@@ -542,12 +609,12 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         style={{
                           display: 'flex',
                           flexDirection: 'row',
-                          justifyContent: 'space-between',
+                          justifyContent: isMobile ? 'center' : 'space-between',
                           alignItems: 'center',
                           padding: '0px',
-                          gap: '423px',
-                          width: '473px',
-                          height: '28px',
+                          gap: isMobile ? '0' : '423px',
+                          width: isMobile ? '100%' : '473px',
+                          height: isMobile ? 'auto' : '28px',
                           flex: 'none',
                           order: 0,
                           alignSelf: 'stretch',
@@ -557,13 +624,13 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         {/* Is this your account? */}
                         <span
                           style={{
-                            margin: '0 auto',
-                            width: '473px',
-                            height: '28px',
+                            margin: isMobile ? '0 auto' : '0',
+                            width: isMobile ? 'auto' : '473px',
+                            height: isMobile ? 'auto' : '28px',
                             fontFamily: 'Poppins',
                             fontStyle: 'normal',
                             fontWeight: 600,
-                            fontSize: '20px',
+                            fontSize: isMobile ? '18px' : '20px',
                             lineHeight: '28px',
                             color: '#FFFFFF',
                             flex: 'none',
@@ -580,30 +647,31 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
-                          alignItems: 'flex-start',
+                          alignItems: isMobile ? 'center' : 'flex-start',
                           padding: '0px',
                           gap: '17px',
-                          position: 'absolute',
-                          width: '517px',
-                          height: '18px',
-                          left: '0px',
-                          top: '87px',
+                          position: isMobile ? 'relative' : 'absolute',
+                          width: isMobile ? '100%' : '517px',
+                          height: isMobile ? 'auto' : '18px',
+                          left: isMobile ? '0' : '0px',
+                          top: isMobile ? '0' : '87px',
                         }}
                       >
                         <span
                           style={{
-                            width: '517px',
-                            height: '18px',
+                            width: isMobile ? '100%' : '517px',
+                            height: isMobile ? 'auto' : '18px',
                             fontFamily: 'Poppins',
                             fontStyle: 'normal',
                             fontWeight: 500,
-                            fontSize: '14px',
+                            fontSize: isMobile ? '13px' : '14px',
                             lineHeight: '18px',
                             color: '#6B7289',
                             flex: 'none',
                             order: 0,
                             alignSelf: 'stretch',
                             flexGrow: 0,
+                            textAlign: isMobile ? 'center' : 'left',
                           }}
                         >
                           Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
@@ -620,26 +688,29 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                       alignItems: 'center',
                       padding: '0px',
                       gap: '8px',
-                      position: 'absolute',
-                      width: '113px',
-                      height: '177px',
-                      left: '232px',
-                      top: '166px',
+                      position: isMobile ? 'relative' : 'absolute',
+                      width: isMobile ? '100%' : '113px',
+                      height: isMobile ? 'auto' : '177px',
+                      left: isMobile ? '0' : '232px',
+                      top: isMobile ? '0' : '166px',
                     }}
                   >
                     {/* Profile picture */}
-                    <div
+                    <img
+                      src={`https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`}
+                      alt="Profile"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="113" height="113" viewBox="0 0 113 113"%3E%3Crect width="113" height="113" fill="%2311151D" rx="56.5"/%3E%3C/svg%3E';
+                      }}
                       style={{
                         width: '113px',
                         height: '113px',
-                        background: `url(https://tr.rbxcdn.com/${robloxUserId}/150/150/AvatarHeadshot/Png), #11151D`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
                         borderRadius: '999px',
                         flex: 'none',
                         order: 0,
                         alignSelf: 'stretch',
                         flexGrow: 0,
+                        objectFit: 'cover',
                       }}
                     />
                     {/* Frame 2131329317 - Username and ID */}
@@ -702,43 +773,46 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   {/* Bottom text */}
                   <span
                     style={{
-                      position: 'absolute',
-                      width: '529px',
-                      height: '36px',
-                      left: '30px',
-                      top: '468px',
+                      position: isMobile ? 'relative' : 'absolute',
+                      width: isMobile ? '100%' : '529px',
+                      height: isMobile ? 'auto' : '36px',
+                      left: isMobile ? '0' : '30px',
+                      top: isMobile ? '0' : '468px',
                       fontFamily: 'Poppins',
                       fontStyle: 'normal',
                       fontWeight: 500,
-                      fontSize: '14px',
+                      fontSize: isMobile ? '12px' : '14px',
                       lineHeight: '18px',
                       color: '#525F7C',
+                      textAlign: isMobile ? 'center' : 'left',
                     }}
                   >
                     By continuing, you agree to our Terms of Service
                   </span>
 
                   {/* Vector overlay */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: '90.64%',
-                      right: '6.24%',
-                      top: '6.66%',
-                      bottom: '89.83%',
-                      background: '#FFFFFF',
-                      mixBlendMode: 'overlay',
-                    }}
-                  />
+                  {!isMobile && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: '90.64%',
+                        right: '6.24%',
+                        top: '6.66%',
+                        bottom: '89.83%',
+                        background: '#FFFFFF',
+                        mixBlendMode: 'overlay',
+                      }}
+                    />
+                  )}
 
                   {/* Frame 2131329319 - Back button */}
                   <div
                     style={{
-                      position: 'absolute',
-                      width: '252.5px',
-                      height: '54px',
-                      left: '30px',
-                      top: '388px',
+                      position: isMobile ? 'relative' : 'absolute',
+                      width: isMobile ? '100%' : '252.5px',
+                      height: isMobile ? 'auto' : '54px',
+                      left: isMobile ? '0' : '30px',
+                      top: isMobile ? '0' : '388px',
                       background: '#262937',
                       borderRadius: '15px',
                     }}
@@ -748,7 +822,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                       onClick={() => setStep(1)}
                       disabled={loading}
                       style={{
-                        width: '252.5px',
+                        width: '100%',
                         height: '54px',
                         background: 'transparent',
                         borderRadius: '15px',
@@ -774,13 +848,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   {/* Frame 2131327917 - Yes, Continue button */}
                   <div
                     style={{
-                      position: 'absolute',
-                      width: '252.5px',
-                      height: '54px',
-                      left: '294px',
-                      top: '388px',
+                      position: isMobile ? 'relative' : 'absolute',
+                      width: isMobile ? '100%' : '252.5px',
+                      height: isMobile ? 'auto' : '54px',
+                      left: isMobile ? '0' : '294px',
+                      top: isMobile ? '0' : '388px',
                       background: '#0276FF',
                       borderRadius: '15px',
+                      marginTop: isMobile ? '10px' : '0',
                     }}
                   >
                     <button
@@ -813,11 +888,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Frame 2131327912 - Header */}
           <div
             style={{
-              position: 'absolute',
-              width: '518px',
-              height: '114px',
-              left: '30px',
-              top: '-12px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '518px',
+              height: isMobile ? 'auto' : '114px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '-12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '20px' : '0',
             }}
           >
             {/* Frame 23622476 */}
@@ -825,14 +903,14 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
+                alignItems: isMobile ? 'center' : 'flex-start',
                 padding: '0px',
                 gap: '11px',
-                position: 'absolute',
-                width: '473px',
-                height: '28px',
-                left: '0px',
-                top: '46px',
+                position: isMobile ? 'relative' : 'absolute',
+                width: isMobile ? '100%' : '473px',
+                height: isMobile ? 'auto' : '28px',
+                left: isMobile ? '0' : '0px',
+                top: isMobile ? '0' : '46px',
               }}
             >
               {/* Frame 23622475 */}
@@ -840,12 +918,12 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  justifyContent: isMobile ? 'center' : 'space-between',
                   alignItems: 'center',
                   padding: '0px',
-                  gap: '423px',
-                  width: '473px',
-                  height: '28px',
+                  gap: isMobile ? '0' : '423px',
+                  width: isMobile ? '100%' : '473px',
+                  height: isMobile ? 'auto' : '28px',
                   flex: 'none',
                   order: 0,
                   alignSelf: 'stretch',
@@ -855,13 +933,13 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 {/* Verify Your Account */}
                 <span
                   style={{
-                    margin: '0 auto',
-                    width: '473px',
-                    height: '28px',
+                    margin: isMobile ? '0 auto' : '0',
+                    width: isMobile ? 'auto' : '473px',
+                    height: isMobile ? 'auto' : '28px',
                     fontFamily: 'Poppins',
                     fontStyle: 'normal',
                     fontWeight: 600,
-                    fontSize: '20px',
+                    fontSize: isMobile ? '18px' : '20px',
                     lineHeight: '28px',
                     color: '#FFFFFF',
                     flex: 'none',
@@ -880,30 +958,31 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-start',
+              alignItems: isMobile ? 'center' : 'flex-start',
               padding: '0px',
               gap: '17px',
-              position: 'absolute',
-              width: '517px',
-              height: '36px',
-              left: '30px',
-              top: '102px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '517px',
+              height: isMobile ? 'auto' : '36px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '102px',
             }}
           >
             <span
               style={{
-                width: '517px',
-                height: '36px',
+                width: isMobile ? '100%' : '517px',
+                height: isMobile ? 'auto' : '36px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: 500,
-                fontSize: '14px',
+                fontSize: isMobile ? '13px' : '14px',
                 lineHeight: '18px',
                 color: '#6B7289',
                 flex: 'none',
                 order: 0,
                 alignSelf: 'stretch',
                 flexGrow: 0,
+                textAlign: isMobile ? 'center' : 'left',
               }}
             >
               Copy the verification code and paste it into your Roblox bio
@@ -911,132 +990,134 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           </div>
 
           {/* Step indicators */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              padding: '0px',
-              gap: '5px',
-              position: 'absolute',
-              width: '27px',
-              height: '91px',
-              left: '30px',
-              top: '305px',
-            }}
-          >
-            {/* Step 1 */}
+          {!isMobile && (
             <div
               style={{
-                width: '27px',
-                height: '27px',
-                background: 'rgba(2, 118, 255, 0.24)',
-                borderRadius: '77px',
-                flex: 'none',
-                order: 0,
-                alignSelf: 'stretch',
-                flexGrow: 0,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '0px',
+                gap: '5px',
+                position: 'absolute',
+                width: '27px',
+                height: '91px',
+                left: '30px',
+                top: '305px',
               }}
             >
-              <span
+              {/* Step 1 */}
+              <div
                 style={{
-                  position: 'absolute',
-                  width: '6px',
-                  height: '18px',
-                  left: '10px',
-                  top: '2px',
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  color: '#0276FF',
+                  width: '27px',
+                  height: '27px',
+                  background: 'rgba(2, 118, 255, 0.24)',
+                  borderRadius: '77px',
+                  flex: 'none',
+                  order: 0,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                1
-              </span>
-            </div>
-            {/* Step 2 */}
-            <div
-              style={{
-                width: '27px',
-                height: '27px',
-                background: 'rgba(2, 118, 255, 0.24)',
-                borderRadius: '77px',
-                flex: 'none',
-                order: 1,
-                alignSelf: 'stretch',
-                flexGrow: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '6px',
+                    height: '18px',
+                    left: '10px',
+                    top: '2px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '22px',
+                    color: '#0276FF',
+                  }}
+                >
+                  1
+                </span>
+              </div>
+              {/* Step 2 */}
+              <div
                 style={{
-                  position: 'absolute',
-                  width: '11px',
-                  height: '18px',
-                  left: '8px',
-                  top: '2px',
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  color: '#0276FF',
+                  width: '27px',
+                  height: '27px',
+                  background: 'rgba(2, 118, 255, 0.24)',
+                  borderRadius: '77px',
+                  flex: 'none',
+                  order: 1,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                2
-              </span>
-            </div>
-            {/* Step 3 */}
-            <div
-              style={{
-                width: '27px',
-                height: '27px',
-                background: 'rgba(2, 118, 255, 0.24)',
-                borderRadius: '77px',
-                flex: 'none',
-                order: 2,
-                alignSelf: 'stretch',
-                flexGrow: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '11px',
+                    height: '18px',
+                    left: '8px',
+                    top: '2px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '22px',
+                    color: '#0276FF',
+                  }}
+                >
+                  2
+                </span>
+              </div>
+              {/* Step 3 */}
+              <div
                 style={{
-                  position: 'absolute',
-                  width: '6px',
-                  height: '18px',
-                  left: '9px',
-                  top: '2px',
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  color: '#0276FF',
+                  width: '27px',
+                  height: '27px',
+                  background: 'rgba(2, 118, 255, 0.24)',
+                  borderRadius: '77px',
+                  flex: 'none',
+                  order: 2,
+                  alignSelf: 'stretch',
+                  flexGrow: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                3
-              </span>
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '6px',
+                    height: '18px',
+                    left: '9px',
+                    top: '2px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '22px',
+                    color: '#0276FF',
+                  }}
+                >
+                  3
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Username input */}
           <div
             style={{
-              position: 'absolute',
-              width: '518px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '518px',
               height: '54px',
-              left: '30px',
-              top: '127px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '127px',
               background: '#262937',
               borderRadius: '15px',
             }}
@@ -1059,9 +1140,9 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             <span
               style={{
                 position: 'absolute',
-                width: '114px',
+                width: isMobile ? 'calc(100% - 100px)' : '114px',
                 height: '21px',
-                left: '59px',
+                left: isMobile ? '59px' : '59px',
                 top: '16px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
@@ -1078,26 +1159,27 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Code input */}
           <div
             style={{
-              position: 'absolute',
-              width: '518px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '518px',
               height: '93px',
-              left: '30px',
-              top: '194px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '194px',
               background: '#262937',
               borderRadius: '15px',
+              marginTop: isMobile ? '10px' : '0',
             }}
           >
             <span
               style={{
                 position: 'absolute',
-                width: '208px',
+                width: isMobile ? 'calc(100% - 34px)' : '208px',
                 height: '18px',
                 left: '17px',
                 top: '14px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: 600,
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 lineHeight: '18px',
                 color: '#B0B5CE',
               }}
@@ -1107,7 +1189,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             <span
               style={{
                 position: 'absolute',
-                width: '488px',
+                width: isMobile ? 'calc(100% - 34px)' : '488px',
                 height: '42px',
                 left: '17px',
                 top: '41px',
@@ -1126,9 +1208,10 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             <div
               style={{
                 position: 'absolute',
-                width: '64.31px',
+                width: isMobile ? '60px' : '64.31px',
                 height: '33px',
-                left: '445px',
+                right: isMobile ? '10px' : 'auto',
+                left: isMobile ? 'auto' : '445px',
                 top: '6px',
                 background: '#313546',
                 borderRadius: '12.6923px',
@@ -1161,24 +1244,25 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Instructions */}
           <div
             style={{
-              position: 'absolute',
-              width: '355px',
-              height: '82px',
-              left: '66px',
-              top: '310px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '355px',
+              height: isMobile ? 'auto' : '82px',
+              left: isMobile ? '0' : '66px',
+              top: isMobile ? '0' : '310px',
+              marginTop: isMobile ? '10px' : '0',
             }}
           >
             <span
               style={{
-                position: 'absolute',
-                width: '137px',
+                position: isMobile ? 'relative' : 'absolute',
+                width: isMobile ? '100%' : '137px',
                 height: '18px',
-                left: '0px',
-                top: '0px',
+                left: isMobile ? '0' : '0px',
+                top: isMobile ? '0' : '0px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: 600,
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 lineHeight: '18px',
                 color: '#B0B5CE',
               }}
@@ -1187,15 +1271,15 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </span>
             <span
               style={{
-                position: 'absolute',
-                width: '355px',
+                position: isMobile ? 'relative' : 'absolute',
+                width: isMobile ? '100%' : '355px',
                 height: '18px',
-                left: '0px',
-                top: '31px',
+                left: isMobile ? '0' : '0px',
+                top: isMobile ? '0' : '31px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: 600,
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 lineHeight: '18px',
                 color: '#0276FF',
               }}
@@ -1204,15 +1288,15 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </span>
             <span
               style={{
-                position: 'absolute',
-                width: '257px',
+                position: isMobile ? 'relative' : 'absolute',
+                width: isMobile ? '100%' : '257px',
                 height: '18px',
-                left: '0px',
-                top: '64px',
+                left: isMobile ? '0' : '0px',
+                top: isMobile ? '0' : '64px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: 600,
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 lineHeight: '18px',
                 color: '#B0B5CE',
               }}
@@ -1224,52 +1308,56 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Bottom text */}
           <span
             style={{
-              position: 'absolute',
-              width: '505px',
-              height: '18px',
-              left: '36px',
-              top: '479px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '505px',
+              height: isMobile ? 'auto' : '18px',
+              left: isMobile ? '0' : '36px',
+              top: isMobile ? '0' : '479px',
               fontFamily: 'Poppins',
               fontStyle: 'normal',
               fontWeight: 500,
-              fontSize: '11px',
+              fontSize: isMobile ? '11px' : '11px',
               lineHeight: '18px',
               color: '#525F7C',
+              textAlign: isMobile ? 'center' : 'left',
             }}
           >
             By continuing, you agree to our Terms of Service
           </span>
 
           {/* Vector overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '90.64%',
-              right: '6.24%',
-              top: '6.66%',
-              bottom: '89.83%',
-              background: '#FFFFFF',
-              mixBlendMode: 'overlay',
-            }}
-          />
+          {!isMobile && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '90.64%',
+                right: '6.24%',
+                top: '6.66%',
+                bottom: '89.83%',
+                background: '#FFFFFF',
+                mixBlendMode: 'overlay',
+              }}
+            />
+          )}
 
           {/* Open Profile button */}
           <div
             style={{
-              position: 'absolute',
-              width: '252.5px',
-              height: '54px',
-              left: '30px',
-              top: '413px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '252.5px',
+              height: isMobile ? 'auto' : '54px',
+              left: isMobile ? '0' : '30px',
+              top: isMobile ? '0' : '413px',
               background: '#262937',
               borderRadius: '15px',
+              marginTop: isMobile ? '10px' : '0',
             }}
           >
             <button
               type="button"
               onClick={() => window.open(`https://www.roblox.com/users/${robloxUserId}/profile`, '_blank')}
               style={{
-                width: '252.5px',
+                width: '100%',
                 height: '54px',
                 background: 'transparent',
                 borderRadius: '15px',
@@ -1290,20 +1378,21 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           {/* Verify button */}
           <div
             style={{
-              position: 'absolute',
-              width: '252.5px',
-              height: '54px',
-              left: '294px',
-              top: '413px',
+              position: isMobile ? 'relative' : 'absolute',
+              width: isMobile ? '100%' : '252.5px',
+              height: isMobile ? 'auto' : '54px',
+              left: isMobile ? '0' : '294px',
+              top: isMobile ? '0' : '413px',
               background: '#0276FF',
               borderRadius: '15px',
+              marginTop: isMobile ? '10px' : '0',
             }}
           >
             <button
               type="submit"
               disabled={loading}
               style={{
-                width: '252.5px',
+                width: '100%',
                 height: '54px',
                 background: 'transparent',
                 borderRadius: '15px',

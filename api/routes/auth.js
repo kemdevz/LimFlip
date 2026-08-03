@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { checkUsernameExists, searchRobloxUsers, getUserDescription } = require('../utils/roblox');
+const noblox = require('noblox.js');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -104,12 +105,16 @@ router.post('/login', async (req, res) => {
 
     let user = await User.findOne({ username });
 
-    // Always fetch fresh avatar URL from Roblox
-    const users = await searchRobloxUsers(username);
-    console.log('Login search results:', users);
-    const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
-    console.log('Login using avatar URL:', avatarUrl);
+    // Always fetch fresh avatar URL from Roblox using noblox
+    let avatarUrl;
+    try {
+      const userThumbnail = await noblox.getPlayerThumbnail(robloxUserId, 420, 'png', false, 'Headshot');
+      avatarUrl = userThumbnail[0].imageUrl;
+      console.log('Login using noblox avatar URL:', avatarUrl);
+    } catch (error) {
+      console.error('Error fetching thumbnail with noblox:', error);
+      avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
+    }
 
     if (!user) {
       user = new User({
@@ -242,19 +247,18 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Always fetch fresh avatar URL from Roblox API (same as login modal)
+    // Always fetch fresh avatar URL from Roblox using noblox (same as login modal)
     let avatarUrl = user.avatarUrl;
     try {
-      const users = await searchRobloxUsers(user.username);
-      const foundUser = users.find(u => u.username.toLowerCase() === user.username.toLowerCase());
-      avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
-      console.log('/me using fresh avatar URL:', avatarUrl);
+      const userThumbnail = await noblox.getPlayerThumbnail(user.robloxUserId, 420, 'png', false, 'Headshot');
+      avatarUrl = userThumbnail[0].imageUrl;
+      console.log('/me using noblox avatar URL:', avatarUrl);
       
       // Update user with fresh avatar
       user.avatarUrl = avatarUrl;
       await user.save();
     } catch (error) {
-      console.error('Error fetching avatar for /me:', error);
+      console.error('Error fetching avatar for /me with noblox:', error);
       avatarUrl = user.avatarUrl || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
     }
 

@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useMobileLayout } from '@/context/MobileLayoutContext';
 import { useAuth } from '@/hooks/useAuth';
 import { User } from '@/types';
+import WalletModal from '@/components/wallet/WalletModal';
 
 interface NavbarProps {
   onSignUpClick?: () => void;
@@ -198,6 +199,10 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                   >
                     <div style={{ position: 'absolute', inset: 0, background: '#1E222F', borderRadius: '12px' }}>
                       <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsWalletModalOpen(true);
+                        }}
                         style={{
                           position: 'absolute',
                           right: 0,
@@ -209,6 +214,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          cursor: 'pointer',
                         }}
                       >
                         <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px', color: '#FFFFFF' }}>Deposit</span>
@@ -479,7 +485,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
         />
       )}
 
-      {/* <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} /> */}
+      <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
     </div>
   );
 }

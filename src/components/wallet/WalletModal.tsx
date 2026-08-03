@@ -1718,10 +1718,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
               
               <div
+                onClick={() => window.open('https://www.roblox.com/users/11411583845/profile?friendshipSourceType=PlayerSearch', '_blank')}
                 style={{
                   width: '535px',
                   height: '54px',
                   position: 'relative',
+                  cursor: 'pointer',
                 }}
               >
                 <div
@@ -1733,7 +1735,6 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                     top: '0px',
                     background: '#0276FF',
                     borderRadius: '15px',
-                    cursor: 'pointer',
                   }}
                 />
                 <span
@@ -1772,7 +1773,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                 color: '#FFFFFF',
               }}
             >
-              To initiate Deposit process, trade the bot x3s2a1s2d in the Lobby from the vip provided below within the timeframe.
+              To initiate Deposit process, trade the bot MM2_BUGGY in the Lobby from the vip provided below within the timeframe.
             </span>
           </>
         )}

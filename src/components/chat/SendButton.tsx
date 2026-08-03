@@ -15,8 +15,9 @@ export default function SendButton({ onSend }: SendButtonProps) {
       style={{
         width: isMobile ? '50px' : '47.55px',
         height: isMobile ? '50px' : '46.58px',
-        left: isMobile ? 'calc(100% - 60px)' : '292px',
+        left: isMobile ? 'calc(100% - 60px)' : 'calc(9px + 280px + 8px)',
         bottom: '10px',
+        top: '5px',
         opacity: 0.44,
         cursor: 'pointer',
       }}

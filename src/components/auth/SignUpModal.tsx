@@ -18,6 +18,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
   const [step, setStep] = useState(1); // 1 = enter username, 2 = confirm account, 3 = update description
   const [robloxUserId, setRobloxUserId] = useState<number | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -50,10 +51,34 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
 
         const data = await response.json();
 
-        if (response.ok) {
-          // Username exists, store userId, verification code and move to confirmation step
-          setRobloxUserId(data.userId);
+        if (!response.ok) {
+          throw new Error(data.error || 'Username check failed');
+        }
+
+        if (data.exists) {
+          const userId = data.userId || data.robloxUserId;
+          setRobloxUserId(userId);
           setVerificationCode(data.verificationCode || '');
+          
+          console.log('Step 1 - User found:', { userId, verificationCode: data.verificationCode });
+          
+          // Fetch avatar URL from Roblox API
+          try {
+            const searchResponse = await fetch(`http://localhost:3001/roblox/search?q=${encodeURIComponent(username)}`);
+            const searchData = await searchResponse.json();
+            console.log('Search results:', searchData);
+            if (searchData && searchData.length > 0) {
+              setAvatarUrl(searchData[0].avatar || '');
+              // Fallback: use ID from search results if userId is not available
+              if (!userId && searchData[0].id) {
+                setRobloxUserId(searchData[0].id);
+                console.log('Using ID from search results:', searchData[0].id);
+              }
+            }
+          } catch (searchError) {
+            console.error('Error fetching avatar:', searchError);
+          }
+          
           setStep(2);
         } else {
           setError(data.message || 'Username not found');
@@ -64,7 +89,9 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
       } else {
         // Step 3: Verify description and login/signup
         const endpoint = 'http://localhost:3001/auth/verify-description';
-        const body = { username, robloxUserId };
+        const body = { username, robloxUserId: robloxUserId?.toString() };
+
+        console.log('Sending to verify-description:', { username, robloxUserId });
 
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -80,9 +107,10 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           throw new Error(data.error || 'Verification failed. Please make sure you updated your description.');
         }
 
-        // Store token
+        // Store only token
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        console.log('Stored token:', data.token);
 
         // Close modal
         onClose?.();
@@ -125,7 +153,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left side - PNG image */}
+        
         <div
           className="signup-modal-image"
           style={{
@@ -140,7 +168,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           }}
         >
           <img
-            src="/assets/images/loginbgg.png"
+            src="/assets/images/auth/loginbgg.png"
             alt="Login"
             style={{
               width: '100%',
@@ -150,7 +178,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           />
         </div>
 
-        {/* Right side - Form */}
+        
         <div
           className="signup-modal-form"
           style={{
@@ -166,10 +194,10 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             padding: isMobile ? '20px' : '0',
           }}
         >
-          {/* Step 1: Username input */}
+          
           {step === 1 && (
             <>
-              {/* Content frame */}
+              
               <div
                 style={{
                   position: isMobile ? 'relative' : 'absolute',
@@ -182,7 +210,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   gap: isMobile ? '20px' : '0',
                 }}
               >
-                {/* Welcome header */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -234,7 +262,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   </div>
                 </div>
 
-                {/* Welcome text */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -266,7 +294,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                       textAlign: isMobile ? 'center' : 'left',
                     }}
                   >
-                    Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
+                    Welcome to MM2Stake, the leading roblox social arcade for Crypto and R$
                   </span>
                   <span
                     style={{
@@ -289,7 +317,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   </span>
                 </div>
 
-                {/* Form fields */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -304,7 +332,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     top: isMobile ? '0' : '156px',
                   }}
                 >
-              {/* Username field */}
+              
               <div
                 style={{
                   width: isMobile ? '100%' : '518px',
@@ -378,7 +406,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 </div>
               </div>
 
-              {/* Continue button */}
+              
               <div
                 style={{
                   width: isMobile ? '100%' : '518px',
@@ -418,7 +446,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               </div>
             </div>
 
-              {/* "or" divider */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -474,7 +502,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 />
               </div>
 
-              {/* Social login buttons */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -489,7 +517,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   top: isMobile ? '0' : '368px',
                 }}
               >
-                {/* Google */}
+                
                 <div
                   onClick={() => window.open('https://accounts.google.com', '_blank')}
                   style={{
@@ -509,7 +537,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   <img src="/assets/svg/ui/google.svg" alt="Google" style={{ width: '92px', height: '26px' }} />
                 </div>
 
-                {/* Discord */}
+                
                 <div
                   onClick={() => window.open('https://discord.com', '_blank')}
                   style={{
@@ -530,7 +558,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 </div>
               </div>
 
-              {/* Sign in or register with Email text */}
+              
               <span
                 style={{
                   position: isMobile ? 'relative' : 'absolute',
@@ -550,7 +578,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 Sign in or register with Email
               </span>
 
-              {/* Terms of Service text */}
+              
               <span
                 style={{
                   position: isMobile ? 'relative' : 'absolute',
@@ -573,10 +601,10 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         </>
       )}
 
-      {/* Step 2: Profile confirmation */}
+      
       {step === 2 && (
         <>
-          {/* Frame 2131327912 - Header */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -589,7 +617,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               gap: isMobile ? '20px' : '0',
             }}
           >
-            {/* Frame 23622476 */}
+            
             <div
               style={{
                         display: 'flex',
@@ -604,7 +632,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         top: isMobile ? '0' : '46px',
                       }}
                     >
-                      {/* Frame 23622475 */}
+                      
                       <div
                         style={{
                           display: 'flex',
@@ -621,7 +649,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                           flexGrow: 0,
                         }}
                       >
-                        {/* Is this your account? */}
+                        
                         <span
                           style={{
                             margin: isMobile ? '0 auto' : '0',
@@ -642,7 +670,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         </span>
                       </div>
 
-                      {/* Frame 2131329315 - Welcome text */}
+                      
                       <div
                         style={{
                           display: 'flex',
@@ -652,7 +680,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                           gap: '17px',
                           position: isMobile ? 'relative' : 'absolute',
                           width: isMobile ? '100%' : '517px',
-                          height: isMobile ? 'auto' : '18px',
+                          height: isMobile ? 'auto' : '53px',
                           left: isMobile ? '0' : '0px',
                           top: isMobile ? '0' : '87px',
                         }}
@@ -674,13 +702,33 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                             textAlign: isMobile ? 'center' : 'left',
                           }}
                         >
-                          Welcome to BloxBash, the leading roblox social arcade for Crypto and R$
+                          Please add this code to your Roblox profile description:
+                        </span>
+                        <span
+                          style={{
+                            width: isMobile ? '100%' : '517px',
+                            height: isMobile ? 'auto' : '18px',
+                            fontFamily: 'Poppins',
+                            fontStyle: 'normal',
+                            fontWeight: 600,
+                            fontSize: isMobile ? '14px' : '16px',
+                            lineHeight: '18px',
+                            color: '#006EFF',
+                            flex: 'none',
+                            order: 1,
+                            alignSelf: 'stretch',
+                            flexGrow: 0,
+                            textAlign: isMobile ? 'center' : 'left',
+                            wordBreak: 'break-all',
+                          }}
+                        >
+                          {verificationCode}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Frame 2131329318 - Profile section */}
+                  
                   <div
                     style={{
                       display: 'flex',
@@ -695,9 +743,9 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                       top: isMobile ? '0' : '166px',
                     }}
                   >
-                    {/* Profile picture */}
+                    
                     <img
-                      src={`https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`}
+                      src={avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`}
                       alt="Profile"
                       onError={(e) => {
                         e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="113" height="113" viewBox="0 0 113 113"%3E%3Crect width="113" height="113" fill="%2311151D" rx="56.5"/%3E%3C/svg%3E';
@@ -713,7 +761,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                         objectFit: 'cover',
                       }}
                     />
-                    {/* Frame 2131329317 - Username and ID */}
+                    
                     <div
                       style={{
                         display: 'flex',
@@ -770,7 +818,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     </div>
                   </div>
 
-                  {/* Bottom text */}
+                  
                   <span
                     style={{
                       position: isMobile ? 'relative' : 'absolute',
@@ -790,7 +838,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     By continuing, you agree to our Terms of Service
                   </span>
 
-                  {/* Vector overlay */}
+                  
                   {!isMobile && (
                     <div
                       style={{
@@ -805,7 +853,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     />
                   )}
 
-                  {/* Frame 2131329319 - Back button */}
+                  
                   <div
                     style={{
                       position: isMobile ? 'relative' : 'absolute',
@@ -845,7 +893,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     </button>
                   </div>
 
-                  {/* Frame 2131327917 - Yes, Continue button */}
+                  
                   <div
                     style={{
                       position: isMobile ? 'relative' : 'absolute',
@@ -882,10 +930,10 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 </>
               )}
 
-      {/* Step 3: Verification */}
+      
       {step === 3 && (
         <>
-          {/* Frame 2131327912 - Header */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -898,7 +946,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               gap: isMobile ? '20px' : '0',
             }}
           >
-            {/* Frame 23622476 */}
+            
             <div
               style={{
                 display: 'flex',
@@ -913,7 +961,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 top: isMobile ? '0' : '46px',
               }}
             >
-              {/* Frame 23622475 */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -930,7 +978,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   flexGrow: 0,
                 }}
               >
-                {/* Verify Your Account */}
+                
                 <span
                   style={{
                     margin: isMobile ? '0 auto' : '0',
@@ -953,7 +1001,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </div>
           </div>
 
-          {/* Frame 2131329315 - Instructions */}
+          
           <div
             style={{
               display: 'flex',
@@ -989,7 +1037,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </span>
           </div>
 
-          {/* Step indicators */}
+          
           {!isMobile && (
             <div
               style={{
@@ -1005,7 +1053,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 top: '305px',
               }}
             >
-              {/* Step 1 */}
+              
               <div
                 style={{
                   width: '27px',
@@ -1039,7 +1087,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   1
                 </span>
               </div>
-              {/* Step 2 */}
+              
               <div
                 style={{
                   width: '27px',
@@ -1073,7 +1121,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   2
                 </span>
               </div>
-              {/* Step 3 */}
+              
               <div
                 style={{
                   width: '27px',
@@ -1110,7 +1158,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </div>
           )}
 
-          {/* Username input */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1122,7 +1170,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               borderRadius: '15px',
             }}
           >
-            {/* Profile picture */}
+            
             <div
               style={{
                 position: 'absolute',
@@ -1130,13 +1178,13 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 height: '34px',
                 left: '12px',
                 top: '10px',
-                background: `url(https://tr.rbxcdn.com/${robloxUserId}/150/150/AvatarHeadshot/Png), #11151D`,
+                background: avatarUrl ? `url(${avatarUrl})` : `url(https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png), #11151D`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 borderRadius: '999px',
               }}
             />
-            {/* Username */}
+            
             <span
               style={{
                 position: 'absolute',
@@ -1156,7 +1204,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </span>
           </div>
 
-          {/* Code input */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1204,7 +1252,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             >
               {verificationCode}
             </span>
-            {/* Copy button */}
+            
             <div
               style={{
                 position: 'absolute',
@@ -1241,7 +1289,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </div>
           </div>
 
-          {/* Instructions */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1305,7 +1353,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </span>
           </div>
 
-          {/* Bottom text */}
+          
           <span
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1325,7 +1373,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             By continuing, you agree to our Terms of Service
           </span>
 
-          {/* Vector overlay */}
+          
           {!isMobile && (
             <div
               style={{
@@ -1340,7 +1388,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             />
           )}
 
-          {/* Open Profile button */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1375,7 +1423,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
             </button>
           </div>
 
-          {/* Verify button */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -1413,7 +1461,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
       )}
         </div>
 
-        {/* Error display */}
+        
         {error && (
           <span
             style={{

@@ -4,13 +4,17 @@ import { useState, useEffect } from 'react';
 import MyListingsModal from './MyListingsModal';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 
-export default function MarketplaceContent() {
+interface MarketplaceContentProps {
+  onMyListingsClick?: () => void;
+}
+
+export default function MarketplaceContent({ onMyListingsClick }: MarketplaceContentProps) {
   const isMobile = useIsMobile();
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
-  const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [displayedCartTotal, setDisplayedCartTotal] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
@@ -72,6 +76,30 @@ export default function MarketplaceContent() {
     return total + priceValue;
   }, 0);
 
+  // Animate cart total when it changes
+  useEffect(() => {
+    const duration = 600; // animation duration in ms
+    const startTime = performance.now();
+    const startValue = displayedCartTotal;
+    const endValue = cartTotal;
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out quintic function for smoother animation
+      const easeOut = 1 - Math.pow(1 - progress, 5);
+      
+      setDisplayedCartTotal(startValue + (endValue - startValue) * easeOut);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [cartTotal]);
+
   return (
     <div
       className="marketplace-root"
@@ -81,11 +109,12 @@ export default function MarketplaceContent() {
         transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
       }}
     >
-      {/* Recently Sold Section */}
+      
       <div
         style={{
           marginBottom: '17px',
-          marginLeft: '26px',
+          marginLeft: isMobile ? '12px' : '26px',
+          marginRight: isMobile ? '12px' : '42px',
         }}
       >
         <div
@@ -94,8 +123,8 @@ export default function MarketplaceContent() {
             flexDirection: 'row',
             alignItems: 'center',
             marginBottom: '15px',
-            marginLeft: '4px',
-            marginRight: '21px',
+            marginLeft: isMobile ? '0' : '4px',
+            marginRight: isMobile ? '0' : '21px',
           }}
         >
           <span
@@ -108,23 +137,27 @@ export default function MarketplaceContent() {
             Recently Sold
           </span>
           <div style={{ flex: 1 }} />
-          <img
-            src="/assets/svg/ui/arrow1.svg"
-            alt="Arrow Left"
-            style={{
-              width: '7px',
-              height: '12px',
-              marginRight: '17px',
-            }}
-          />
-          <img
-            src="/assets/svg/ui/arrow2.svg"
-            alt="Arrow Right"
-            style={{
-              width: '7px',
-              height: '12px',
-            }}
-          />
+          {!isMobile && (
+            <>
+              <img
+                src="/assets/svg/ui/arrow1.svg"
+                alt="Arrow Left"
+                style={{
+                  width: '7px',
+                  height: '12px',
+                  marginRight: '17px',
+                }}
+              />
+              <img
+                src="/assets/svg/ui/arrow2.svg"
+                alt="Arrow Right"
+                style={{
+                  width: '7px',
+                  height: '12px',
+                }}
+              />
+            </>
+          )}
         </div>
 
         <div
@@ -132,7 +165,7 @@ export default function MarketplaceContent() {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            marginRight: '42px',
+            marginRight: isMobile ? '0' : '42px',
             overflowX: 'auto',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -152,14 +185,14 @@ export default function MarketplaceContent() {
                 alignItems: 'flex-start',
                 padding: '0px',
                 gap: '3px',
-                width: '177px',
+                width: isMobile ? 'calc(50% - 6px)' : '177px',
                 height: '78px',
                 position: 'relative',
-                marginRight: '12px',
+                marginRight: isMobile ? '12px' : '12px',
                 flexShrink: 0,
               }}
             >
-              {/* Background */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -174,7 +207,7 @@ export default function MarketplaceContent() {
                 }}
               />
 
-              {/* Price */}
+              
               <span
                 style={{
                   position: 'absolute',
@@ -193,7 +226,7 @@ export default function MarketplaceContent() {
                 21.35 $
               </span>
 
-              {/* MM2 */}
+              
               <span
                 style={{
                   position: 'absolute',
@@ -212,7 +245,7 @@ export default function MarketplaceContent() {
                 MM2
               </span>
 
-              {/* blox bash overlay */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -260,7 +293,7 @@ export default function MarketplaceContent() {
                 </span>
               </div>
 
-              {/* Item image with blur */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -295,7 +328,7 @@ export default function MarketplaceContent() {
                 />
               </div>
 
-              {/* Item name and time */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -345,184 +378,346 @@ export default function MarketplaceContent() {
         </div>
       </div>
 
-      {/* Search and Filters */}
+      
       <div
         className="marketplace-toolbar"
         style={{
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'center',
           marginBottom: '17px',
-          marginLeft: '26px',
-          marginRight: '12px',
-          gap: '13px',
+          marginLeft: isMobile ? '12px' : '26px',
+          marginRight: isMobile ? '12px' : '26px',
+          gap: isMobile ? '10px' : '13px',
         }}
       >
-        <div
-          style={{
-            position: 'relative',
-            flex: 1,
-            height: '53px',
-            backgroundColor: '#191D29',
-            borderRadius: '15px',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingLeft: '15px',
-          }}
-        >
-          <img
-            src="/assets/svg/ui/search.svg"
-            alt="Search"
-            style={{
-              width: '18px',
-              height: '18px',
-              marginRight: '11px',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search for collectibles ..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              fontFamily: 'Poppins',
-              fontStyle: 'normal',
-              fontWeight: 600,
-              fontSize: '14px',
-              lineHeight: '21px',
-              color: '#596175',
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              width: '100%',
-            }}
-          />
-        </div>
-        <button
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderColor: '#333845',
-            borderRadius: '15px',
-            borderWidth: '1px',
-            padding: '14px 18px',
-            marginRight: '13px',
-            backgroundColor: 'transparent',
-            cursor: 'pointer',
-          }}
-        >
-          <img
-            src="/assets/svg/ui/arrowprice.svg"
-            alt="Price"
-            style={{
-              width: '28px',
-              height: '21px',
-              marginRight: '12px',
-            }}
-          />
-          <span
-            style={{
-              color: '#FFFFFF',
-              fontSize: '15px',
-              fontWeight: 'bold',
-              marginRight: '16px',
-            }}
-          >
-            Price sort low to high
-          </span>
-          <img
-            src="/assets/svg/ui/dropdown.svg"
-            alt="Dropdown"
-            style={{
-              width: '17px',
-              height: '9px',
-            }}
-          />
-        </button>
-        <button
-          onClick={() => setIsMyListingsOpen(true)}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: '#191D29',
-            borderRadius: '15px',
-            padding: '13px 22px',
-            marginRight: '14px',
-            boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
-            cursor: 'pointer',
-            border: 'none',
-          }}
-        >
-          <span
-            style={{
-              color: '#373F56',
-              fontSize: '18px',
-              fontWeight: 'bold',
-            }}
-          >
-            My Listings
-          </span>
-        </button>
-        <div className="marketplace-toolbar__actions" style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <span
+        {isMobile ? (
+          <>
+            <div style={{ display: 'flex', gap: '13px', width: '100%' }}>
+              <button
+                onClick={() => onMyListingsClick && onMyListingsClick()}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: '#191D29',
+                  borderRadius: '15px',
+                  padding: '13px 22px',
+                  boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
+                  cursor: 'pointer',
+                  border: 'none',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    color: '#373F56',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  My Listings
+                </span>
+              </button>
+              <div
+                style={{
+                  position: 'relative',
+                  flex: 1,
+                  height: '53px',
+                  backgroundColor: '#191D29',
+                  borderRadius: '15px',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingLeft: '15px',
+                }}
+              >
+                <img
+                  src="/assets/svg/ui/search.svg"
+                  alt="Search"
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    marginRight: '11px',
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    lineHeight: '21px',
+                    color: '#596175',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    width: '100%',
+                  }}
+                />
+              </div>
+            </div>
+            <div className="marketplace-toolbar__actions" style={{ display: 'flex', alignItems: 'center', gap: '13px', width: '100%' }}>
+              <button
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  borderColor: '#333845',
+                  borderRadius: '15px',
+                  borderWidth: '1px',
+                  padding: '14px 30px',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <img
+                  src="/assets/svg/ui/arrowprice.svg"
+                  alt="Price"
+                  style={{
+                    width: '28px',
+                    height: '21px',
+                    marginRight: '12px',
+                  }}
+                />
+                <span
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: '15px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Low to High
+                </span>
+              </button>
+              <div style={{ position: 'relative' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    left: '95px',
+                    backgroundColor: '#FF3939',
+                    borderRadius: '1298px',
+                    padding: '0 5px',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    zIndex: 10,
+                  }}
+                >
+                  {selectedItems.size}
+                </span>
+                <button
+                  onClick={() => setIsCartOpen(!isCartOpen)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#0276FF',
+                    borderRadius: '12px',
+                    padding: '10px 15px',
+                    boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
+                    cursor: 'pointer',
+                    border: 'none',
+                  }}
+                >
+                  <img
+                    src="/assets/svg/ui/cart.svg"
+                    alt="Cart"
+                    style={{
+                      borderRadius: '15px',
+                      width: '22px',
+                      height: '22px',
+                      marginRight: '8px',
+                    }}
+                  />
+                  <span
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ${displayedCartTotal.toFixed(2)}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
               style={{
-                position: 'absolute',
-                top: isMobile ? '-5px' : '-8px',
-                left: isMobile ? '95px' : '124px',
-                backgroundColor: '#FF3939',
-                borderRadius: '1298px',
-                padding: '0 5px',
-                color: '#FFFFFF',
-                fontSize: isMobile ? '14px' : '17px',
-                fontWeight: 'bold',
-                zIndex: 10,
+                position: 'relative',
+                flex: 1,
+                height: '53px',
+                backgroundColor: '#191D29',
+                borderRadius: '15px',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingLeft: '15px',
               }}
             >
-              {selectedItems.size}
-            </span>
+              <img
+                src="/assets/svg/ui/search.svg"
+                alt="Search"
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  marginRight: '11px',
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Search for collectibles ..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  color: '#596175',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  width: '100%',
+                }}
+              />
+            </div>
             <button
-              onClick={() => setIsCartOpen(!isCartOpen)}
+              onClick={() => onMyListingsClick && onMyListingsClick()}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: '#0276FF',
-                borderRadius: isMobile ? '12px' : '15px',
-                padding: isMobile ? '10px 15px' : '12px 19px',
+                backgroundColor: '#191D29',
+                borderRadius: '15px',
+                padding: '13px 22px',
                 boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
                 cursor: 'pointer',
                 border: 'none',
               }}
             >
-              <img
-                src="/assets/svg/ui/cart.svg"
-                alt="Cart"
-                style={{
-                  borderRadius: '15px',
-                  width: isMobile ? '22px' : '27px',
-                  height: isMobile ? '22px' : '27px',
-                  marginRight: isMobile ? '8px' : '11px',
-                }}
-              />
               <span
                 style={{
-                  color: '#FFFFFF',
-                  fontSize: isMobile ? '16px' : '18px',
+                  color: '#373F56',
+                  fontSize: '18px',
                   fontWeight: 'bold',
                 }}
               >
-                ${cartTotal.toFixed(2)}
+                My Listings
               </span>
             </button>
-          </div>
-        </div>
+            <div className="marketplace-toolbar__actions" style={{ display: 'flex', alignItems: 'center', gap: '13px' }}>
+              <button
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  borderColor: '#333845',
+                  borderRadius: '15px',
+                  borderWidth: '1px',
+                  padding: '14px 18px',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                <img
+                  src="/assets/svg/ui/arrowprice.svg"
+                  alt="Price"
+                  style={{
+                    width: '28px',
+                    height: '21px',
+                    marginRight: '12px',
+                  }}
+                />
+                <span
+                  style={{
+                    color: '#FFFFFF',
+                    fontSize: '15px',
+                    fontWeight: 'bold',
+                    marginRight: '16px',
+                  }}
+                >
+                  Price sort low to high
+                </span>
+                <img
+                  src="/assets/svg/ui/dropdown.svg"
+                  alt="Dropdown"
+                  style={{
+                    width: '17px',
+                    height: '9px',
+                  }}
+                />
+              </button>
+              <div style={{ position: 'relative' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    left: '124px',
+                    backgroundColor: '#FF3939',
+                    borderRadius: '1298px',
+                    padding: '0 5px',
+                    color: '#FFFFFF',
+                    fontSize: '17px',
+                    fontWeight: 'bold',
+                    zIndex: 10,
+                  }}
+                >
+                  {selectedItems.size}
+                </span>
+                <button
+                  onClick={() => setIsCartOpen(!isCartOpen)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#0276FF',
+                    borderRadius: '15px',
+                    padding: '12px 19px',
+                    boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
+                    cursor: 'pointer',
+                    border: 'none',
+                  }}
+                >
+                  <img
+                    src="/assets/svg/ui/cart.svg"
+                    alt="Cart"
+                    style={{
+                      borderRadius: '15px',
+                      width: '27px',
+                      height: '27px',
+                      marginRight: '11px',
+                    }}
+                  />
+                  <span
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ${displayedCartTotal.toFixed(2)}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Main Content Area */}
+      
       <div
         className="marketplace-main"
         style={{
@@ -534,7 +729,7 @@ export default function MarketplaceContent() {
           overflow: 'hidden',
         }}
       >
-        {/* Items Grid */}
+        
         <div
           className="marketplace-grid hide-scrollbar"
           style={{
@@ -569,7 +764,7 @@ export default function MarketplaceContent() {
                 cursor: 'pointer',
               }}
             >
-              {/* Top gradient section */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -581,7 +776,7 @@ export default function MarketplaceContent() {
                   borderRadius: '15px 15px 0px 0px',
                 }}
               >
-                {/* Multiplier badge */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -623,7 +818,7 @@ export default function MarketplaceContent() {
                   </span>
                 </div>
 
-                {/* Item images with blur */}
+                
                 <div
                   style={{
                     position: 'absolute',
@@ -658,7 +853,7 @@ export default function MarketplaceContent() {
                   />
                 </div>
 
-                {/* blox bash overlay */}
+                
                 <div
                   style={{
                     position: 'absolute',
@@ -707,7 +902,7 @@ export default function MarketplaceContent() {
                 </div>
               </div>
 
-              {/* Item name and price */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -745,7 +940,7 @@ export default function MarketplaceContent() {
                 </span>
               </div>
 
-              {/* Rate */}
+              
               <span
                 style={{
                   position: 'absolute',
@@ -764,7 +959,7 @@ export default function MarketplaceContent() {
                 {item.rate}
               </span>
 
-              {/* Blue bar */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -778,7 +973,7 @@ export default function MarketplaceContent() {
                 }}
               />
 
-              {/* Market icon */}
+              
               <div
                 style={{
                   position: 'absolute',
@@ -808,6 +1003,7 @@ export default function MarketplaceContent() {
                     style={{
                       width: '14px',
                       height: '14px',
+                      filter: 'brightness(0) invert(1)',
                     }}
                   />
                 </div>
@@ -816,7 +1012,7 @@ export default function MarketplaceContent() {
           ))}
         </div>
 
-        {/* My Cart Sidebar */}
+        
         {isCartOpen && isMobile && (
           <div
             onClick={() => setIsCartOpen(false)}
@@ -836,18 +1032,19 @@ export default function MarketplaceContent() {
           style={{
             position: isMobile ? 'fixed' : 'absolute',
             width: isMobile ? '85%' : '357px',
-            height: isMobile ? '100vh' : '554px',
+            height: isMobile ? 'calc(100vh - 59px)' : '554px',
             right: isMobile ? '0' : (isCartOpen ? '18px' : '-375px'),
             top: isMobile ? '0' : 'calc(50% - 554px/2 + 101px)',
             backgroundColor: '#191D29',
+            border: isMobile ? '1px solid #222530' : 'none',
             borderRadius: isMobile ? '0' : '13px',
             transition: isMobile ? 'transform 0.3s ease' : 'right 0.3s ease',
             transform: isMobile ? (isCartOpen ? 'translateX(0)' : 'translateX(100%)') : 'none',
             zIndex: isMobile ? 1000 : 'auto',
-            boxShadow: isMobile ? '-5px 0 15px rgba(0, 0, 0, 0.3)' : 'none',
+            boxShadow: isMobile ? '-5px 0 15px rgba(0, 0, 0, 0.5)' : 'none',
           }}
         >
-          {/* Top Section */}
+          
           <div
             style={{
               display: 'flex',
@@ -856,10 +1053,11 @@ export default function MarketplaceContent() {
               padding: isMobile ? '20px' : '0px 30px',
               gap: '15px',
               position: 'absolute',
-              width: isMobile ? '100%' : '374px',
+              width: isMobile ? '100%' : '357px',
               height: isMobile ? 'auto' : '52px',
-              left: isMobile ? '0' : '-5px',
+              left: isMobile ? '0' : '0px',
               top: isMobile ? '0' : '16px',
+              backgroundColor: '#191D29',
             }}
           >
             <div
@@ -968,7 +1166,7 @@ export default function MarketplaceContent() {
             }}
           />
 
-          {/* Cart Items */}
+          
           <div
             style={{
               display: 'flex',
@@ -984,6 +1182,7 @@ export default function MarketplaceContent() {
               overflowY: 'auto',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
+              backgroundColor: 'transparent',
             }}
           >
             <style>{`
@@ -1002,7 +1201,7 @@ export default function MarketplaceContent() {
                   position: 'relative',
                 }}
               >
-                {/* Item image with blur */}
+                
                 <div
                   style={{
                     position: 'absolute',
@@ -1037,7 +1236,7 @@ export default function MarketplaceContent() {
                   />
                 </div>
 
-                {/* Item name and price */}
+                
                 <div
                   style={{
                     position: 'absolute',
@@ -1084,7 +1283,7 @@ export default function MarketplaceContent() {
                   </span>
                 </div>
 
-                {/* Remove button */}
+                
                 <button
                   onClick={() => removeFromCart(item.name)}
                   style={{
@@ -1115,7 +1314,7 @@ export default function MarketplaceContent() {
                   />
                 </button>
 
-                {/* Blue bar */}
+                
                 <div
                   style={{
                     position: 'absolute',
@@ -1141,6 +1340,7 @@ export default function MarketplaceContent() {
                   height: isMobile ? '100%' : '332px',
                   color: '#737E98',
                   fontSize: isMobile ? '16px' : '14px',
+                  backgroundColor: '#191D29',
                 }}
               >
                 Your cart is empty
@@ -1148,7 +1348,7 @@ export default function MarketplaceContent() {
             )}
           </div>
 
-          {/* Vertical divider - hide on mobile */}
+          
           <div
             style={{
               position: 'absolute',
@@ -1162,7 +1362,7 @@ export default function MarketplaceContent() {
             }}
           />
 
-          {/* Gradient overlay - hide on mobile */}
+          
           <div
             style={{
               position: 'absolute',
@@ -1176,7 +1376,7 @@ export default function MarketplaceContent() {
             }}
           />
 
-          {/* Bottom Section */}
+          
           <div
             style={{
               display: 'flex',
@@ -1186,10 +1386,11 @@ export default function MarketplaceContent() {
               padding: isMobile ? '20px' : '0px 30px',
               gap: '15px',
               position: 'absolute',
-              width: isMobile ? '100%' : '374px',
+              width: isMobile ? '100%' : '357px',
               height: isMobile ? 'auto' : '120px',
-              left: isMobile ? '0' : '-8px',
+              left: isMobile ? '0' : '0px',
               bottom: isMobile ? '0' : '21px',
+              backgroundColor: '#191D29',
             }}
           >
             <div
@@ -1290,7 +1491,7 @@ export default function MarketplaceContent() {
                     color: '#FFFFFF',
                   }}
                 >
-                  ${cartTotal.toFixed(2)}
+                  ${displayedCartTotal.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -1348,7 +1549,6 @@ export default function MarketplaceContent() {
           </div>
         </div>
       </div>
-      <MyListingsModal isOpen={isMyListingsOpen} onClose={() => setIsMyListingsOpen(false)} />
     </div>
   );
 }

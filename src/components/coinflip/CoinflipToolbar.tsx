@@ -1,10 +1,61 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useSocket } from '@/context/SocketContext';
+
 interface CoinflipToolbarProps {
   onBetItemsClick?: () => void;
 }
 
+const formatAmount = (amount: number) => {
+  if (amount >= 1000000) {
+    return `R$${(amount / 1000000).toFixed(2)}m`;
+  } else if (amount >= 1000) {
+    return `R$${(amount / 1000).toFixed(2)}k`;
+  } else {
+    return `R$${amount.toFixed(2)}`;
+  }
+};
+
 export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProps) {
+  const [playerCount, setPlayerCount] = useState(0);
+  const [totalBets, setTotalBets] = useState(0);
+  const [yourBets, setYourBets] = useState(0);
+  const { user } = useAuth();
+  const { onlineCount } = useSocket();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/coinflip/active');
+        const data = await response.json();
+        const games = data.games || [];
+
+        // Calculate total bets
+        const total = games.reduce((sum: number, game: any) => sum + (game.totalValue || 0), 0);
+        setTotalBets(total);
+
+        // Calculate your bets
+        if (user?.id) {
+          const yourTotal = games
+            .filter((game: any) => game.creator === user.id || game.joiner === user.id)
+            .reduce((sum: number, game: any) => sum + (game.totalValue || 0), 0);
+          setYourBets(yourTotal);
+        }
+
+        // Set player count from socket
+        setPlayerCount(onlineCount);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
+    return () => clearInterval(interval);
+  }, [user?.id, onlineCount]);
+
   return (
     <div className="coinflip-toolbar">
       <div
@@ -60,7 +111,7 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
         <img src="/assets/images/coinflip/tails.png" alt="Tails" style={{ width: '42px', height: '42px', cursor: 'pointer' }} />
       </div>
 
-      {/* Divider */}
+      
       <img
         src="/assets/svg/ui/divider.svg"
         alt="Divider"
@@ -94,15 +145,15 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
       <div className="coinflip-toolbar__stats" style={{ marginLeft: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <img src="/assets/svg/home/dice.svg" alt="Players" style={{ width: '27px', height: '22px' }} />
-          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#FFFFFF' }}>36</span>
+          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#FFFFFF' }}>{playerCount}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <img src="/assets/svg/home/wallet.svg" alt="Total Bets" style={{ width: '20px', height: '16px' }} />
-          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#0276FF' }}>R$1.59m</span>
+          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#0276FF' }}>{formatAmount(totalBets)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <img src="/assets/svg/home/wallet.svg" alt="Your Bets" style={{ width: '20px', height: '16px' }} />
-          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#0276FF' }}>$56.13</span>
+          <span style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '18px', color: '#0276FF' }}>{formatAmount(yourBets)}</span>
         </div>
       </div>
 

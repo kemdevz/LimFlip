@@ -7,15 +7,27 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
+import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
+import MyListingsModal from '@/components/market/MyListingsModal';
+import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
+import PrivacyModal from '@/components/privacy/PrivacyModal';
+import RulesModal from '@/components/rules/RulesModal';
+import FaqModal from '@/components/faq/FaqModal';
 
 export default function ProfilePage() {
   const isMobile = useIsMobile();
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
+  const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
+  const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'account' | 'linking'>('account');
 
   return (
     <div className="page-shell page-shell--fixed">
-      {/* Background image */}
+      
       <div
         className="page-bg page-bg--main"
         style={{
@@ -23,7 +35,7 @@ export default function ProfilePage() {
         }}
       />
       
-      {/* Dark overlay */}
+      
       <div
         className="absolute inset-0"
         style={{
@@ -34,14 +46,18 @@ export default function ProfilePage() {
       <Subnavbar
         onTermsClick={() => window.location.href = '/tos'}
         onLeaderboardClick={() => {}}
+        onProvablyFairClick={() => setIsValidateFairnessOpen(true)}
+        onPrivacyClick={() => setIsPrivacyModalOpen(true)}
+        onFaqClick={() => setIsFaqModalOpen(true)}
       />
       <Navbar
         onSignUpClick={() => setIsSignUpModalOpen(true)}
         onLogInClick={() => setIsSignUpModalOpen(true)}
+        onSellItemsClick={() => setIsMyListingsOpen(true)}
       />
-      <Sidebar />
+      <Sidebar onGiftClick={() => setIsCreateGiveawayOpen(true)} />
 
-      {/* Profile content container */}
+      
       <div
         style={{
           position: isMobile ? 'relative' : 'absolute',
@@ -52,7 +68,7 @@ export default function ProfilePage() {
           padding: isMobile ? '20px' : '0',
         }}
       >
-        {/* Settings header */}
+        
         <div
           style={{
             position: isMobile ? 'relative' : 'absolute',
@@ -73,7 +89,7 @@ export default function ProfilePage() {
           Settings
         </div>
 
-        {/* Navigation tabs */}
+        
         <div
           style={{
             display: 'flex',
@@ -90,7 +106,7 @@ export default function ProfilePage() {
             marginBottom: isMobile ? '20px' : '0',
           }}
         >
-          {/* Account tab */}
+          
           <div
             onClick={() => setActiveTab('account')}
             style={{
@@ -132,7 +148,7 @@ export default function ProfilePage() {
             </span>
           </div>
 
-          {/* Linking tab */}
+          
           <div
             onClick={() => setActiveTab('linking')}
             style={{
@@ -176,7 +192,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Linking tab content */}
+        
         {activeTab === 'linking' && (
           <div
             style={{
@@ -188,7 +204,7 @@ export default function ProfilePage() {
               marginBottom: isMobile ? '20px' : '0',
             }}
           >
-            {/* Header */}
+            
             <span
               style={{
                 position: isMobile ? 'relative' : 'absolute',
@@ -228,7 +244,7 @@ export default function ProfilePage() {
               Link your account and deposit to the site.
             </span>
 
-            {/* Info box */}
+            
             <div
               style={{
                 position: isMobile ? 'relative' : 'absolute',
@@ -262,7 +278,7 @@ export default function ProfilePage() {
               </span>
             </div>
 
-            {/* Content area */}
+            
             <div
               style={{
                 display: 'flex',
@@ -277,7 +293,7 @@ export default function ProfilePage() {
                 top: isMobile ? '0' : '160px',
               }}
             >
-              {/* Left side - Link buttons */}
+              
               <div
                 style={{
                   width: isMobile ? '100%' : '419px',
@@ -285,7 +301,7 @@ export default function ProfilePage() {
                   position: 'relative',
                 }}
               >
-                {/* Link Roblox button */}
+                
                 <div
                   style={{
                     position: isMobile ? 'relative' : 'absolute',
@@ -320,7 +336,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                {/* Link Discord button */}
+                
                 <div
                   style={{
                     position: isMobile ? 'relative' : 'absolute',
@@ -355,7 +371,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Right side - Linked accounts */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -370,7 +386,7 @@ export default function ProfilePage() {
                   height: isMobile ? 'auto' : '360px',
                 }}
               >
-                {/* Linked account card 1 */}
+                
                 <div
                   style={{
                     width: isMobile ? 'calc(50% - 8px)' : '407px',
@@ -468,7 +484,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Linked account card 2 */}
+                
                 <div
                   style={{
                     width: isMobile ? 'calc(50% - 8px)' : '407px',
@@ -566,7 +582,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Linked account card 3 */}
+                
                 <div
                   style={{
                     width: isMobile ? 'calc(50% - 8px)' : '407px',
@@ -668,10 +684,10 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Account tab content */}
+        
         {activeTab === 'account' && (
           <div style={{ position: 'relative', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '20px' : '0' }}>
-          {/* Connections section */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -760,7 +776,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Two Factor Authentication section */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -888,7 +904,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Profile section */}
+          
           <div
             style={{
               position: isMobile ? 'relative' : 'absolute',
@@ -930,7 +946,7 @@ export default function ProfilePage() {
               Profile
             </span>
 
-            {/* Avatar */}
+            
             <div
               style={{
                 position: isMobile ? 'relative' : 'absolute',
@@ -945,7 +961,7 @@ export default function ProfilePage() {
               }}
             />
 
-            {/* Username */}
+            
             <span
               style={{
                 position: isMobile ? 'relative' : 'absolute',
@@ -965,7 +981,7 @@ export default function ProfilePage() {
               @justjakep
             </span>
 
-            {/* Edit button */}
+            
             <div
               style={{
                 position: isMobile ? 'absolute' : 'absolute',
@@ -995,7 +1011,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Form fields */}
+            
             <div
               style={{
                 display: 'flex',
@@ -1011,7 +1027,7 @@ export default function ProfilePage() {
                 marginBottom: isMobile ? '20px' : '0',
               }}
             >
-              {/* Username field */}
+              
               <div
                 style={{
                   width: isMobile ? '100%' : '607px',
@@ -1084,7 +1100,7 @@ export default function ProfilePage() {
                     marginBottom: isMobile ? '5px' : '0',
                   }}
                 >
-                  Access your profile at https://bloxbash.com/profile/justjakep
+                  Access your profile at https://MM2Stake.com/profile/justjakep
                 </span>
                 <div
                   style={{
@@ -1116,7 +1132,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Email field */}
+              
               <div
                 style={{
                   width: isMobile ? '100%' : '607px',
@@ -1171,7 +1187,7 @@ export default function ProfilePage() {
                     color: '#717991',
                   }}
                 >
-                  j***p@bloxbash.com
+                  j***p@MM2Stake.com
                 </span>
                 <span
                   style={{
@@ -1192,7 +1208,7 @@ export default function ProfilePage() {
                 </span>
               </div>
 
-              {/* Password change section */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -1219,7 +1235,7 @@ export default function ProfilePage() {
                   Change Password
                 </span>
 
-                {/* New Password */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -1285,7 +1301,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Confirm Password */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -1353,7 +1369,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Save button */}
+            
             <div
               style={{
                 position: isMobile ? 'relative' : 'absolute',
@@ -1392,6 +1408,30 @@ export default function ProfilePage() {
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+      />
+      <ValidateFairnessModal
+        isOpen={isValidateFairnessOpen}
+        onClose={() => setIsValidateFairnessOpen(false)}
+      />
+      <MyListingsModal
+        isOpen={isMyListingsOpen}
+        onClose={() => setIsMyListingsOpen(false)}
+      />
+      <CreateGiveawayModal
+        isOpen={isCreateGiveawayOpen}
+        onClose={() => setIsCreateGiveawayOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+      />
+      <RulesModal
+        isOpen={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
+      />
+      <FaqModal
+        isOpen={isFaqModalOpen}
+        onClose={() => setIsFaqModalOpen(false)}
       />
     </div>
   );

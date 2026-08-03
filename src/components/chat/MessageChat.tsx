@@ -65,7 +65,7 @@ export default function MessageChat({
         borderRadius: '20px',
       }}
     >
-      {/* Avatar */}
+      
       <div
         style={{
           position: 'absolute',
@@ -104,7 +104,7 @@ export default function MessageChat({
         />
       </div>
 
-      {/* Content frame */}
+      
       <div
         style={{
           position: 'absolute',
@@ -115,7 +115,7 @@ export default function MessageChat({
           top: '-18px',
         }}
       >
-        {/* Username row */}
+        
         <div
           style={{
             display: 'flex',
@@ -194,7 +194,7 @@ export default function MessageChat({
           </div>
         </div>
 
-        {/* Message text */}
+        
         <div
           style={{
             position: 'absolute',
@@ -215,7 +215,7 @@ export default function MessageChat({
         </div>
       </div>
 
-      {/* Timestamp */}
+      
       <div
         style={{
           position: 'absolute',

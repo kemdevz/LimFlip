@@ -6,13 +6,17 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
+import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
+import PrivacyModal from '@/components/privacy/PrivacyModal';
 
 export default function TOSPage() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   return (
     <div className="page-shell page-shell--fixed bg-[#12151C]">
-      {/* Background image with luminosity blend mode */}
+      
       <div
         className="page-bg"
         style={{
@@ -22,7 +26,7 @@ export default function TOSPage() {
         }}
       />
 
-      {/* Blue glow effect */}
+      
       <div
         className="absolute"
         style={{
@@ -39,14 +43,15 @@ export default function TOSPage() {
 
       <Subnavbar 
         onTermsClick={() => window.location.href = '/tos'}
+        onPrivacyClick={() => setIsPrivacyModalOpen(true)}
       />
       <Navbar 
         onSignUpClick={() => setIsSignUpModalOpen(true)}
         onLogInClick={() => setIsSignUpModalOpen(true)}
       />
-      <Sidebar />
+      <Sidebar onGiftClick={() => setIsCreateGiveawayOpen(true)} />
 
-      {/* Scrollable Content Area */}
+      
       <div
         className="page-content-area hide-scrollbar"
         style={{
@@ -54,7 +59,7 @@ export default function TOSPage() {
           paddingBottom: '60px',
         }}
       >
-        {/* Privacy Policy Content */}
+        
         <div
           style={{
             width: 'calc(100% - 32px)',
@@ -70,7 +75,7 @@ export default function TOSPage() {
           }}
         >
         <p style={{ marginBottom: '20px', color: '#0276FF' }}>
-          Welcome to BloxBash! This Privacy Policy (the "Policies") govern your privacy of the BloxBash website and its related services (the "Service"). By accessing or using our Service, you agree to comply with these Policies. Please read them carefully.
+          Welcome to MM2Stake! This Privacy Policy (the "Policies") govern your privacy of the MM2Stake website and its related services (the "Service"). By accessing or using our Service, you agree to comply with these Policies. Please read them carefully.
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           Last Updated: 9/04/2024
@@ -121,13 +126,13 @@ export default function TOSPage() {
           Children's Privacy
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
-          BloxBash is for mature audiences. We do not knowingly collect personal information or allow individuals under the age of 18. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us.
+          MM2Stake is for mature audiences. We do not knowingly collect personal information or allow individuals under the age of 18. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us.
         </p>
         <p style={{ marginBottom: '20px', color: '#0276FF' }}>
           Contact
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
-          For any inquiries or concerns regarding these Policies, please contact us at https://discord.gg/bloxbash or by our on-site support system.
+          For any inquiries or concerns regarding these Policies, please contact us at https://discord.gg/MM2Stake or by our on-site support system.
         </p>
         </div>
       </div>
@@ -137,6 +142,14 @@ export default function TOSPage() {
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+      />
+      <CreateGiveawayModal
+        isOpen={isCreateGiveawayOpen}
+        onClose={() => setIsCreateGiveawayOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
       />
     </div>
   );

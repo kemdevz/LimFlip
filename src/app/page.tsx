@@ -6,13 +6,22 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
+import ProfileModal from '@/components/chat/ProfileModal';
 import CoinFlipRow from '@/components/coinflip/CoinFlipRow';
 import CoinflipToolbar from '@/components/coinflip/CoinflipToolbar';
 import CoinflipViewModal from '@/components/coinflip/CoinflipViewModal';
 import CoinflipCreateModal from '@/components/coinflip/CoinflipCreateModal';
+import CoinflipJoinModal from '@/components/coinflip/CoinflipJoinModal';
 import Leaderboard from '@/components/leaderboard/Leaderboard';
+import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
+import MyListingsModal from '@/components/market/MyListingsModal';
+import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
+import PrivacyModal from '@/components/privacy/PrivacyModal';
+import RulesModal from '@/components/rules/RulesModal';
+import FaqModal from '@/components/faq/FaqModal';
 import { useSocket } from '@/context/SocketContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useAuth } from '@/hooks/useAuth';
 
 function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
   const styleRef = useRef<HTMLStyleElement>(null);
@@ -97,7 +106,7 @@ function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
 function MaintenancePage() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#131721]">
-      {/* Background image with color-dodge blend mode */}
+      
       <div
         className="absolute inset-0"
         style={{
@@ -111,7 +120,7 @@ function MaintenancePage() {
         }}
       />
 
-      {/* Logo */}
+      
       <div
         className="absolute"
         style={{
@@ -123,14 +132,14 @@ function MaintenancePage() {
       >
         <img
           src="/assets/svg/ui/logo.svg"
-          alt="bloxbash logo"
+          alt="MM2Stake logo"
           width={459}
           height={248}
           style={{ width: '100%', height: '100%' }}
         />
       </div>
 
-      {/* Maintenance text */}
+      
       <div
         className="absolute font-bold text-center"
         style={{
@@ -147,7 +156,7 @@ function MaintenancePage() {
         Down for maintenance...
       </div>
 
-      {/* Twitter icon */}
+      
       <div
         className="absolute"
         style={{
@@ -168,7 +177,7 @@ function MaintenancePage() {
         </svg>
       </div>
 
-      {/* Discord icon placeholder */}
+      
       <div
         className="absolute"
         style={{
@@ -192,19 +201,167 @@ function MaintenancePage() {
   );
 }
 
-function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
+function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => void; onProfileClick?: (username: string, avatarUrl: string) => void }) {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [isCoinflipViewModalOpen, setIsCoinflipViewModalOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isCoinflipCreateModalOpen, setIsCoinflipCreateModalOpen] = useState(false);
+  const [isCoinflipJoinModalOpen, setIsCoinflipJoinModalOpen] = useState(false);
   const [isLeaderboardVisible, setIsLeaderboardVisible] = useState(false);
+  const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
+  const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
+  const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [games, setGames] = useState<any[]>([]);
+  const [newGameIds, setNewGameIds] = useState<Set<string>>(new Set());
+  const prevGameIdsRef = useRef<Set<string>>(new Set());
+  const { socket, isConnected } = useSocket();
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/coinflip/active');
+        const data = await response.json();
+        const newGames = data.games || [];
+        
+        console.log('Fetched games:', newGames.map((g: any) => ({ 
+          id: g._id, 
+          creator: g.creator, 
+          creatorUsername: g.creator?.username,
+          joiner: g.joiner,
+          joinerUsername: g.joiner?.username 
+        })));
+        
+        // Sort games by totalValue (high to low)
+        const sortedGames = newGames.sort((a: any, b: any) => b.totalValue - a.totalValue);
+        
+        // Detect new games
+        const currentIds = new Set<string>(sortedGames.map((g: any) => g._id as string));
+        const prevIds = prevGameIdsRef.current;
+        
+        const newlyAddedIds = new Set<string>();
+        currentIds.forEach((id: string) => {
+          if (!prevIds.has(id)) {
+            newlyAddedIds.add(id);
+          }
+        });
+        
+        setNewGameIds(newlyAddedIds);
+        setGames(sortedGames);
+        prevGameIdsRef.current = currentIds;
+        
+        // Clear new game IDs after animation
+        setTimeout(() => {
+          setNewGameIds(new Set());
+        }, 500);
+      } catch (error) {
+        console.error('Error fetching games:', error);
+      }
+    };
+
+    fetchGames();
+    const interval = setInterval(fetchGames, 2000); // Poll every 2 seconds for faster updates
+    return () => clearInterval(interval);
+  }, []);
+
+  // Socket listener for new coinflip games
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const handleCoinflipCreated = (data: { game: any }) => {
+      console.log('New coinflip game created via socket:', data.game);
+      setGames((prevGames) => {
+        // Check if game already exists to prevent duplicates
+        if (prevGames.some((g: any) => g._id === data.game._id)) {
+          return prevGames;
+        }
+        const updatedGames = [data.game, ...prevGames];
+        // Sort by totalValue (high to low)
+        return updatedGames.sort((a: any, b: any) => b.totalValue - a.totalValue);
+      });
+      setNewGameIds((prev) => new Set([...prev, data.game._id]));
+      
+      // Auto open view modal only for the creator
+      if (user && (data.game.creator._id === (user as any)._id || data.game.creator === (user as any)._id)) {
+        setSelectedGame(data.game);
+        setIsCoinflipViewModalOpen(true);
+      }
+      
+      // Clear new game ID after animation
+      setTimeout(() => {
+        setNewGameIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(data.game._id);
+          return newSet;
+        });
+      }, 500);
+    };
+
+    const handleCoinflipJoined = (data: { game: any }) => {
+      console.log('Coinflip game joined via socket:', data.game);
+      setGames((prevGames) => {
+        // Update the game in the list
+        return prevGames.map((game) => 
+          game._id === data.game._id ? data.game : game
+        );
+      });
+      
+      // Auto open view modal for the joined game
+      setSelectedGame(data.game);
+      setIsCoinflipViewModalOpen(true);
+    };
+
+    const handleCoinflipCompleted = (data: { game: any }) => {
+      console.log('Coinflip game completed via socket:', data.game);
+      setGames((prevGames) => {
+        // Update the game in the list
+        return prevGames.map((game) => 
+          game._id === data.game._id ? data.game : game
+        );
+      });
+      
+      // Update selected game if view modal is open
+      if (selectedGame && selectedGame._id === data.game._id) {
+        setSelectedGame(data.game);
+      }
+      
+      // Remove completed game after 5 minutes
+      setTimeout(() => {
+        setGames((prevGames) => {
+          return prevGames.filter((game) => game._id !== data.game._id);
+        });
+      }, 300000); // 5 minutes
+    };
+
+    socket.on('coinflip-created', handleCoinflipCreated);
+    socket.on('coinflip-joined', handleCoinflipJoined);
+    socket.on('coinflip-completed', handleCoinflipCompleted);
+
+    return () => {
+      socket.off('coinflip-created', handleCoinflipCreated);
+      socket.off('coinflip-joined', handleCoinflipJoined);
+      socket.off('coinflip-completed', handleCoinflipCompleted);
+    };
+  }, [socket, isConnected, selectedGame]);
 
   const handleLeaderboardClose = () => {
     setIsLeaderboardVisible(false);
   };
 
+  const handleJoinGame = (gameId: string) => {
+    const game = games.find(g => g._id === gameId);
+    if (game) {
+      setSelectedGame(game);
+      setIsCoinflipJoinModalOpen(true);
+    }
+  };
+
   return (
     <div className="page-shell page-shell--fixed">
-      {/* Background image with luminosity blend mode */}
+      
       <div
         className="page-bg page-bg--main"
         style={{
@@ -212,33 +369,46 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
         }}
       />
       
-      {/* Dark overlay */}
+      
       <div
         className="absolute inset-0"
         style={{
-          background: 'rgba(19, 22, 33, 0.3)',
+          backgroundColor: 'rgba(19, 22, 33, 0.3)',
         }}
       />
 
       <Subnavbar
         onTermsClick={() => window.location.href = '/tos'}
         onLeaderboardClick={() => setIsLeaderboardVisible(!isLeaderboardVisible)}
+        onProvablyFairClick={() => setIsValidateFairnessOpen(true)}
+        onPrivacyClick={() => setIsPrivacyModalOpen(true)}
+        onFaqClick={() => setIsFaqModalOpen(true)}
       />
       <Navbar
         onSignUpClick={onSignUpClick}
         onLogInClick={onSignUpClick}
+        onSellItemsClick={() => setIsMyListingsOpen(true)}
       />
-      <Sidebar />
+      <Sidebar onProfileClick={onProfileClick} onGiftClick={() => setIsCreateGiveawayOpen(true)} onRulesClick={() => setIsRulesModalOpen(true)} />
 
       <div className="page-content-area">
       <CoinflipToolbar onBetItemsClick={() => setIsCoinflipCreateModalOpen(true)} />
 
-      {/* CoinFlipRow */}
-      <CoinFlipRow
-        topOffset={0}
-        winner="heads"
-        onViewClick={() => setIsCoinflipViewModalOpen(true)}
-      />
+      
+      {games.map((game, index) => (
+        <CoinFlipRow
+          key={game._id}
+          game={game}
+          topOffset={index * 110}
+          winner="heads"
+          onJoinClick={handleJoinGame}
+          onViewClick={() => {
+            setSelectedGame(game);
+            setIsCoinflipViewModalOpen(true);
+          }}
+          isNew={newGameIds.has(game._id)}
+        />
+      ))}
 
       <Footer />
       </div>
@@ -246,13 +416,51 @@ function NotFoundPage({ onSignUpClick }: { onSignUpClick: () => void }) {
       <CoinflipViewModal
         isOpen={isCoinflipViewModalOpen}
         onClose={() => setIsCoinflipViewModalOpen(false)}
+        game={selectedGame}
       />
       <CoinflipCreateModal
         isOpen={isCoinflipCreateModalOpen}
         onClose={() => setIsCoinflipCreateModalOpen(false)}
+        onGameCreated={(game) => {
+          console.log('Game created callback:', game);
+          // The socket listener will handle adding the game and opening the modal
+        }}
+      />
+      <CoinflipJoinModal
+        isOpen={isCoinflipJoinModalOpen}
+        onClose={() => setIsCoinflipJoinModalOpen(false)}
+        game={selectedGame}
+        onGameJoined={(game) => {
+          console.log('Game joined callback:', game);
+          // Refresh games to show updated state
+        }}
       />
 
       {isLeaderboardVisible && <Leaderboard onClose={handleLeaderboardClose} />}
+      <ValidateFairnessModal
+        isOpen={isValidateFairnessOpen}
+        onClose={() => setIsValidateFairnessOpen(false)}
+      />
+      <MyListingsModal
+        isOpen={isMyListingsOpen}
+        onClose={() => setIsMyListingsOpen(false)}
+      />
+      <CreateGiveawayModal
+        isOpen={isCreateGiveawayOpen}
+        onClose={() => setIsCreateGiveawayOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+      />
+      <RulesModal
+        isOpen={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
+      />
+      <FaqModal
+        isOpen={isFaqModalOpen}
+        onClose={() => setIsFaqModalOpen(false)}
+      />
     </div>
   );
 }
@@ -261,6 +469,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState('');
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('');
   const { isConnected } = useSocket();
   const isMaintenance = process.env.MAINTENANCE === 'true';
 
@@ -279,11 +490,24 @@ export default function Home() {
       {isMaintenance ? (
         <MaintenancePage />
       ) : (
-        <NotFoundPage onSignUpClick={() => setIsSignUpModalOpen(true)} />
+        <NotFoundPage 
+          onSignUpClick={() => setIsSignUpModalOpen(true)}
+          onProfileClick={(username, avatarUrl) => {
+            setSelectedUsername(username);
+            setSelectedAvatarUrl(avatarUrl);
+            setIsProfileModalOpen(true);
+          }}
+        />
       )}
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+      />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        username={selectedUsername}
+        avatarUrl={selectedAvatarUrl}
       />
     </>
   );

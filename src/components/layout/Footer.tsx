@@ -28,7 +28,7 @@ export default function Footer() {
         bottom: isVisible ? '0px' : '-211px',
       }}
     >
-      {/* Container */}
+      
       <div
         className="absolute app-footer__inner"
         style={{
@@ -38,7 +38,7 @@ export default function Footer() {
           top: '-18px',
         }}
       >
-        {/* Logo */}
+        
         <div
           className="absolute app-footer__logo"
           style={{
@@ -50,7 +50,7 @@ export default function Footer() {
         >
           <img
             src="/assets/svg/ui/logo.svg"
-            alt="bloxbash logo"
+            alt="MM2Stake logo"
             style={{
               width: '100%',
               height: '100%',
@@ -58,7 +58,7 @@ export default function Footer() {
           />
         </div>
 
-        {/* Social icons */}
+        
         <div
           className="absolute"
           style={{
@@ -106,7 +106,7 @@ export default function Footer() {
           />
         </div>
 
-        {/* Disclaimer */}
+        
         <div
           className="absolute font-semibold"
           style={{
@@ -123,7 +123,7 @@ export default function Footer() {
           ETHEREAL ENTERTAINMENT is not affiliated, associated, or partnered with Roblox Corporation in any way. We are not authorized, endorsed, or sponsored by Roblox.
         </div>
 
-        {/* Home section */}
+        
         <div
           className="absolute font-semibold app-footer__columns"
           style={{
@@ -194,7 +194,7 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* About section */}
+        
         <div
           className="absolute font-semibold"
           style={{
@@ -266,7 +266,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Blur effect */}
+      
       <div
         className="absolute"
         style={{

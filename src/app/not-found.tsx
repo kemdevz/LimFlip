@@ -6,13 +6,17 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
+import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
+import PrivacyModal from '@/components/privacy/PrivacyModal';
 
 export default function NotFound() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#12151C]">
-      {/* Background image with luminosity blend mode */}
+      
       <div
         className="absolute inset-0"
         style={{
@@ -26,7 +30,7 @@ export default function NotFound() {
         }}
       />
 
-      {/* Blur effects */}
+      
       <div
         className="absolute"
         style={{
@@ -56,115 +60,109 @@ export default function NotFound() {
 
       <Subnavbar 
         onTermsClick={() => window.location.href = '/tos'}
+        onPrivacyClick={() => setIsPrivacyModalOpen(true)}
       />
       <Navbar 
         onSignUpClick={() => setIsSignUpModalOpen(true)}
         onLogInClick={() => setIsSignUpModalOpen(true)}
       />
-      <Sidebar />
+      <Sidebar onGiftClick={() => setIsCreateGiveawayOpen(true)} />
 
-      {/* 404 graphic */}
+      
       <div
         className="absolute"
         style={{
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '0px',
+          gap: '17px',
+          position: 'absolute',
+          width: '642px',
+          height: '102px',
+          left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
         }}
       >
-        <img
-          src="/assets/svg/errors/404.svg"
-          alt="404"
-          style={{
-            width: 'min(45vw, 546px)',
-            height: 'min(26vw, 318px)',
-            filter: 'drop-shadow(0px 4px 75.1px rgba(2, 118, 255, 0.38))',
-          }}
-        />
-      </div>
-
-      {/* Error text */}
-      <div
-        className="absolute"
-        style={{
-          width: 'auto',
-          height: 'auto',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px)',
-          transform: 'translateX(-50%)',
-          fontFamily: 'Poppins, sans-serif',
-          fontStyle: 'normal',
-          fontWeight: 700,
-          fontSize: 'min(2.5vw, 25px)',
-          lineHeight: '1.2',
-          color: '#FFFFFF',
-        }}
-      >
-        Error
-      </div>
-
-      {/* Description text */}
-      <div
-        className="absolute"
-        style={{
-          width: 'min(50vw, 642px)',
-          height: 'auto',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px)',
-          transform: 'translateX(-50%)',
-          fontFamily: 'Poppins, sans-serif',
-          fontStyle: 'normal',
-          fontWeight: 600,
-          fontSize: 'min(1.2vw, 16px)',
-          lineHeight: '1.5',
-          color: '#505A71',
-          textAlign: 'center',
-        }}
-      >
-        We can't seem to find page you're looking for. Try going back to the homepage.
-      </div>
-
-      {/* Goto Home-Page button */}
-      <div
-        className="absolute"
-        style={{
-          width: 'min(12vw, 151px)',
-          height: 'min(3vw, 36px)',
-          left: 'calc(min(22vw, 352px) + (100vw - min(22vw, 352px)) / 2)',
-          top: 'calc(50% + min(26vw, 318px) / 2 + 20px + min(2.5vw, 25px) + 15px + min(1.2vw, 16px) * 1.5 + 20px)',
-          transform: 'translateX(-50%)',
-        }}
-      >
         <div
           style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            left: '0px',
-            top: '0px',
-            background: '#0276FF',
-            borderRadius: '7px',
+            width: '642px',
+            height: '16px',
+            fontFamily: 'Poppins, sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 700,
+            fontSize: '25px',
+            lineHeight: '16px',
+            textAlign: 'center',
+            color: '#FFFFFF',
+            flex: 'none',
+            order: 0,
+            alignSelf: 'stretch',
+            flexGrow: 0,
           }}
-        />
+        >
+          Error
+        </div>
         <div
           style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            left: '0px',
-            top: '0px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: '642px',
+            height: '16px',
             fontFamily: 'Poppins, sans-serif',
             fontStyle: 'normal',
             fontWeight: 600,
-            fontSize: 'min(1vw, 13px)',
-            lineHeight: '1',
-            color: '#FFFFFF',
+            fontSize: '16px',
+            lineHeight: '16px',
+            color: '#505A71',
+            flex: 'none',
+            order: 1,
+            alignSelf: 'stretch',
+            flexGrow: 0,
           }}
         >
-          Goto Home-Page
+          We can't seem to find page you're looking for. Try going back to the homepage.
+        </div>
+        <div
+          style={{
+            width: '151px',
+            height: '36px',
+            flex: 'none',
+            order: 2,
+            flexGrow: 0,
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: '151px',
+              height: '36px',
+              left: '0px',
+              top: '0px',
+              background: '#0276FF',
+              borderRadius: '15px',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '144px',
+              height: '14px',
+              left: '18px',
+              top: '8px',
+              fontFamily: 'Poppins, sans-serif',
+              fontStyle: 'normal',
+              fontWeight: 600,
+              fontSize: '13px',
+              lineHeight: '20px',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+            }}
+            onClick={() => window.location.href = '/'}
+          >
+            Goto Home-Page
+          </div>
         </div>
       </div>
       
@@ -173,6 +171,14 @@ export default function NotFound() {
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+      />
+      <CreateGiveawayModal
+        isOpen={isCreateGiveawayOpen}
+        onClose={() => setIsCreateGiveawayOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
       />
     </div>
   );

@@ -18,12 +18,14 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
   const [activeTab, setActiveTab] = useState<'profit' | 'wager' | 'least'>('profit');
   const [shouldRender, setShouldRender] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const styleRef = useRef<HTMLStyleElement>(null);
 
   useEffect(() => {
     // Trigger the open animation after component mounts
     const timer = setTimeout(() => {
       setIsOpen(true);
+      setIsVisible(true);
     }, 10);
     return () => clearTimeout(timer);
   }, []);
@@ -72,6 +74,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
 
   const handleClose = () => {
     setIsOpen(false);
+    setIsVisible(false);
     setTimeout(() => {
       setShouldRender(false);
       onClose?.();
@@ -99,18 +102,30 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
 
   return (
     <div
-      className={`leaderboard-panel ${isOpen ? 'leaderboard-animate-in' : 'leaderboard-animate-out'}`}
+      className="responsive-modal-overlay"
       style={{
-        position: 'fixed',
-        width: '595px',
-        height: '755px',
-        left: 'calc(50% - 595px/2)',
-        top: 'calc(50% - 755px/2)',
-        filter: 'drop-shadow(0px 4px 27.2px rgba(0, 0, 0, 0.25))',
-        zIndex: 1000,
+        background: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 10000,
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.15s ease-in-out',
+        pointerEvents: isVisible ? 'auto' : 'none',
       }}
+      onClick={handleClose}
     >
-      {/* Main container */}
+      <div
+        className={`leaderboard-panel ${isOpen ? 'leaderboard-animate-in' : 'leaderboard-animate-out'}`}
+        style={{
+          position: 'fixed',
+          width: '595px',
+          height: '755px',
+          left: 'calc(50% - 595px/2)',
+          top: 'calc(50% - 755px/2)',
+          filter: 'drop-shadow(0px 4px 27.2px rgba(0, 0, 0, 0.25))',
+          zIndex: 10001,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+      
       <div
         style={{
           boxSizing: 'border-box',
@@ -124,34 +139,26 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
           borderRadius: '15px',
         }}
       >
-        {/* Close button */}
-        <div
+        
+        <span
           onClick={handleClose}
           style={{
             position: 'absolute',
-            width: '36px',
-            height: '36px',
-            left: '539px',
-            top: '24px',
-            background: '#2F3646',
-            borderRadius: '12px',
+            left: '548px',
+            top: '32px',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            fontSize: '28px',
+            color: '#424964',
+            fontWeight: 'bold',
+            lineHeight: '1',
+            userSelect: 'none',
+            zIndex: 100,
           }}
         >
-          <div
-            style={{
-              width: '23px',
-              height: '25px',
-              background: '#8890A2',
-              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-            }}
-          />
-        </div>
+          ×
+        </span>
 
-        {/* Title */}
+        
         <span
           style={{
             position: 'absolute',
@@ -170,19 +177,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
           Leaderboard
         </span>
 
-        {/* Decorative line */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '92.1%',
-            right: '4.87%',
-            top: '4.24%',
-            bottom: '93.38%',
-            background: '#424964',
-          }}
-        />
-
-        {/* Tab switcher */}
+        
         <div
           style={{
             position: 'absolute',
@@ -201,7 +196,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
               top: '0px',
             }}
           >
-            {/* Tab background */}
+            
             <div
               style={{
                 position: 'absolute',
@@ -214,13 +209,14 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
               }}
             />
 
-            {/* Top Profit tab */}
+            
             <div
               onClick={() => setActiveTab('profit')}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: '0px',
                 gap: '3px',
                 position: 'absolute',
@@ -247,8 +243,9 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                   position: 'absolute',
                   width: '62px',
                   height: '20px',
-                  left: '61px',
-                  top: '10px',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
                   fontFamily: 'Poppins',
                   fontStyle: 'normal',
                   fontWeight: 500,
@@ -261,8 +258,8 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
               </span>
             </div>
 
-            {/* Top Wager tab */}
-            <span
+            
+            <div
               onClick={() => setActiveTab('wager')}
               style={{
                 position: 'absolute',
@@ -277,13 +274,14 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                 lineHeight: '20px',
                 color: '#FFFFFF',
                 cursor: 'pointer',
+                textAlign: 'center',
               }}
             >
               Top Wager
-            </span>
+            </div>
 
-            {/* Least Profit tab */}
-            <span
+            
+            <div
               onClick={() => setActiveTab('least')}
               style={{
                 position: 'absolute',
@@ -298,14 +296,15 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                 lineHeight: '20px',
                 color: '#FFFFFF',
                 cursor: 'pointer',
+                textAlign: 'center',
               }}
             >
               Least Profit
-            </span>
+            </div>
           </div>
         </div>
 
-        {/* List container */}
+        
         <div
           style={{
             position: 'absolute',
@@ -315,7 +314,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
             top: '131px',
           }}
         >
-          {/* Header labels */}
+          
           <span
             style={{
               position: 'absolute',
@@ -351,7 +350,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
             Profit
           </span>
 
-          {/* List items */}
+          
           <div
             style={{
               display: 'flex',
@@ -383,7 +382,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                   flexGrow: 0,
                 }}
               >
-                {/* Rank */}
+                
                 <span
                   style={{
                     width: '59px',
@@ -402,7 +401,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                   #{item.rank}
                 </span>
 
-                {/* Username section */}
+                
                 <div
                   style={{
                     display: 'flex',
@@ -417,7 +416,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                     flexGrow: 0,
                   }}
                 >
-                  {/* Avatar */}
+                  
                   <div
                     style={{
                       width: '30px',
@@ -441,7 +440,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                     />
                   </div>
 
-                  {/* Username */}
+                  
                   <span
                     style={{
                       width: '117px',
@@ -461,7 +460,7 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                   </span>
                 </div>
 
-                {/* Profit section */}
+                
                 <div
                   style={{
                     width: '144px',
@@ -474,15 +473,10 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                     gap: '8px',
                   }}
                 >
-                  {/* R$ icon */}
-                  <img
-                    src="/assets/svg/ui/whale.svg"
-                    alt="R$"
-                    style={{
-                      width: '22px',
-                      height: '18px',
-                    }}
-                  />
+                  
+                  <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.4 18C3.19 18 2.15417 17.5594 1.2925 16.6781C0.430833 15.7969 0 14.7375 0 13.5V4.5C0 3.2625 0.430833 2.20313 1.2925 1.32188C2.15417 0.440625 3.19 0 4.4 0H17.6C18.81 0 19.8458 0.440625 20.7075 1.32188C21.5692 2.20313 22 3.2625 22 4.5V13.5C22 14.7375 21.5692 15.7969 20.7075 16.6781C19.8458 17.5594 18.81 18 17.6 18H4.4ZM4.4 4.5H17.6C18.0033 4.5 18.3883 4.54688 18.755 4.64062C19.1217 4.73438 19.47 4.88437 19.8 5.09062V4.5C19.8 3.88125 19.5848 3.35175 19.1543 2.9115C18.7238 2.47125 18.2057 2.25075 17.6 2.25H4.4C3.795 2.25 3.27727 2.4705 2.8468 2.9115C2.41633 3.3525 2.20073 3.882 2.2 4.5V5.09062C2.53 4.88437 2.87833 4.73438 3.245 4.64062C3.61167 4.54688 3.99667 4.5 4.4 4.5ZM2.365 8.15625L14.6025 11.1937C14.7675 11.2312 14.9325 11.2312 15.0975 11.1937C15.2625 11.1562 15.4183 11.0813 15.565 10.9688L19.3875 7.70625C19.1858 7.425 18.9292 7.1955 18.6175 7.01775C18.3058 6.84 17.9667 6.75075 17.6 6.75H4.4C3.92333 6.75 3.50643 6.87675 3.1493 7.13025C2.79217 7.38375 2.53073 7.72575 2.365 8.15625Z" fill="#006EFF"/>
+                  </svg>
                   <span
                     style={{
                       fontFamily: 'Poppins',
@@ -501,18 +495,19 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
           </div>
         </div>
       </div>
+      </div>
     </div>
   );
 }
 
 // Mock data for demonstration
 const mockItems: LeaderboardItem[] = [
-  { rank: 1, username: 'Anonymous', profit: 273451 },
-  { rank: 2, username: 'Anonymous', profit: 273451 },
-  { rank: 3, username: 'Anonymous', profit: 273451 },
-  { rank: 4, username: 'Anonymous', profit: 273451 },
-  { rank: 5, username: 'Anonymous', profit: 273451 },
-  { rank: 6, username: 'Anonymous', profit: 273451 },
-  { rank: 7, username: 'Anonymous', profit: 273451 },
-  { rank: 8, username: 'Anonymous', profit: 273451 },
+  { rank: 1, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 2, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 3, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 4, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 5, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 6, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 7, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 8, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
 ];

@@ -49,7 +49,7 @@ export default function RecentlySold() {
         marginLeft: '26px',
       }}
     >
-      {/* Header */}
+      
       <div
         style={{
           display: 'flex',
@@ -89,7 +89,7 @@ export default function RecentlySold() {
         />
       </div>
 
-      {/* Items */}
+      
       <div
         style={{
           display: 'flex',
@@ -112,7 +112,7 @@ export default function RecentlySold() {
               position: 'relative',
             }}
           >
-            {/* Price and time */}
+            
             <div
               style={{
                 display: 'flex',
@@ -142,7 +142,7 @@ export default function RecentlySold() {
               </span>
             </div>
 
-            {/* Item image */}
+            
             <img
               src={item.itemImage}
               alt={item.itemName}
@@ -153,7 +153,7 @@ export default function RecentlySold() {
               }}
             />
 
-            {/* Game name */}
+            
             <span
               style={{
                 color: '#4C526B',
@@ -164,7 +164,7 @@ export default function RecentlySold() {
               {item.game}
             </span>
 
-            {/* Item name */}
+            
             <span
               style={{
                 position: 'absolute',
@@ -178,7 +178,7 @@ export default function RecentlySold() {
               {item.itemName}
             </span>
 
-            {/* Platform branding - left */}
+            
             <span
               style={{
                 position: 'absolute',
@@ -192,7 +192,7 @@ export default function RecentlySold() {
               blox
             </span>
 
-            {/* Platform branding - right */}
+            
             <span
               style={{
                 position: 'absolute',

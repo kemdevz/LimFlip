@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useSocket } from '@/context/SocketContext';
-import { useMobileLayout } from '@/context/MobileLayoutContext';
+import React, { useState, useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useAuth } from '@/hooks/useAuth';
+import { useMobileLayout } from '@/context/MobileLayoutContext';
+import { useSocket } from '@/context/SocketContext';
 import MessageChat from '../chat/MessageChat';
 import ChatInput from '../chat/ChatInput';
 import SendButton from '../chat/SendButton';
-import ProfileModal from '../chat/ProfileModal';
 import Link from 'next/link';
+import { Message } from '@/types';
 
-interface Message {
-  username: string;
-  message: string;
-  time: string;
-  avatarUrl: string;
-  isWhale?: boolean;
+interface SidebarProps {
+  onProfileClick?: (username: string, avatarUrl: string) => void;
+  onGiftClick?: () => void;
+  onRulesClick?: () => void;
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: SidebarProps) {
   const { socket, onlineCount } = useSocket();
+  const { user } = useAuth();
   const { isSidebarOpen, closeSidebar } = useMobileLayout();
   const isMobile = useIsMobile();
   const [messages, setMessages] = useState<Message[]>([
@@ -33,9 +33,6 @@ export default function Sidebar() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isMounted, setIsMounted] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [selectedUsername, setSelectedUsername] = useState('');
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('');
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 52, seconds: 8 });
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -46,9 +43,9 @@ export default function Sidebar() {
   };
 
   const handleProfileClick = (username: string, avatarUrl: string) => {
-    setSelectedUsername(username);
-    setSelectedAvatarUrl(avatarUrl);
-    setIsProfileModalOpen(true);
+    if (onProfileClick) {
+      onProfileClick(username, avatarUrl);
+    }
   };
 
   useEffect(() => {
@@ -110,17 +107,16 @@ export default function Sidebar() {
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
+    if (inputMessage.length > 75) return;
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     const newMessage: Message = {
-      username: user.username || 'Anonymous',
+      username: user?.username || 'Anonymous',
       message: inputMessage,
       time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      avatarUrl: '/assets/images/coinflip/1SIDE.png',
+      avatarUrl: user?.avatarUrl || '/assets/images/coinflip/item_1side.png',
       isWhale: false,
     };
 
-    // Only emit to socket, don't add to local state (socket will broadcast back)
     socket?.emit('chat-message', newMessage);
     setInputMessage('');
   };
@@ -134,7 +130,7 @@ export default function Sidebar() {
         />
       )}
       <div className={`sidebar-panel ${isMobile && isSidebarOpen ? 'sidebar-panel--open' : ''}`}>
-      {/* Top left header */}
+      
       <div
         className="absolute"
         style={{
@@ -146,7 +142,7 @@ export default function Sidebar() {
           overflow: 'hidden',
         }}
       >
-        {/* Logo container */}
+        
         <Link href="/">
           <div
             className="absolute"
@@ -160,7 +156,7 @@ export default function Sidebar() {
           >
             <img
               src="/assets/svg/ui/logo.svg"
-              alt="bloxbash logo"
+              alt="MM2Stake logo"
               style={{
                 width: '100%',
                 height: '100%',
@@ -169,7 +165,7 @@ export default function Sidebar() {
           </div>
         </Link>
 
-        {/* Blue blur effect left */}
+        
         <div
           className="absolute"
           style={{
@@ -183,7 +179,7 @@ export default function Sidebar() {
           }}
         />
 
-        {/* Blue blur effect right */}
+        
         <div
           className="absolute"
           style={{
@@ -198,7 +194,7 @@ export default function Sidebar() {
         />
       </div>
 
-      {/* Chat header section */}
+      
       <div
         className="absolute"
         style={{
@@ -209,7 +205,7 @@ export default function Sidebar() {
           background: '#191D29',
         }}
       >
-        {/* Chat title */}
+        
         <span
           style={{
             position: 'absolute',
@@ -228,7 +224,7 @@ export default function Sidebar() {
           Chat
         </span>
 
-        {/* Control buttons */}
+        
         <div
           style={{
             position: 'absolute',
@@ -243,7 +239,7 @@ export default function Sidebar() {
             gap: '6px',
           }}
         >
-          {/* Online count button */}
+          
           <div
             style={{
               width: '70px',
@@ -291,8 +287,21 @@ export default function Sidebar() {
                 top: '13px',
                 background: '#6EFF66',
                 borderRadius: '49px',
+                animation: 'blink 2s ease-in-out infinite',
               }}
             />
+            <style>{`
+              @keyframes blink {
+                0%, 100% {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+                50% {
+                  opacity: 0.5;
+                  transform: scale(0.8);
+                }
+              }
+            `}</style>
             <img
               src="/assets/svg/chat/usa.svg"
               alt="Online"
@@ -307,8 +316,9 @@ export default function Sidebar() {
             />
           </div>
 
-          {/* Button 1 */}
+          
           <div
+            onClick={onRulesClick}
             style={{
               width: '34px',
               height: '34px',
@@ -316,6 +326,7 @@ export default function Sidebar() {
               order: 1,
               flexGrow: 0,
               position: 'relative',
+              cursor: 'pointer',
             }}
           >
             <div
@@ -342,8 +353,9 @@ export default function Sidebar() {
             />
           </div>
 
-          {/* Button 2 */}
+          
           <div
+            onClick={onGiftClick}
             style={{
               width: '34px',
               height: '34px',
@@ -351,6 +363,7 @@ export default function Sidebar() {
               order: 2,
               flexGrow: 0,
               position: 'relative',
+              cursor: 'pointer',
             }}
           >
             <div
@@ -379,7 +392,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Giveaway component */}
+      
       <div
         style={{
           position: 'absolute',
@@ -390,7 +403,7 @@ export default function Sidebar() {
           overflow: 'hidden',
         }}
       >
-        {/* Main background */}
+        
         <div
           style={{
             position: 'absolute',
@@ -404,7 +417,7 @@ export default function Sidebar() {
           }}
         />
 
-        {/* Blurred image */}
+        
         <div
           style={{
             position: 'absolute',
@@ -418,7 +431,7 @@ export default function Sidebar() {
           }}
         />
 
-        {/* Sharp image */}
+        
         <div
           style={{
             position: 'absolute',
@@ -431,7 +444,7 @@ export default function Sidebar() {
           }}
         />
 
-        {/* Info boxes container */}
+        
         <div
           style={{
             display: 'flex',
@@ -446,7 +459,7 @@ export default function Sidebar() {
             top: '74px',
           }}
         >
-          {/* Username box */}
+          
           <div
             style={{
               width: '68px',
@@ -487,7 +500,7 @@ export default function Sidebar() {
             </span>
           </div>
 
-          {/* Entries box */}
+          
           <div
             style={{
               width: '73px',
@@ -528,7 +541,7 @@ export default function Sidebar() {
             </span>
           </div>
 
-          {/* Time box */}
+          
           <div
             style={{
               width: '73px',
@@ -570,7 +583,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Blue glow */}
+        
         <div
           style={{
             position: 'absolute',
@@ -584,7 +597,7 @@ export default function Sidebar() {
           }}
         />
 
-        {/* Item name */}
+        
         <span
           style={{
             position: 'absolute',
@@ -603,7 +616,7 @@ export default function Sidebar() {
           Luger
         </span>
 
-        {/* Price */}
+        
         <div
           style={{
             position: 'absolute',
@@ -638,7 +651,7 @@ export default function Sidebar() {
           </span>
         </div>
 
-        {/* Join button */}
+        
         <div
           style={{
             position: 'absolute',
@@ -677,7 +690,7 @@ export default function Sidebar() {
           </span>
         </div>
 
-        {/* Icon frame */}
+        
         <div
           style={{
             position: 'absolute',
@@ -687,11 +700,11 @@ export default function Sidebar() {
             top: '11px',
           }}
         >
-          {/* Empty frame for gun image */}
+          
         </div>
       </div>
 
-      {/* Chat messages area */}
+      
       <div
         ref={messagesContainerRef}
         className="absolute chat-messages-container hide-scrollbar"
@@ -721,7 +734,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Chat input */}
+      
       <div
         style={{
           position: 'absolute',
@@ -735,14 +748,6 @@ export default function Sidebar() {
         <ChatInput onMessageChange={setInputMessage} message={inputMessage} onSend={handleSendMessage} />
         <SendButton onSend={handleSendMessage} />
       </div>
-
-      {/* Profile Modal */}
-      <ProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        username={selectedUsername}
-        avatarUrl={selectedAvatarUrl}
-      />
     </div>
     </>
   );

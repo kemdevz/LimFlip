@@ -10,13 +10,14 @@ interface SubnavbarProps {
   onFaqClick?: () => void;
   onAffiliatesClick?: () => void;
   onLeaderboardClick?: () => void;
+  onPrivacyClick?: () => void;
 }
 
-export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick, onLeaderboardClick }: SubnavbarProps) {
+export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFairClick, onFaqClick, onAffiliatesClick, onLeaderboardClick, onPrivacyClick }: SubnavbarProps) {
   const { onlineCount } = useSocket();
   return (
     <div className="app-subnavbar">
-      {/* Navigation links */}
+      
       <div
         className="absolute"
         style={{
@@ -31,7 +32,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           gap: '14px',
         }}
       >
-        {/* Terms of Service */}
+        
         <div
           style={{
             width: '135px',
@@ -74,7 +75,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           </span>
         </div>
 
-        {/* Provably Fair */}
+        
         <div
           style={{
             width: '112px',
@@ -117,7 +118,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           </span>
         </div>
 
-        {/* Privacy Policy */}
+        
         <div
           style={{
             width: '111px',
@@ -140,7 +141,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
             }}
           />
           <span
-            onClick={onSupportClick}
+            onClick={onPrivacyClick}
             style={{
               position: 'absolute',
               width: '90px',
@@ -160,7 +161,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           </span>
         </div>
 
-        {/* FAQ */}
+        
         <div
           style={{
             width: '48px',
@@ -203,7 +204,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
           </span>
         </div>
 
-        {/* Leaderboard */}
+        
         <div
           style={{
             width: '106px',
@@ -247,7 +248,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
         </div>
       </div>
 
-      {/* Right side social icons */}
+      
       <div
         className="absolute"
         style={{

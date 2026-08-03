@@ -4,6 +4,7 @@ import "./globals.css";
 import { SocketProvider } from "@/context/SocketContext";
 import { MobileLayoutProvider } from "@/context/MobileLayoutContext";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { ToastProvider } from "@/components/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BloxBash.com - Leading MM2 Casino with finest gamemodes in the world!",
-  description: "BloxBash.com is a crypto/mm2 casino with various game-modes including coinflip, jackpot and more. We also offer a marketplace service with lowest selling/buying fees! Visit BloxBash.com!",
+  title: "MM2Stake.com - Leading MM2 Casino with finest gamemodes in the world!",
+  description: "MM2Stake.com is a crypto/mm2 casino with various game-modes including coinflip, jackpot and more. We also offer a marketplace service with lowest selling/buying fees! Visit MM2Stake.com!",
 };
 
 export const viewport: Viewport = {
@@ -53,6 +54,7 @@ export default function RootLayout({
           <MobileLayoutProvider>
             {children}
             <MobileBottomNav />
+            <ToastProvider />
           </MobileLayoutProvider>
         </SocketProvider>
       </body>

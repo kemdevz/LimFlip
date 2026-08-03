@@ -3,55 +3,82 @@
 import React, { useState, useEffect } from 'react';
 import CoinflipItemCard from './CoinflipItemCard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/Toast';
 
 interface CoinflipCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onGameCreated?: (game: any) => void;
 }
 
-const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClose }) => {
-  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
-  const [animatedAmount, setAnimatedAmount] = useState(0);
+const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClose, onGameCreated }) => {
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [animatedAmount, setAnimatedAmount] = useState(0);
   const isMobile = useIsMobile();
+  
+  // Get user from useAuth hook
+  const { user } = useAuth();
+  console.log('CoinflipCreateModal - user:', user);
+  console.log('CoinflipCreateModal - user.id:', user?.id);
+  const { inventory, loading, error } = useInventory(user?.id || null);
 
-  const toggleItemSelection = (index: number) => {
+  const toggleItemSelection = (uniqueId: string) => {
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
+      if (newSet.has(uniqueId)) {
+        newSet.delete(uniqueId);
       } else {
-        newSet.add(index);
+        newSet.add(uniqueId);
       }
       return newSet;
     });
   };
 
   const ITEM_VALUE = 43.8; // Each item is worth 43.8K
-  const totalSelectedAmount = selectedItems.size * ITEM_VALUE;
-  const formatAmount = (amount: number) => `B$${amount.toFixed(1)}k`;
-
-  // Animate amount when it changes
+  const totalSelectedAmount = Array.from(selectedItems).reduce((sum, uniqueId) => {
+    const item = inventory?.items.find(i => i.uniqueId === uniqueId);
+    return sum + (item?.value || ITEM_VALUE);
+  }, 0);
+  
+  // Animate amount changes
   useEffect(() => {
-    const duration = 300; // ms
+    const duration = 300;
+    const start = animatedAmount;
+    const end = totalSelectedAmount;
     const startTime = performance.now();
-    const startValue = animatedAmount;
-    const endValue = totalSelectedAmount;
-
+    
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3); // cubic ease-out
-      setAnimatedAmount(startValue + (endValue - startValue) * easeOut);
-
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setAnimatedAmount(start + (end - start) * easeOut);
+      
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
-
+    
     requestAnimationFrame(animate);
   }, [totalSelectedAmount]);
+  
+  // Calculate 10% less and 10% more of selected value
+  const minSelectedValue = animatedAmount * 0.9;
+  const maxSelectedValue = animatedAmount * 1.1;
+  
+  const formatAmount = (amount: number) => {
+    if (amount >= 1000000) {
+      return `B$${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `B$${(amount / 1000).toFixed(0)}K`;
+    } else {
+      return `B$${amount.toFixed(0)}`;
+    }
+  };
 
   // Handle open/close animations
   useEffect(() => {
@@ -116,7 +143,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           }}
           onClick={(e) => e.stopPropagation()}
         >
-        {/* Rectangle 18653 - Main background */}
+        
         <div
           style={{
             boxSizing: 'border-box',
@@ -131,7 +158,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           }}
         />
 
-        {/* Coin icons at bottom */}
+        
         {!isMobile && (
           <>
             <div
@@ -139,8 +166,8 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                 position: 'absolute',
                 width: '41px',
                 height: '41px',
-                left: '774px',
-                top: '647px',
+                left: '770px',
+                top: '640px',
                 background: 'url(/assets/images/coinflip/tails.png)',
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
@@ -153,8 +180,8 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                 position: 'absolute',
                 width: '41px',
                 height: '41px',
-                left: '821px',
-                top: '647px',
+                left: '817px',
+                top: '640px',
                 background: 'url(/assets/images/coinflip/heads.png)',
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
@@ -165,14 +192,14 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           </>
         )}
 
-        {/* Frame 2131328022 - Stats row */}
+        
         <div
           style={{
             display: isMobile ? 'flex' : 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             alignItems: isMobile ? 'flex-start' : 'flex-start',
+            justifyContent: 'space-between',
             padding: '0px',
-            gap: isMobile ? '8px' : '213px',
             position: 'absolute',
             width: isMobile ? 'calc(100% - 32px)' : '1019px',
             height: isMobile ? 'auto' : '27px',
@@ -182,7 +209,6 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
         >
           <span
             style={{
-              width: isMobile ? 'auto' : '181px',
               height: '27px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
@@ -195,11 +221,10 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               flexGrow: 0,
             }}
           >
-            Selected: {formatAmount(animatedAmount)}
+            Selected: <span style={{ color: '#006EFF' }}>{formatAmount(animatedAmount)}</span>
           </span>
           <span
             style={{
-              width: isMobile ? 'auto' : '244px',
               height: '27px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
@@ -207,33 +232,34 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               fontSize: isMobile ? '14px' : '18px',
               lineHeight: '27px',
               color: '#FFFFFF',
-              flex: 'none',
+              flex: 1,
               order: 1,
               flexGrow: 0,
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
             }}
           >
-            Inventory Value: B$1.2m
+            Inventory Value: <span style={{ color: '#006EFF' }}>{formatAmount(inventory?.totalValue || 0)}</span>
           </span>
           <span
             style={{
-              width: isMobile ? 'auto' : '168px',
               height: '27px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
               fontWeight: 600,
               fontSize: isMobile ? '14px' : '18px',
               lineHeight: '27px',
-              color: '#FFFFFF',
+              color: '#006EFF',
               flex: 'none',
               order: 2,
               flexGrow: 0,
             }}
           >
-            B$43.8K - B$44.6k
+            {formatAmount(minSelectedValue)} - {formatAmount(maxSelectedValue)}
           </span>
         </div>
 
-        {/* Frame 2131328009 - Search bar */}
+        
         <div
           style={{
             display: 'flex',
@@ -303,7 +329,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           </div>
         </div>
 
-        {/* Frame 2131328044 - High to low dropdown */}
+        
         {!isMobile && (
           <div
             style={{
@@ -359,7 +385,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           </div>
         )}
 
-        {/* Frame 2131328043 - Filter dropdown */}
+        
         {!isMobile && (
           <div
             style={{
@@ -425,19 +451,60 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           </div>
         )}
 
-        {/* Frame 2131328002 - Create Game button */}
+        
         <div
+          onClick={async () => {
+            if (selectedItems.size > 0 && user?.id && !isCreating) {
+              setIsCreating(true);
+              try {
+                const response = await fetch('http://localhost:3001/coinflip/create', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    userId: user.id,
+                    uniqueIds: Array.from(selectedItems),
+                    betAmount: totalSelectedAmount,
+                  }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                  throw new Error(data.error || 'Failed to create game');
+                }
+
+                console.log('Game created:', data.game);
+                
+                toast.success('Coinflip game created!');
+                
+                // Call the callback to notify parent component
+                onGameCreated?.(data.game);
+                
+                onClose();
+              } catch (err) {
+                console.error('Error creating game:', err);
+                toast.error(err instanceof Error ? err.message : 'Failed to create game');
+              } finally {
+                setIsCreating(false);
+              }
+            }
+          }}
           style={{
             position: 'absolute',
             width: isMobile ? 'calc(100% - 32px)' : '199px',
             height: '44px',
             left: isMobile ? '16px' : '875px',
             top: isMobile ? 'calc(100% - 60px)' : '638px',
-            background: '#202634',
+            background: '#006EFF',
             borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            cursor: selectedItems.size > 0 && !isCreating ? 'pointer' : 'not-allowed',
+            opacity: selectedItems.size > 0 && !isCreating ? 1 : 0.5,
+            zIndex: 50,
           }}
         >
           <span
@@ -452,13 +519,49 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               lineHeight: '24px',
               color: '#FFFFFF',
               whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
           >
-            Create Game {formatAmount(animatedAmount)}
+            {isCreating ? (
+              <>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{
+                    animation: 'spin 1s linear infinite',
+                  }}
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="31.4"
+                    strokeDashoffset="10"
+                  />
+                </svg>
+                Creating...
+              </>
+            ) : `Create Game ${formatAmount(animatedAmount)}`}
           </span>
         </div>
 
-        {/* Frame 2131328533 - Header with coin */}
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+
+        
         <div
           style={{
             display: 'flex',
@@ -484,7 +587,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           />
         </div>
 
-        {/* Frame 2131328010 - Create Coinflip Duel title */}
+        
         <div
           style={{
             position: 'absolute',
@@ -524,7 +627,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           </div>
         </div>
 
-        {/* Frame 2131328205 - Item grid */}
+        
         <div
           style={{
             display: 'flex',
@@ -533,63 +636,60 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             alignItems: 'flex-start',
             alignContent: 'flex-start',
             padding: '0px',
-            gap: isMobile ? '8px' : '11px',
+            gap: isMobile ? '8px' : '16px',
             position: 'absolute',
-            width: isMobile ? 'calc(100% - 32px)' : '1030px',
-            height: isMobile ? 'calc(100% - 200px)' : '418px',
-            left: isMobile ? '16px' : '54px',
-            top: isMobile ? '180px' : '201px',
+            width: isMobile ? 'calc(100% - 32px)' : '960px',
+            height: isMobile ? 'auto' : '440px',
+            left: isMobile ? '16px' : '80px',
+            top: isMobile ? '210px' : '200px',
             overflowY: 'auto',
           }}
+          className="hide-scrollbar"
         >
-          {/* Item cards - rendering 13 items */}
-          {[
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-          ].map((imageSrc, index) => (
-            <div
-              key={index}
-              onClick={() => toggleItemSelection(index)}
-              style={{
-                position: 'relative',
-                width: isMobile ? 'calc(50% - 4px)' : '159.29px',
-                height: isMobile ? 'auto' : '203.81px',
-                cursor: 'pointer',
-                flex: 'none',
-                order: index,
-                flexGrow: 0,
-              }}
-            >
-              {selectedItems.has(index) && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: isMobile ? 'calc(50% - 4px)' : '159.29px',
-                    height: isMobile ? 'auto' : '203.81px',
-                    left: '0px',
-                    top: '0px',
-                    border: '1px solid #006EFF',
-                    borderRadius: '7.91501px',
-                    zIndex: 10,
-                  }}
-                />
-              )}
-              <CoinflipItemCard imageSrc={imageSrc} />
-            </div>
-          ))}
+          {loading ? (
+            <span style={{ color: '#6B7289' }}>Loading inventory...</span>
+          ) : error ? (
+            <span style={{ color: '#EF4444' }}>Error loading inventory</span>
+          ) : inventory?.items && inventory.items.length > 0 ? (
+            inventory.items.map((item, index) => (
+              <div
+                key={`${item.uniqueId}_${index}`}
+                onClick={() => toggleItemSelection(item.uniqueId)}
+                style={{
+                  position: 'relative',
+                  width: isMobile ? 'calc(50% - 4px)' : '145px',
+                  height: isMobile ? 'auto' : '185px',
+                  cursor: 'pointer',
+                  flex: 'none',
+                  flexGrow: 0,
+                  transition: 'transform 0.2s ease, opacity 0.2s ease',
+                }}
+              >
+                {selectedItems.has(item.uniqueId) && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: isMobile ? 'calc(50% - 4px)' : '145px',
+                      height: isMobile ? 'auto' : '185px',
+                      left: '0px',
+                      top: '0px',
+                      border: '1px solid #006EFF',
+                      borderRadius: '7.91501px',
+                      zIndex: 10,
+                      transition: 'opacity 0.2s ease',
+                      animation: 'pulse 0.3s ease-out',
+                    }}
+                  />
+                )}
+                <CoinflipItemCard imageSrc={item.image} itemName={item.name} itemValue={item.value} />
+              </div>
+            ))
+          ) : (
+            <span style={{ color: '#6B7289' }}>No items in inventory</span>
+          )}
         </div>
 
-        {/* Advanced text */}
+        
         {!isMobile && (
           <span
             style={{
@@ -597,7 +697,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               width: '153px',
               height: '27px',
               left: '60px',
-              top: '659px',
+              top: '638px',
               fontFamily: 'Poppins, sans-serif',
               fontStyle: 'normal',
               fontWeight: 600,
@@ -606,11 +706,10 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               color: '#585D76',
             }}
           >
-            Advanced
           </span>
         )}
 
-        {/* Scrollbar */}
+        
         {!isMobile && (
           <div
             style={{

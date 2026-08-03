@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CoinflipItemCard from '@/components/coinflip/CoinflipItemCard';
+import { useInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MyListingsModalProps {
   isOpen: boolean;
@@ -10,6 +13,32 @@ interface MyListingsModalProps {
 export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  
+  // Get user from useAuth hook
+  const { user } = useAuth();
+  const { inventory, loading, error } = useInventory(user?.id || null);
+
+  const toggleItemSelection = (itemId: string) => {
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  const totalSelectedAmount = Array.from(selectedItems).reduce((sum, itemId) => {
+    const item = inventory?.items.find(i => i.itemId === itemId);
+    return sum + (item?.value || 0);
+  }, 0);
+  
+  const formatAmount = (amount: number) => {
+    return `B$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -27,31 +56,40 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
     <div
       className="responsive-modal-overlay"
       style={{
-        background: 'rgba(0, 0, 0, 0.7)',
-        zIndex: 1000,
+        background: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 10000,
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.2s ease-out',
+        transition: 'opacity 0.15s ease-in-out',
         pointerEvents: isVisible ? 'auto' : 'none',
       }}
       onClick={onClose}
     >
       <div
-        className="responsive-modal-panel"
+        className="responsive-modal-panel responsive-modal-panel--center"
         style={{
           position: 'relative',
           width: '1066px',
           height: '701px',
-          background: '#191D29',
-          border: '1px solid #222530',
-          borderRadius: '15px',
+          transform: isVisible ? 'scale(1)' : 'scale(0.95)',
+          transition: 'transform 0.15s ease-in-out',
           filter: 'drop-shadow(0px 4px 27.2px rgba(0, 0, 0, 0.25))',
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'scale(1)' : 'scale(0.9)',
-          transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* My Listings Header */}
+        <div
+          style={{
+            boxSizing: 'border-box',
+            position: 'absolute',
+            width: '1062px',
+            height: '701px',
+            left: '0px',
+            top: '0px',
+            background: '#191D29',
+            border: '1px solid #222530',
+            borderRadius: '15px',
+          }}
+        />
+
         <div
           style={{
             position: 'absolute',
@@ -59,18 +97,17 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
             height: '32px',
             left: '27px',
             top: '22px',
-            display: 'flex',
-            alignItems: 'center',
           }}
         >
-          <div
+          <img
+            src="/assets/market/market.svg"
+            alt="Market"
             style={{
               position: 'absolute',
-              width: '3px',
-              height: '26px',
+              width: '30px',
+              height: '30px',
               left: '0px',
-              top: '3px',
-              background: '#0276FF',
+              top: '0px',
             }}
           />
           <span
@@ -92,22 +129,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           </span>
         </div>
 
-        {/* Close button */}
-        <img
-          src="/assets/svg/ui/x.svg"
-          alt="Close"
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            width: '19px',
-            height: '20px',
-            right: '20px',
-            top: '18px',
-            cursor: 'pointer',
-          }}
-        />
-
-        {/* Search bar */}
+        
         <div
           style={{
             position: 'absolute',
@@ -139,15 +161,15 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
                 borderRadius: '15px',
               }}
             />
-            <div
+            <img
+              src="/assets/market/search.svg"
+              alt="Search"
               style={{
                 position: 'absolute',
-                width: '17px',
-                height: '17px',
+                width: '20px',
+                height: '20px',
                 left: '30px',
-                top: '16px',
-                border: '2.5px solid #737991',
-                borderRadius: '50%',
+                top: '14px',
               }}
             />
             <span
@@ -170,7 +192,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           </div>
         </div>
 
-        {/* High to low filter */}
+        
         <div
           style={{
             position: 'absolute',
@@ -208,20 +230,20 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           >
             High to low
           </span>
-          <div
+          <img
+            src="/assets/market/dropdown.svg"
+            alt="Dropdown"
             style={{
               position: 'absolute',
-              width: '10px',
-              height: '10px',
-              right: '20px',
-              top: '22px',
-              background: '#404763',
-              transform: 'rotate(90deg)',
+              width: '12px',
+              height: '7px',
+              right: '45 px',
+              top: '23px',
             }}
           />
         </div>
 
-        {/* Filter from.. */}
+        
         <div
           style={{
             position: 'absolute',
@@ -259,30 +281,20 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           >
             Filter from..
           </span>
-          <div
+          <img
+            src="/assets/market/dropdown.svg"
+            alt="Dropdown"
             style={{
               position: 'absolute',
-              width: '10px',
-              height: '10px',
+              width: '12px',
+              height: '7px',
               right: '20px',
-              top: '22px',
-              background: '#404763',
-              transform: 'rotate(90deg)',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              width: '2px',
-              height: '10px',
-              right: '10px',
-              top: '22px',
-              background: '#424964',
+              top: '23px',
             }}
           />
         </div>
 
-        {/* Stats row */}
+        
         <div
           style={{
             position: 'absolute',
@@ -308,7 +320,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            Selected: B$43.8k
+            Selected: <span style={{ color: '#006EFF' }}>{formatAmount(totalSelectedAmount)}</span>
           </span>
           <span
             style={{
@@ -322,59 +334,115 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            Listing Value: B$1.2m
+            Inventory Value: <span style={{ color: '#006EFF' }}>{formatAmount(inventory?.totalValue || 0)}</span>
           </span>
         </div>
 
-        {/* Empty state */}
+        
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'flex-start',
+            alignContent: 'flex-start',
+            padding: '0px',
+            gap: '11px',
             position: 'absolute',
-            width: '642px',
-            height: '49px',
-            left: '215px',
-            top: '376px',
-            textAlign: 'center',
+            width: '1018px',
+            height: '418px',
+            left: '29px',
+            top: '199px',
+            overflowY: 'auto',
           }}
         >
-          <span
-            style={{
-              position: 'absolute',
-              width: '642px',
-              height: '16px',
-              left: '0px',
-              top: '0px',
-              fontFamily: 'Poppins',
-              fontStyle: 'normal',
-              fontWeight: 700,
-              fontSize: '25px',
-              lineHeight: '16px',
-              textAlign: 'center',
-              color: '#FFFFFF',
-            }}
-          >
-            Uh Oh
-          </span>
-          <span
-            style={{
-              position: 'absolute',
-              width: '624px',
-              height: '16px',
-              left: '9px',
-              top: '33px',
-              fontFamily: 'Poppins',
-              fontStyle: 'normal',
-              fontWeight: 600,
-              fontSize: '16px',
-              lineHeight: '16px',
-              color: '#505A71',
-            }}
-          >
-            You have no listings up, click "List Items" to start listing items on the market.
-          </span>
+          {loading ? (
+            <span style={{ color: '#6B7289' }}>Loading inventory...</span>
+          ) : error ? (
+            <span style={{ color: '#EF4444' }}>Error loading inventory</span>
+          ) : inventory?.items && inventory.items.length > 0 ? (
+            inventory.items.map((item) => (
+              <div
+                key={item.itemId}
+                onClick={() => toggleItemSelection(item.itemId)}
+                style={{
+                  position: 'relative',
+                  width: '159.29px',
+                  height: '203.81px',
+                  cursor: 'pointer',
+                  flex: 'none',
+                  order: 0,
+                  flexGrow: 0,
+                }}
+              >
+                {selectedItems.has(item.itemId) && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: '159.29px',
+                      height: '203.81px',
+                      left: '0px',
+                      top: '0px',
+                      border: '1px solid #006EFF',
+                      borderRadius: '7.91501px',
+                      zIndex: 10,
+                    }}
+                  />
+                )}
+                <CoinflipItemCard imageSrc={item.image} itemName={item.name} itemValue={item.value} />
+              </div>
+            ))
+          ) : (
+            <div
+              style={{
+                position: 'absolute',
+                width: '642px',
+                height: '49px',
+                left: '215px',
+                top: '376px',
+                textAlign: 'center',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '642px',
+                  height: '16px',
+                  left: '0px',
+                  top: '0px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 700,
+                  fontSize: '25px',
+                  lineHeight: '16px',
+                  textAlign: 'center',
+                  color: '#FFFFFF',
+                }}
+              >
+                Uh Oh
+              </span>
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '624px',
+                  height: '16px',
+                  left: '9px',
+                  top: '33px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  lineHeight: '16px',
+                  color: '#505A71',
+                }}
+              >
+                You have no items in inventory
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Scrollbar */}
+        
         <div
           style={{
             position: 'absolute',
@@ -387,7 +455,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           }}
         />
 
-        {/* Select All button */}
+        
         <div
           style={{
             position: 'absolute',
@@ -428,7 +496,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           </span>
         </div>
 
-        {/* Edit R$0 button */}
+        
         <div
           style={{
             position: 'absolute',
@@ -465,11 +533,11 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            Edit R$0
+            Edit <span style={{ color: '#006EFF' }}>R$0</span>
           </span>
         </div>
 
-        {/* List Items button */}
+
         <div
           style={{
             position: 'absolute',

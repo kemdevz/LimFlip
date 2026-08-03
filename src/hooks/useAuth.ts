@@ -5,6 +5,11 @@ interface User {
   username: string;
   robloxUserId: string;
   avatarUrl?: string;
+  balance?: number;
+  totalBet?: number;
+  totalProfit?: number;
+  totalWon?: number;
+  inventoryTotalValue?: number;
 }
 
 export const useAuth = () => {

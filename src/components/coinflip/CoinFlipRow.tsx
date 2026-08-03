@@ -447,7 +447,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                   flex: 'none',
                   order: i,
                   flexGrow: 0,
-                  margin: i < 4 ? '0px -12px' : '0px',
+                  margin: i < 4 ? '0px -8px' : '0px',
                   position: 'relative',
                   overflow: 'visible',
                   cursor: 'pointer',

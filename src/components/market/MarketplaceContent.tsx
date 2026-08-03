@@ -856,7 +856,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
           {loading ? (
             <div style={{ color: '#FFFFFF', padding: '20px' }}>Loading...</div>
           ) : (
-            listings.slice(0, 15).map((listing) => (
+            listings.map((listing) => (
               <div
                 key={listing._id}
                 onClick={() => toggleSelection(listing._id)}

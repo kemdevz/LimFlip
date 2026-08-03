@@ -242,21 +242,20 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // If avatarUrl is empty, fetch it from Roblox
+    // Always fetch fresh avatar URL from Roblox API (same as login modal)
     let avatarUrl = user.avatarUrl;
-    if (!avatarUrl && user.robloxUserId) {
-      try {
-        const users = await searchRobloxUsers(user.username);
-        const foundUser = users.find(u => u.username.toLowerCase() === user.username.toLowerCase());
-        avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
-        
-        // Update user with fetched avatar
-        user.avatarUrl = avatarUrl;
-        await user.save();
-      } catch (error) {
-        console.error('Error fetching avatar for /me:', error);
-        avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
-      }
+    try {
+      const users = await searchRobloxUsers(user.username);
+      const foundUser = users.find(u => u.username.toLowerCase() === user.username.toLowerCase());
+      avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+      console.log('/me using fresh avatar URL:', avatarUrl);
+      
+      // Update user with fresh avatar
+      user.avatarUrl = avatarUrl;
+      await user.save();
+    } catch (error) {
+      console.error('Error fetching avatar for /me:', error);
+      avatarUrl = user.avatarUrl || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
     }
 
     res.json({

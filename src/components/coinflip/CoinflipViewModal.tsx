@@ -318,8 +318,8 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
               alignItems: 'center',
               justifyContent: 'center',
               flex: isMobile ? 1 : 'none',
-              left: isMobile ? '0' : '420px',
-              top: isMobile ? '0' : '100px',
+              left: isMobile ? '0' : '390px',
+              top: isMobile ? '0' : '70px',
             }}
           >
             {game?.status === 'active' && !showVideo && (

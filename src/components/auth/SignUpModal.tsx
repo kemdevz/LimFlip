@@ -143,16 +143,30 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
       <div
         className="responsive-modal-panel responsive-modal-panel--center signup-modal-panel"
         style={{
-          position: 'relative',
+          position: isMobile ? 'relative' : 'fixed',
           width: isMobile ? '100%' : '939px',
           height: isMobile ? '100vh' : '521px',
+          left: isMobile ? '0' : '50%',
+          top: isMobile ? '0' : '50%',
           transform: isMobile 
             ? (isVisible ? 'translateY(0)' : 'translateY(100%)')
-            : (isVisible ? 'scale(1)' : 'scale(0.95)'),
+            : (isVisible ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)'),
           transition: isMobile ? 'transform 0.3s ease-out' : 'transform 0.15s ease-in-out',
+          overflow: 'hidden',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        <style jsx>{`
+          .signup-modal-panel::-webkit-scrollbar {
+            display: none;
+          }
+          .signup-modal-panel {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
         
         <div
           className="signup-modal-image"

@@ -113,12 +113,23 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
           top: isMobile ? '0' : '50%',
           transform: isMobile ? 'none' : `translate(-50%, -50%) ${isVisible ? 'scale(1)' : 'scale(0.9)'}`,
           maxHeight: isMobile ? '100vh' : '650px',
-          overflowY: isMobile ? 'auto' : 'visible',
+          overflow: 'hidden',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
           opacity: isVisible ? 1 : 0,
           transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        <style jsx>{`
+          .responsive-modal-panel::-webkit-scrollbar {
+            display: none;
+          }
+          .responsive-modal-panel {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
         
         <div
           style={{
@@ -147,24 +158,6 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
               padding: isMobile ? '16px' : '0',
               zIndex: 0,
               minHeight: isMobile ? '100vh' : 'auto',
-            }}
-          />
-
-          
-          <img
-            src="/assets/svg/ui/x.svg"
-            alt="Close"
-            width={18}
-            height={18}
-            onClick={onClose}
-            style={{
-              position: isMobile ? 'absolute' : 'absolute',
-              left: isMobile ? 'calc(100% - 30px)' : '96.06%',
-              right: isMobile ? '16px' : '2.25%',
-              top: isMobile ? '16px' : '4.12%',
-              bottom: isMobile ? 'auto' : '92.65%',
-              cursor: 'pointer',
-              zIndex: 10,
             }}
           />
 

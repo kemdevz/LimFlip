@@ -22,15 +22,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
   const { user } = useAuth();
   const { isSidebarOpen, closeSidebar } = useMobileLayout();
   const isMobile = useIsMobile();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      username: 'jakep',
-      message: 'i gambled my life savings, and won. thank you bloxybet. now im a whale.',
-      time: '15:24',
-      avatarUrl: '/assets/images/auth/PFPJAKEP.png',
-      isWhale: true,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isMounted, setIsMounted] = useState(false);
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 52, seconds: 8 });
@@ -50,12 +42,21 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
 
   useEffect(() => {
     setIsMounted(true);
-    // Load messages from localStorage after mount
-    const saved = localStorage.getItem('chatMessages');
-    if (saved) {
-      setMessages(JSON.parse(saved));
-    }
+    // Fetch messages from API on mount
+    fetchMessages();
   }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch('https://api-bash.onrender.com/messages/recent');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setMessages(data);
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
 
   // Countdown timer for giveaway
   useEffect(() => {
@@ -93,11 +94,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
     if (!isMounted || !socket) return;
 
     socket.on('chat-message', (data: Message) => {
-      setMessages((prev) => {
-        const newMessages = [...prev, data];
-        localStorage.setItem('chatMessages', JSON.stringify(newMessages));
-        return newMessages;
-      });
+      setMessages((prev) => [...prev, data]);
     });
 
     return () => {

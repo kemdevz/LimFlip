@@ -5,6 +5,7 @@ import { SocketProvider } from "@/context/SocketContext";
 import { MobileLayoutProvider } from "@/context/MobileLayoutContext";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { ToastProvider } from "@/components/Toast";
+import ToastContainer from "@/components/ui/ToastContainer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +56,7 @@ export default function RootLayout({
             {children}
             <MobileBottomNav />
             <ToastProvider />
+            <ToastContainer />
           </MobileLayoutProvider>
         </SocketProvider>
       </body>

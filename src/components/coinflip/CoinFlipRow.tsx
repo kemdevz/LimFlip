@@ -439,6 +439,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
             alignItems: 'center',
             padding: '0px',
             gap: '10px',
+            overflow: 'hidden',
           }}
         >
           <div
@@ -452,6 +453,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
               flex: 'none',
               order: 0,
               flexGrow: 0,
+              overflow: 'hidden',
             }}
           >
             {game?.items?.slice(0, 5).map((item: any, i: number) => (
@@ -478,9 +480,9 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                   flex: 'none',
                   order: i,
                   flexGrow: 0,
-                  margin: i < 4 ? '0px -8px' : '0px',
+                  margin: i > 0 && i < 4 ? '0px -8px' : '0px',
                   position: 'relative',
-                  overflow: 'visible',
+                  overflow: 'hidden',
                   cursor: 'pointer',
                 }}
               >
@@ -515,8 +517,8 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                     position: 'absolute',
                     width: '49.35px',
                     height: '49.35px',
-                    left: '-3px',
-                    top: '-3px',
+                    left: '7.83px',
+                    top: '7.83px',
                     background: `url(${item.image})`,
                     backgroundSize: 'contain',
                     backgroundPosition: 'center',
@@ -699,39 +701,25 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
           <svg
             width="50"
             height="50"
-            viewBox="0 0 120 120"
+            viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{
-              position: 'absolute',
-              left: '0px',
-              top: '0px',
-              width: '100%',
-              height: '100%',
+              animation: 'spin 1s linear infinite',
             }}
           >
             <circle
-              cx="60"
-              cy="60"
-              r="55"
+              cx="25"
+              cy="25"
+              r="20"
               fill="none"
-              stroke="#13151E"
+              stroke="#0276FF"
               strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray="80"
+              strokeDashoffset="20"
             />
           </svg>
-          <span
-            style={{
-              position: 'absolute',
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: 600,
-              fontSize: '20px',
-              lineHeight: '30px',
-              color: '#FFFFFF',
-            }}
-          >
-            ?
-          </span>
         </div>
       ) : (
         <div

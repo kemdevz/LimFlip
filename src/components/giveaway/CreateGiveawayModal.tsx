@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import CoinflipItemCard from '../coinflip/CoinflipItemCard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CreateGiveawayModalProps {
   isOpen: boolean;
@@ -15,7 +16,10 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
   const [duration, setDuration] = useState('');
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState('');
   const isMobile = useIsMobile();
+  const { user } = useAuth();
 
   const toggleItemSelection = (index: number) => {
     setSelectedItems((prev) => {
@@ -32,6 +36,67 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
   const ITEM_VALUE = 43.8; // Each item is worth 43.8K
   const totalSelectedAmount = selectedItems.size * ITEM_VALUE;
   const formatAmount = (amount: number) => `B$${amount.toFixed(1)}k`;
+
+  const handleCreateGiveaway = async () => {
+    if (selectedItems.size === 0 || !duration) {
+      setError('Please select items and enter a duration');
+      return;
+    }
+
+    setIsCreating(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please login first');
+        return;
+      }
+
+      // Convert selected items to item objects
+      const items = Array.from(selectedItems).map((index) => ({
+        itemId: `item_${index}`,
+        name: `Item ${index}`,
+        image: [
+          '/assets/images/coinflip/knife.png',
+          '/assets/images/coinflip/chroma.png',
+          '/assets/images/coinflip/gun.png',
+          '/assets/images/coinflip/candy.png',
+          '/assets/images/coinflip/luger.png',
+        ][index % 5],
+        rarity: 'Legendary',
+        value: ITEM_VALUE,
+        category: 'Weapon'
+      }));
+
+      const response = await fetch('https://api-bash.onrender.com/giveaway/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          items,
+          duration: parseInt(duration)
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create giveaway');
+      }
+
+      console.log('Giveaway created:', data);
+      onClose();
+      setSelectedItems(new Set());
+      setDuration('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   // Animate amount when it changes
   useEffect(() => {
@@ -441,12 +506,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
 
         
         <div
-          onClick={() => {
-            if (selectedItems.size > 0 && duration) {
-              // Handle create giveaway logic
-              console.log('Creating giveaway with items:', Array.from(selectedItems), 'duration:', duration);
-            }
-          }}
+          onClick={handleCreateGiveaway}
           style={{
             position: 'absolute',
             width: isMobile ? 'calc(100% - 32px)' : 'auto',
@@ -461,8 +521,8 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 16px',
-            cursor: selectedItems.size > 0 && duration ? 'pointer' : 'not-allowed',
-            opacity: selectedItems.size > 0 && duration ? 1 : 0.5,
+            cursor: selectedItems.size > 0 && duration && !isCreating ? 'pointer' : 'not-allowed',
+            opacity: selectedItems.size > 0 && duration && !isCreating ? 1 : 0.5,
           }}
         >
           <span
@@ -476,9 +536,29 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
               whiteSpace: 'nowrap',
             }}
           >
-            Create {formatAmount(animatedAmount)}
+            {isCreating ? 'Creating...' : `Create ${formatAmount(animatedAmount)}`}
           </span>
         </div>
+
+        {error && (
+          <div
+            style={{
+              position: 'absolute',
+              width: isMobile ? 'calc(100% - 32px)' : '300px',
+              left: isMobile ? '16px' : '56px',
+              top: isMobile ? 'calc(100% - 110px)' : '590px',
+              background: 'rgba(255, 0, 0, 0.1)',
+              border: '1px solid #FF0000',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              color: '#FF0000',
+              fontSize: '12px',
+              fontFamily: 'Poppins, sans-serif',
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         
         <div

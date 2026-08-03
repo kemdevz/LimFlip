@@ -4,7 +4,16 @@ const User = require('../models/User');
 const Item = require('../models/Item');
 const Inventory = require('../models/Inventory');
 
-const API_KEY = "NIGGA"
+const API_KEY = "NIGGA";
+
+// Get io instance from server (will be set by server.js)
+let io;
+
+const setIo = (socketIo) => {
+  io = socketIo;
+};
+
+module.exports = { router, setIo };
 
 // Middleware to verify API key
 const verifyApiKey = (req, res, next) => {
@@ -158,11 +167,20 @@ router.post('/deposit', verifyApiKey, async (req, res) => {
     await inventory.save();
 
     console.log(`Deposit confirmed for user ${UserId}: ${items.length} items`);
+
+    // Emit socket notification to user
+    if (io) {
+      io.emit('deposit-received', {
+        userId: user._id.toString(),
+        username: user.username,
+        itemCount: items.length,
+        totalValue: inventory.totalValue
+      });
+    }
+
     res.json({ success: true, message: 'Deposit confirmed' });
   } catch (error) {
     console.error('Deposit error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-module.exports = router;

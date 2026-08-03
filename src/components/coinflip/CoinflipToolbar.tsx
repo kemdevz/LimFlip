@@ -28,7 +28,7 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:3001/coinflip/active');
+        const response = await fetch('https://api-bash.onrender.com/coinflip/active');
         const data = await response.json();
         const games = data.games || [];
 

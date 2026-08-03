@@ -223,7 +223,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('http://localhost:3001/coinflip/active');
+        const response = await fetch('https://api-bash.onrender.com/coinflip/active');
         const data = await response.json();
         const newGames = data.games || [];
         

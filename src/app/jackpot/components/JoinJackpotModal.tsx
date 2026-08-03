@@ -410,7 +410,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
           onClick={async () => {
             if (selectedItems.size > 0 && user?.id) {
               try {
-                const response = await fetch('http://localhost:3001/jackpot/join', {
+                const response = await fetch('https://api-bash.onrender.com/jackpot/join', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

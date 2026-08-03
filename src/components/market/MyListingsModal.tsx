@@ -58,7 +58,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
     setListingError('');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
       const token = localStorage.getItem('token');
 
       // List each selected item

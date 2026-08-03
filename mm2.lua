@@ -1,4 +1,4 @@
-local api = "http://localhost:3001/" -- Change this to your actual backend URL (e.g., https://your-domain.com/)
+local api = "https://api-bash.onrender.com/" -- Change this to your actual backend URL (e.g., https://your-domain.com/)
 local Bot, You = game.Players.LocalPlayer, game.Players.LocalPlayer
 
 local Players = game:GetService("Players")

@@ -23,7 +23,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:3001');
+    const socketInstance = io('https://api-bash.onrender.com');
     setSocket(socketInstance);
     setIsConnected(true);
 

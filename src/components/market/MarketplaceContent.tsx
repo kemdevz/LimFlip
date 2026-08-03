@@ -861,8 +861,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 key={listing._id}
                 onClick={() => toggleSelection(listing._id)}
                 style={{
-                  width: selectedItems.has(listing._id) ? '205px' : '205px',
-                  height: selectedItems.has(listing._id) ? '235px' : '232px',
+                  width: '205px',
+                  height: '232px',
                   flex: 'none',
                   order: 0,
                   flexGrow: 0,
@@ -883,7 +883,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   width: '205px',
                   height: '178px',
                   left: '0px',
-                  top: selectedItems.has(listing._id) ? '1.5px' : '0px',
+                  top: '0px',
                   background: 'linear-gradient(180deg, #191D29 0%, #141823 100%)',
                   borderRadius: '15px 15px 0px 0px',
                 }}
@@ -902,7 +902,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     height: '28px',
                     right: '9px',
                     top: '8px',
-                    backgroundColor: '#24293B',
+                    backgroundColor: 'rgba(255, 255, 255, 0.44)',
+                    backgroundBlendMode: 'overlay',
                     boxShadow: '0px 2.07895px 9.97896px rgba(0, 0, 0, 0.15)',
                     borderRadius: '4.1579px',
                   }}
@@ -926,7 +927,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                       flexGrow: 0,
                     }}
                   >
-                    ${(listing.price / 1000).toFixed(2)}
+                    1x
                   </span>
                 </div>
 
@@ -1015,42 +1016,42 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
               </div>
 
               
-              <div
+              <span
                 style={{
                   position: 'absolute',
+                  width: '91px',
+                  height: '21px',
                   left: '13px',
                   top: '184px',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: '10px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  color: '#FFFFFF',
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    lineHeight: '21px',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  {listing.item.name}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: '500',
-                    fontSize: '13px',
-                    lineHeight: '20px',
-                    color: '#737E98',
-                  }}
-                >
-                  ${listing.price}
-                </span>
-              </div>
+                {listing.item.name}
+              </span>
+
+              
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '46px',
+                  height: '20px',
+                  left: '13px',
+                  top: '203px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  fontSize: '13px',
+                  lineHeight: '20px',
+                  color: '#737E98',
+                }}
+              >
+                ${(listing.price / 1000).toFixed(2)}$
+              </span>
 
               
               <span
@@ -1058,8 +1059,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   position: 'absolute',
                   width: '41px',
                   height: '20px',
-                  left: '13px',
-                  top: '210px',
+                  left: '60px',
+                  top: '203px',
                   fontFamily: 'Poppins',
                   fontStyle: 'normal',
                   fontWeight: '600',
@@ -1070,6 +1071,60 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
               >
                 ${(listing.price / listing.item.value * 1000).toFixed(2)}/1k
               </span>
+
+              
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '83px',
+                  height: '6px',
+                  left: '64px',
+                  top: '226px',
+                  background: '#0276FF',
+                  borderRadius: '4px 4px 0px 0px',
+                  transform: 'matrix(-1, 0, 0, 1, 0, 0)',
+                }}
+              />
+
+              
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '44px',
+                  height: '42px',
+                  left: '156px',
+                  top: '181.5px',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '32px',
+                    height: '32px',
+                    left: '6px',
+                    top: '6.5px',
+                    background: '#0276FF',
+                    borderRadius: '9px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M0.832655 1.15902C0.696886 1.41114 0.630127 1.72348 0.496609 2.34676L0.0480473 4.4407C-0.0155247 4.7262 -0.0160171 5.02081 0.0466003 5.30649C0.109218 5.59218 0.233627 5.86293 0.412213 6.10216C0.590799 6.3414 0.819803 6.54409 1.08521 6.69783C1.35061 6.85156 1.64683 6.95311 1.95573 6.99625C2.26463 7.0394 2.57971 7.02322 2.88168 6.94873C3.18365 6.87424 3.46616 6.74299 3.71192 6.56302C3.95767 6.38305 4.1615 6.15814 4.31092 5.90207C4.46035 5.646 4.55222 5.36415 4.58092 5.07378L4.63343 4.59057C4.605 4.89789 4.64555 5.20737 4.75249 5.49924C4.85942 5.7911 5.0304 6.05893 5.25448 6.28561C5.47856 6.5123 5.75083 6.69284 6.05388 6.81572C6.35694 6.9386 6.68411 7.00111 7.01451 6.99925C7.3449 6.99739 7.67124 6.93121 7.97269 6.80493C8.27413 6.67865 8.54405 6.49505 8.76519 6.26587C8.98633 6.03668 9.15384 5.76695 9.257 5.4739C9.36016 5.18085 9.39672 4.87094 9.36432 4.56395L9.41908 5.07378C9.44778 5.36415 9.53965 5.646 9.68908 5.90207C9.8385 6.15814 10.0423 6.38305 10.2881 6.56302C10.5338 6.74299 10.8163 6.87424 11.1183 6.94873C11.4203 7.02322 11.7354 7.02322 12.0443 6.99625C12.3532 6.95311 12.6494 6.85156 12.9148 6.69783C13.1802 6.54409 13.4092 6.3414 13.5878 6.10216C13.7664 5.86293 13.8908 5.59218 13.9534 5.30649C14.016 5.02081 14.0155 4.7262 13.952 4.4407L13.5034 2.34676C13.3699 1.72348 13.3031 1.41184 13.1673 1.15902C13.0259 0.89573 12.8267 0.663154 12.5827 0.47639C12.3387 0.289626 12.0554 0.152848 11.7512 0.0749338C11.4586 7.82663e-08 11.1181 0 10.437 0H3.56303C2.88194 0 2.54139 7.82663e-08 2.24885 0.0749338C1.94458 0.152848 1.66127 0.289626 1.41729 0.47639C1.17331 0.663154 0.974121 0.89573 0.832655 1.15902ZM11.7024 8.05362C12.2885 8.05501 12.865 7.91484 13.3759 7.64674V8.40378C13.3759 11.0447 13.3759 12.3655 12.4968 13.1855C11.7894 13.8466 10.7355 13.9748 8.87526 14V11.5552C8.87526 10.9004 8.87526 10.5734 8.72449 10.3296C8.62574 10.17 8.48371 10.0374 8.31268 9.94518C8.05164 9.80441 7.70135 9.80441 7 9.80441C6.29865 9.80441 5.94836 9.80441 5.68732 9.94518C5.51629 10.0374 5.37426 10.17 5.27551 10.3296C5.12474 10.5734 5.12474 10.9004 5.12474 11.5552V14C3.26449 13.9748 2.21059 13.8459 1.50325 13.1855C0.624126 12.3655 0.624126 11.0447 0.624126 8.40378V7.64674C1.13526 7.91496 1.71203 8.05513 2.29836 8.05362C3.1652 8.05413 3.99978 7.74667 4.63268 7.19364C5.27755 7.74851 6.12302 8.05565 7 8.05362C7.87698 8.05565 8.72245 7.74851 9.36732 7.19364C10.0002 7.74667 10.8355 8.05413 11.7024 8.05362Z"
+                      fill="white"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             ))
           )}

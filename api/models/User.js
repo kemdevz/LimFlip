@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  balance: {
+    type: Number,
+    default: 1000
+  },
   verifiedAt: {
     type: Date,
     default: null

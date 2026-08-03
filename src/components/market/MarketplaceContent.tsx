@@ -3,77 +3,186 @@
 import { useState, useEffect } from 'react';
 import MyListingsModal from './MyListingsModal';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MarketplaceContentProps {
   onMyListingsClick?: () => void;
 }
 
+interface Listing {
+  _id: string;
+  item: {
+    _id: string;
+    name: string;
+    image: string;
+    rarity: string;
+    value: number;
+    category: string;
+  };
+  seller: {
+    _id: string;
+    username: string;
+    avatarUrl: string;
+  };
+  price: number;
+  status: string;
+  createdAt: string;
+}
+
 export default function MarketplaceContent({ onMyListingsClick }: MarketplaceContentProps) {
   const isMobile = useIsMobile();
-  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const { user } = useAuth();
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [displayedCartTotal, setDisplayedCartTotal] = useState(0);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [recentlySold, setRecentlySold] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState('');
+  const [userBalance, setUserBalance] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
+    fetchListings();
+    fetchRecentlySold();
+    fetchUserBalance();
   }, []);
 
-  const items = [
-    { name: 'Gingerscope', price: '0.35$+', rate: '$15/1k', cartPrice: '$21.22', image: '/assets/images/coinflip/candy.png' },
-    { name: 'Chroma Waves', price: '0.35$+', rate: '$15/1k', cartPrice: '$21.22', image: '/assets/images/coinflip/chroma.png' },
-    { name: 'Chroma Darkbr..', price: '0.35$+', rate: '$15/1k', cartPrice: '$21.22', image: '/assets/images/coinflip/knife.png' },
-    { name: 'Luger', price: '0.35$+', rate: '$15/1k', cartPrice: '$21.22', image: '/assets/images/coinflip/luger.png', featured: true },
-    { name: 'Candy', price: '0.35$+', rate: '$15/1k', cartPrice: '$21.22', image: '/assets/images/coinflip/pet.png' },
-    { name: 'Nether Star', price: '0.45$+', rate: '$18/1k', cartPrice: '$28.50', image: '/assets/images/coinflip/chroma.png' },
-    { name: 'Void Walker', price: '0.50$+', rate: '$20/1k', cartPrice: '$32.00', image: '/assets/images/coinflip/knife.png' },
-    { name: 'Shadow Blade', price: '0.40$+', rate: '$16/1k', cartPrice: '$25.60', image: '/assets/images/coinflip/luger.png' },
-    { name: 'Crystal Heart', price: '0.55$+', rate: '$22/1k', cartPrice: '$35.20', image: '/assets/images/coinflip/pet.png' },
-    { name: 'Dark Matter', price: '0.60$+', rate: '$24/1k', cartPrice: '$38.40', image: '/assets/images/coinflip/candy.png' },
-    { name: 'Frost Bite', price: '0.38$+', rate: '$15.5/1k', cartPrice: '$24.32', image: '/assets/images/coinflip/chroma.png' },
-    { name: 'Thunder Strike', price: '0.42$+', rate: '$17/1k', cartPrice: '$26.88', image: '/assets/images/coinflip/knife.png' },
-    { name: 'Golden Phoenix', price: '0.65$+', rate: '$26/1k', cartPrice: '$41.60', image: '/assets/images/coinflip/luger.png' },
-    { name: 'Silver Moon', price: '0.48$+', rate: '$19/1k', cartPrice: '$30.72', image: '/assets/images/coinflip/pet.png' },
-    { name: 'Inferno Flame', price: '0.52$+', rate: '$21/1k', cartPrice: '$33.28', image: '/assets/images/coinflip/candy.png' },
-    { name: 'Ocean Depth', price: '0.44$+', rate: '$17.5/1k', cartPrice: '$28.16', image: '/assets/images/coinflip/chroma.png' },
-    { name: 'Forest Spirit', price: '0.46$+', rate: '$18.5/1k', cartPrice: '$29.44', image: '/assets/images/coinflip/knife.png' },
-    { name: 'Sky Diamond', price: '0.58$+', rate: '$23/1k', cartPrice: '$37.12', image: '/assets/images/coinflip/luger.png' },
-    { name: 'Mystic Orb', price: '0.54$+', rate: '$21.5/1k', cartPrice: '$34.56', image: '/assets/images/coinflip/pet.png' },
-    { name: 'Dragon Scale', price: '0.62$+', rate: '$25/1k', cartPrice: '$39.68', image: '/assets/images/coinflip/candy.png' },
-    { name: 'Phoenix Wing', price: '0.56$+', rate: '$22.5/1k', cartPrice: '$35.84', image: '/assets/images/coinflip/chroma.png' },
-    { name: 'Ancient Rune', price: '0.47$+', rate: '$19/1k', cartPrice: '$30.08', image: '/assets/images/coinflip/knife.png' },
-    { name: 'Cosmic Dust', price: '0.51$+', rate: '$20.5/1k', cartPrice: '$32.64', image: '/assets/images/coinflip/luger.png' },
-    { name: 'Starlight', price: '0.49$+', rate: '$19.5/1k', cartPrice: '$31.36', image: '/assets/images/coinflip/pet.png' },
-    { name: 'Eternal Flame', price: '0.64$+', rate: '$25.5/1k', cartPrice: '$40.96', image: '/assets/images/coinflip/candy.png' },
-  ];
+  const fetchUserBalance = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserBalance(data.balance || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user balance:', error);
+    }
+  };
 
-  const cartItems = Array.from(selectedItems).map(index => ({
-    name: items[index].name,
-    price: items[index].cartPrice,
-    image: items[index].image,
-  }));
+  const fetchListings = async (search?: string) => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const url = search 
+        ? `${API_URL}/marketplace/listings?search=${encodeURIComponent(search)}`
+        : `${API_URL}/marketplace/listings`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      setListings(data);
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const toggleSelection = (index: number) => {
+  const fetchRecentlySold = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/marketplace/recently-sold`);
+      const data = await response.json();
+      setRecentlySold(data);
+    } catch (error) {
+      console.error('Error fetching recently sold:', error);
+    }
+  };
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchListings(searchQuery);
+    }, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  const cartItems = Array.from(selectedItems).map(listingId => {
+    const listing = listings.find(l => l._id === listingId);
+    return listing ? {
+      id: listing._id,
+      name: listing.item.name,
+      price: listing.price,
+      image: listing.item.image,
+    } : null;
+  }).filter(Boolean);
+
+  const toggleSelection = (listingId: string) => {
     const newSelected = new Set(selectedItems);
-    if (newSelected.has(index)) {
-      newSelected.delete(index);
+    if (newSelected.has(listingId)) {
+      newSelected.delete(listingId);
     } else {
-      newSelected.add(index);
+      newSelected.add(listingId);
     }
     setSelectedItems(newSelected);
   };
 
-  const removeFromCart = (itemName: string) => {
-    const itemIndex = items.findIndex(item => item.name === itemName);
-    if (itemIndex !== -1) {
-      toggleSelection(itemIndex);
+  const removeFromCart = (listingId: string) => {
+    toggleSelection(listingId);
+  };
+
+  const handlePurchase = async () => {
+    if (cartItems.length === 0) {
+      setPurchaseError('Your cart is empty');
+      return;
+    }
+
+    if (cartTotal > userBalance) {
+      setPurchaseError('Insufficient balance');
+      return;
+    }
+
+    setIsPurchasing(true);
+    setPurchaseError('');
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
+
+      // Purchase each item in cart
+      const purchasePromises = cartItems.map(async (cartItem) => {
+        if (!cartItem?.id) return null;
+        
+        const response = await fetch(`${API_URL}/marketplace/buy/${cartItem.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to purchase item');
+        }
+
+        return response.json();
+      });
+
+      await Promise.all(purchasePromises);
+
+      // Clear cart and refresh data
+      setSelectedItems(new Set());
+      await fetchListings();
+      await fetchRecentlySold();
+      await fetchUserBalance();
+      setIsCartOpen(false);
+    } catch (error: any) {
+      setPurchaseError(error.message || 'Failed to complete purchase');
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
   const cartTotal = cartItems.reduce((total, item) => {
-    const priceValue = parseFloat(item.price.replace('$', ''));
-    return total + priceValue;
+    return total + (item?.price || 0);
   }, 0);
 
   // Animate cart total when it changes
@@ -176,9 +285,9 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
               display: none;
             }
           `}</style>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((_, index) => (
+          {recentlySold.map((sale, index) => (
             <div
-              key={index}
+              key={sale._id || index}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -223,7 +332,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   color: '#4C526B',
                 }}
               >
-                21.35 $
+                ${sale.price}
               </span>
 
               
@@ -304,7 +413,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 }}
               >
                 <img
-                  src="/assets/images/coinflip/chroma.png"
+                  src={sale.item?.image || '/assets/images/coinflip/chroma.png'}
                   alt="Item"
                   style={{
                     position: 'absolute',
@@ -316,7 +425,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   }}
                 />
                 <img
-                  src="/assets/images/coinflip/chroma.png"
+                  src={sale.item?.image || '/assets/images/coinflip/chroma.png'}
                   alt="Item"
                   style={{
                     position: 'absolute',
@@ -353,7 +462,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     color: '#F5F5F5',
                   }}
                 >
-                  Chroma Waves
+                  {sale.item?.name || 'Unknown'}
                 </span>
                 <span
                   style={{
@@ -370,7 +479,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     color: '#4C526B',
                   }}
                 >
-                  12s ago
+                  {Math.floor((Date.now() - new Date(sale.soldAt).getTime()) / 1000)}s ago
                 </span>
               </div>
             </div>
@@ -744,26 +853,29 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
             overflowY: 'auto',
           }}
         >
-          {items.slice(0, 4).map((item, index) => (
-            <div
-              key={index}
-              onClick={() => toggleSelection(index)}
-              style={{
-                width: selectedItems.has(index) ? '205px' : '205px',
-                height: selectedItems.has(index) ? '235px' : '232px',
-                flex: 'none',
-                order: 0,
-                flexGrow: 0,
-                position: 'relative',
-                backgroundColor: '#191D29',
-                boxShadow: selectedItems.has(index) 
-                  ? 'inset 0px 4px 111.6px rgba(2, 118, 255, 0.2)' 
-                  : '0px 4px 56.6px rgba(0, 0, 0, 0.035)',
-                borderRadius: '15px',
-                border: selectedItems.has(index) ? '1px solid #0276FF' : 'none',
-                cursor: 'pointer',
-              }}
-            >
+          {loading ? (
+            <div style={{ color: '#FFFFFF', padding: '20px' }}>Loading...</div>
+          ) : (
+            listings.slice(0, 12).map((listing) => (
+              <div
+                key={listing._id}
+                onClick={() => toggleSelection(listing._id)}
+                style={{
+                  width: selectedItems.has(listing._id) ? '205px' : '205px',
+                  height: selectedItems.has(listing._id) ? '235px' : '232px',
+                  flex: 'none',
+                  order: 0,
+                  flexGrow: 0,
+                  position: 'relative',
+                  backgroundColor: '#191D29',
+                  boxShadow: selectedItems.has(listing._id) 
+                    ? 'inset 0px 4px 111.6px rgba(2, 118, 255, 0.2)' 
+                    : '0px 4px 56.6px rgba(0, 0, 0, 0.035)',
+                  borderRadius: '15px',
+                  border: selectedItems.has(listing._id) ? '1px solid #0276FF' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
               
               <div
                 style={{
@@ -771,7 +883,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   width: '205px',
                   height: '178px',
                   left: '0px',
-                  top: selectedItems.has(index) ? '1.5px' : '0px',
+                  top: selectedItems.has(listing._id) ? '1.5px' : '0px',
                   background: 'linear-gradient(180deg, #191D29 0%, #141823 100%)',
                   borderRadius: '15px 15px 0px 0px',
                 }}
@@ -814,7 +926,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                       flexGrow: 0,
                     }}
                   >
-                    3x
+                    ${(listing.price / 1000).toFixed(2)}
                   </span>
                 </div>
 
@@ -829,8 +941,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   }}
                 >
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={listing.item.image}
+                    alt={listing.item.name}
                     style={{
                       position: 'absolute',
                       width: '109.34px',
@@ -841,8 +953,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     }}
                   />
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={listing.item.image}
+                    alt={listing.item.name}
                     style={{
                       position: 'absolute',
                       width: '109.45px',
@@ -924,7 +1036,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     color: '#FFFFFF',
                   }}
                 >
-                  {item.name}
+                  {listing.item.name}
                 </span>
                 <span
                   style={{
@@ -936,7 +1048,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     color: '#737E98',
                   }}
                 >
-                  {item.price}
+                  ${listing.price}
                 </span>
               </div>
 
@@ -956,60 +1068,11 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   color: '#0276FF',
                 }}
               >
-                {item.rate}
+                ${(listing.price / listing.item.value * 1000).toFixed(2)}/1k
               </span>
-
-              
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '83px',
-                  height: '6px',
-                  left: '64px',
-                  top: '226px',
-                  backgroundColor: '#0276FF',
-                  borderRadius: '4px 4px 0px 0px',
-                  transform: 'matrix(-1, 0, 0, 1, 0, 0)',
-                }}
-              />
-
-              
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '44px',
-                  height: '42px',
-                  left: '156px',
-                  top: '181.5px',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '32px',
-                    height: '32px',
-                    left: '6px',
-                    top: '6.5px',
-                    backgroundColor: '#0276FF',
-                    borderRadius: '9px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <img
-                    src="/assets/svg/ui/market.svg"
-                    alt="Market"
-                    style={{
-                      width: '14px',
-                      height: '14px',
-                      filter: 'brightness(0) invert(1)',
-                    }}
-                  />
-                </div>
-              </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
 
         
@@ -1190,9 +1253,9 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 display: none;
               }
             `}</style>
-            {cartItems.map((item, index) => (
+            {cartItems.map((cartItem) => (
               <div
-                key={index}
+                key={cartItem?.id}
                 style={{
                   width: isMobile ? '100%' : '314px',
                   height: isMobile ? '80px' : '73px',
@@ -1212,8 +1275,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   }}
                 >
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={cartItem?.image}
+                    alt={cartItem?.name}
                     style={{
                       position: 'absolute',
                       width: isMobile ? '60px' : '47.6px',
@@ -1224,8 +1287,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     }}
                   />
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={cartItem?.image}
+                    alt={cartItem?.name}
                     style={{
                       position: 'absolute',
                       width: isMobile ? '60px' : '47.65px',
@@ -1262,7 +1325,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                       color: '#FFFFFF',
                     }}
                   >
-                    {item.name}
+                    {cartItem?.name}
                   </span>
                   <span
                     style={{
@@ -1279,13 +1342,13 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                       color: '#737E98',
                     }}
                   >
-                    {item.price}
+                    ${cartItem?.price}
                   </span>
                 </div>
 
                 
                 <button
-                  onClick={() => removeFromCart(item.name)}
+                  onClick={() => removeFromCart(cartItem?.id || '')}
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -1506,6 +1569,8 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
             />
 
             <button
+              onClick={handlePurchase}
+              disabled={isPurchasing || cartItems.length === 0}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -1515,11 +1580,11 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 gap: '9.16px',
                 width: isMobile ? '100%' : '314px',
                 height: isMobile ? '50px' : '40px',
-                backgroundColor: '#0276FF',
+                backgroundColor: isPurchasing || cartItems.length === 0 ? '#404763' : '#0276FF',
                 boxShadow: '0px 10.9967px 23.9177px rgba(0, 0, 0, 0.22)',
                 borderRadius: '15px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: isPurchasing || cartItems.length === 0 ? 'not-allowed' : 'pointer',
               }}
             >
               <img
@@ -1539,13 +1604,73 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   fontWeight: '600',
                   fontSize: isMobile ? '18px' : '17px',
                   lineHeight: '26px',
-                  letterSpacing: '-0.02em',
                   color: '#FFFFFF',
                 }}
               >
-                Purchase
+                {isPurchasing ? 'Purchasing...' : 'Purchase'}
               </span>
             </button>
+
+            {purchaseError && (
+              <div
+                style={{
+                  width: isMobile ? '100%' : '314px',
+                  padding: '10px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  borderRadius: '8px',
+                  border: '1px solid #EF4444',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    lineHeight: '21px',
+                    color: '#EF4444',
+                  }}
+                >
+                  {purchaseError}
+                </span>
+              </div>
+            )}
+
+            <div
+              style={{
+                width: isMobile ? '100%' : '314px',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px 0',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  color: '#737E98',
+                }}
+              >
+                Your Balance
+              </span>
+              <span
+                style={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  lineHeight: '24px',
+                  color: cartTotal > userBalance ? '#EF4444' : '#006EFF',
+                }}
+              >
+                ${userBalance.toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

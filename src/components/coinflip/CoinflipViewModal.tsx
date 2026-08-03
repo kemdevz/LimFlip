@@ -1265,7 +1265,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                 if (!game?._id || !user?.id) return;
                 setIsCancelling(true);
                 try {
-                  const response = await fetch(`https://api-bash.onrender.com/coinflip/cancel/${game._id}`, {
+                  const response = await fetch(`http://localhost:3001/coinflip/cancel/${game._id}`, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

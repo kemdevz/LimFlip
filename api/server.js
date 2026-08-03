@@ -10,6 +10,8 @@ const { router: coinflipRoutes, setIo: setCoinflipIo } = require('./routes/coinf
 const { router: jackpotRoutes, setIo: setJackpotIo } = require('./routes/jackpot');
 const { router: trackTimerRoutes, setIo } = require('./routes/trackTimer');
 const userStatsRoutes = require('./routes/userStats');
+const marketplaceRoutes = require('./routes/marketplace');
+const mm2Routes = require('./routes/mm2');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -78,6 +80,8 @@ app.use('/coinflip', coinflipRoutes);
 app.use('/jackpot', jackpotRoutes);
 app.use('/track-timer', trackTimerRoutes);
 app.use('/user', userStatsRoutes);
+app.use('/marketplace', marketplaceRoutes);
+app.use('/mm2', mm2Routes);
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

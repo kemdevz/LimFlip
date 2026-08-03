@@ -148,7 +148,6 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                   top: '-4px',
                   background: '#131620',
                   borderRadius: '132px',
-                  border: game?.status === 'completed' && game?.winner === game?.creator ? '3px solid #006EFF' : 'none',
                 }}
               />
               <div
@@ -164,6 +163,22 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                   borderRadius: '43px',
                 }}
               />
+              {/* Winner stroke overlay */}
+              {game?.status === 'completed' && game?.winner === game?.creator?._id && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '68px',
+                    height: '70px',
+                    left: '-2px',
+                    top: '-4px',
+                    borderRadius: '132px',
+                    border: '2px solid #006EFF',
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}
+                />
+              )}
               {/* Selected coin indicator */}
               {game?.selectedCoin && (
                 <img
@@ -177,6 +192,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                     left: '-4px',
                     borderRadius: '50%',
                     border: '2px solid #191D29',
+                    zIndex: 15,
                   }}
                 />
               )}
@@ -258,7 +274,6 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                   top: '-4px',
                   background: '#11151D',
                   borderRadius: '132px',
-                  border: game?.status === 'completed' && game?.winner === game?.joiner ? '3px solid #006EFF' : 'none',
                 }}
               />
               {game?.joiner ? (
@@ -323,6 +338,22 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                     ?
                   </span>
                 </div>
+              )}
+              {/* Winner stroke overlay */}
+              {game?.status === 'completed' && game?.winner === game?.joiner?._id && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '68px',
+                    height: '70px',
+                    left: '-2px',
+                    top: '-4px',
+                    borderRadius: '132px',
+                    border: '2px solid #006EFF',
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}
+                />
               )}
             </div>
           </div>

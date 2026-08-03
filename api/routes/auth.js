@@ -108,7 +108,7 @@ router.post('/login', async (req, res) => {
     const users = await searchRobloxUsers(username);
     console.log('Login search results:', users);
     const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`;
+    const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
     console.log('Login using avatar URL:', avatarUrl);
 
     if (!user) {
@@ -182,7 +182,7 @@ router.post('/verify-description', async (req, res) => {
       const users = await searchRobloxUsers(username);
       console.log('Search results:', users);
       const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-      const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`;
+      const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
       console.log('Using avatar URL:', avatarUrl);
       console.log('Roblox userId from request:', robloxUserId);
 
@@ -201,8 +201,8 @@ router.post('/verify-description', async (req, res) => {
         const users = await searchRobloxUsers(username);
         console.log('Search results for existing user:', users);
         const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-        const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=150&height=150&format=png`;
-        console.log('Updating avatar URL:', avatarUrl);
+        const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
+        console.log('Verify using avatar URL:', avatarUrl);
         console.log('Roblox userId from request:', robloxUserId);
         user.avatarUrl = avatarUrl;
       }
@@ -242,11 +242,28 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // If avatarUrl is empty, fetch it from Roblox
+    let avatarUrl = user.avatarUrl;
+    if (!avatarUrl && user.robloxUserId) {
+      try {
+        const users = await searchRobloxUsers(user.username);
+        const foundUser = users.find(u => u.username.toLowerCase() === user.username.toLowerCase());
+        avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+        
+        // Update user with fetched avatar
+        user.avatarUrl = avatarUrl;
+        await user.save();
+      } catch (error) {
+        console.error('Error fetching avatar for /me:', error);
+        avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+      }
+    }
+
     res.json({
       id: user._id.toString(),
       username: user.username,
       robloxUserId: user.robloxUserId,
-      avatarUrl: user.avatarUrl
+      avatarUrl: avatarUrl
     });
   } catch (error) {
     console.error('Get me error:', error);

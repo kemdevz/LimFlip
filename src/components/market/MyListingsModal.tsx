@@ -14,30 +14,87 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [listingPrice, setListingPrice] = useState('');
+  const [isListing, setIsListing] = useState(false);
+  const [listingError, setListingError] = useState('');
   
   // Get user from useAuth hook
   const { user } = useAuth();
-  const { inventory, loading, error } = useInventory(user?.id || null);
+  const { inventory, loading, error, fetchInventory } = useInventory(user?.id || null);
 
-  const toggleItemSelection = (itemId: string) => {
+  const toggleItemSelection = (uniqueId: string) => {
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
+      if (newSet.has(uniqueId)) {
+        newSet.delete(uniqueId);
       } else {
-        newSet.add(itemId);
+        newSet.add(uniqueId);
       }
       return newSet;
     });
   };
 
-  const totalSelectedAmount = Array.from(selectedItems).reduce((sum, itemId) => {
-    const item = inventory?.items.find(i => i.itemId === itemId);
+  const totalSelectedAmount = Array.from(selectedItems).reduce((sum, uniqueId) => {
+    const item = inventory?.items.find(i => i.uniqueId === uniqueId);
     return sum + (item?.value || 0);
   }, 0);
   
   const formatAmount = (amount: number) => {
     return `B$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const handleListItems = async () => {
+    if (selectedItems.size === 0) {
+      setListingError('Please select at least one item');
+      return;
+    }
+
+    if (!listingPrice || parseFloat(listingPrice) <= 0) {
+      setListingError('Please enter a valid price');
+      return;
+    }
+
+    setIsListing(true);
+    setListingError('');
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
+
+      // List each selected item
+      const listingPromises = Array.from(selectedItems).map(async (uniqueId) => {
+        const response = await fetch(`${API_URL}/marketplace/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            inventoryItemUniqueId: uniqueId,
+            price: parseFloat(listingPrice),
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create listing');
+        }
+
+        return response.json();
+      });
+
+      await Promise.all(listingPromises);
+
+      // Clear selection and refetch inventory
+      setSelectedItems(new Set());
+      setListingPrice('');
+      await fetchInventory();
+      onClose();
+    } catch (error: any) {
+      setListingError(error.message || 'Failed to list items');
+    } finally {
+      setIsListing(false);
+    }
   };
 
   useEffect(() => {
@@ -363,8 +420,8 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           ) : inventory?.items && inventory.items.length > 0 ? (
             inventory.items.map((item) => (
               <div
-                key={item.itemId}
-                onClick={() => toggleItemSelection(item.itemId)}
+                key={item.uniqueId}
+                onClick={() => toggleItemSelection(item.uniqueId)}
                 style={{
                   position: 'relative',
                   width: '159.29px',
@@ -375,7 +432,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
                   flexGrow: 0,
                 }}
               >
-                {selectedItems.has(item.itemId) && (
+                {selectedItems.has(item.uniqueId) && (
                   <div
                     style={{
                       position: 'absolute',
@@ -501,7 +558,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           style={{
             position: 'absolute',
             width: '127px',
-            height: '54px',
+            height: '53px',
             left: '755px',
             top: '631px',
             opacity: 0.55,
@@ -511,19 +568,23 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
             style={{
               position: 'absolute',
               width: '127px',
-              height: '54px',
+              height: '50px',
               left: '0px',
-              top: '0px',
-              background: '#202634',
+              top: '3px',
+              border: '1.5px solid #404763',
               borderRadius: '15px',
             }}
           />
-          <span
+          <input
+            type="number"
+            value={listingPrice}
+            onChange={(e) => setListingPrice(e.target.value)}
+            placeholder="Price"
             style={{
               position: 'absolute',
-              width: '68px',
+              width: '80px',
               height: '24px',
-              left: '30px',
+              left: '15px',
               top: '17px',
               fontFamily: 'Poppins',
               fontStyle: 'normal',
@@ -531,11 +592,31 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               fontSize: '16px',
               lineHeight: '24px',
               color: '#FFFFFF',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+            }}
+          />
+        </div>
+
+        {listingError && (
+          <div
+            style={{
+              position: 'absolute',
+              width: '300px',
+              left: '25px',
+              top: '690px',
+              fontFamily: 'Poppins',
+              fontStyle: 'normal',
+              fontWeight: 600,
+              fontSize: '14px',
+              lineHeight: '21px',
+              color: '#EF4444',
             }}
           >
-            Edit <span style={{ color: '#006EFF' }}>R$0</span>
-          </span>
-        </div>
+            {listingError}
+          </div>
+        )}
 
 
         <div
@@ -548,15 +629,16 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           }}
         >
           <div
+            onClick={handleListItems}
             style={{
               position: 'absolute',
               width: '153px',
               height: '50px',
               left: '0px',
               top: '0px',
-              background: '#006EFF',
+              background: isListing ? '#404763' : '#006EFF',
               borderRadius: '15px',
-              cursor: 'pointer',
+              cursor: isListing ? 'not-allowed' : 'pointer',
             }}
           />
           <span
@@ -574,7 +656,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            List Items
+            {isListing ? 'Listing...' : 'List Items'}
           </span>
         </div>
       </div>

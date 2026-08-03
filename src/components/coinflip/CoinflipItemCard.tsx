@@ -7,8 +7,12 @@ interface CoinflipItemCardProps {
 }
 
 const formatValue = (value: number) => {
-  const inThousands = value / 1000;
-  return `B$${inThousands.toFixed(1)}k`;
+  if (value >= 1000) {
+    const inThousands = value / 1000;
+    return `B$${inThousands.toFixed(1)}k`;
+  } else {
+    return `B$${value}`;
+  }
 };
 
 export default function CoinflipItemCard({ imageSrc, itemName = 'Gingerscope', itemValue = 43800 }: CoinflipItemCardProps) {

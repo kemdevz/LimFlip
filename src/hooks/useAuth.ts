@@ -32,7 +32,7 @@ export const useAuth = () => {
     console.log('useAuth: Fetching user with token');
 
     try {
-      const response = await fetch('https://api-bash.onrender.com/auth/me', {
+      const response = await fetch('http://localhost:3001/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

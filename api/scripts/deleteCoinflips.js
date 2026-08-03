@@ -5,7 +5,7 @@ require('dotenv').config();
 async function deleteCoinflips() {
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bloxbashh';
+    const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=rblxroll';
     console.log('Connecting to MongoDB:', mongoUri);
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');

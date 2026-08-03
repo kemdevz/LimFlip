@@ -64,7 +64,7 @@ const generateUniqueId = () => {
 async function giveSpecificItems() {
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bloxbashh';
+    const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=rblxroll';
     console.log('Connecting to MongoDB:', mongoUri);
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
@@ -85,34 +85,33 @@ async function giveSpecificItems() {
       }
     }
 
-    // Find the two users
-    const radotron = await User.findOne({ username: 'Radotron_0' });
-    const redbet = await User.findOne({ username: 'Redbet_holder' });
+    // Find the user
+    const radovanAdm = await User.findOne({ username: 'RadovanAdm' });
 
-    if (!radotron || !redbet) {
-      console.log('Users not found');
+    if (!radovanAdm) {
+      console.log('User not found');
       console.log('Available users:');
       const allUsers = await User.find({}, { username: 1 });
       allUsers.forEach(u => console.log('-', u.username));
       process.exit(1);
     }
 
-    console.log('Found users:', radotron.username, redbet.username);
+    console.log('Found user:', radovanAdm.username);
 
-    // Reset Radotron's inventory
-    let radotronInventory = await Inventory.findOne({ userId: radotron._id });
-    if (radotronInventory) {
-      radotronInventory.items = [];
+    // Reset RadovanAdm's inventory
+    let radovanAdmInventory = await Inventory.findOne({ userId: radovanAdm._id });
+    if (radovanAdmInventory) {
+      radovanAdmInventory.items = [];
     } else {
-      radotronInventory = new Inventory({ userId: radotron._id, items: [] });
+      radovanAdmInventory = new Inventory({ userId: radovanAdm._id, items: [] });
     }
 
-    // Add specific items to Radotron (30 items total) with unique IDs
+    // Add specific items to RadovanAdm (30 items total) with unique IDs
     let itemCounter = 0;
     for (let i = 0; i < 8; i++) {
       itemDefinitions.forEach(itemDef => {
         if (itemCounter < 30) {
-          radotronInventory.items.push({
+          radovanAdmInventory.items.push({
             uniqueId: generateUniqueId(),
             itemId: itemDef.itemId,
             acquiredAt: new Date()
@@ -121,33 +120,8 @@ async function giveSpecificItems() {
         }
       });
     }
-    await radotronInventory.save();
-    console.log(`Reset inventory for ${radotron.username}: ${radotronInventory.items.length} items`);
-
-    // Reset Redbet's inventory
-    let redbetInventory = await Inventory.findOne({ userId: redbet._id });
-    if (redbetInventory) {
-      redbetInventory.items = [];
-    } else {
-      redbetInventory = new Inventory({ userId: redbet._id, items: [] });
-    }
-
-    // Add specific items to Redbet (30 items total) with unique IDs
-    itemCounter = 0;
-    for (let i = 0; i < 8; i++) {
-      itemDefinitions.forEach(itemDef => {
-        if (itemCounter < 30) {
-          redbetInventory.items.push({
-            uniqueId: generateUniqueId(),
-            itemId: itemDef.itemId,
-            acquiredAt: new Date()
-          });
-          itemCounter++;
-        }
-      });
-    }
-    await redbetInventory.save();
-    console.log(`Reset inventory for ${redbet.username}: ${redbetInventory.items.length} items`);
+    await radovanAdmInventory.save();
+    console.log(`Reset inventory for ${radovanAdm.username}: ${radovanAdmInventory.items.length} items`);
 
     console.log('Specific items added successfully');
     await mongoose.connection.close();

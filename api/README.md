@@ -36,7 +36,7 @@ cp .env.example .env
 Edit `.env` with your configuration:
 ```
 PORT=3001
-MONGODB_URI=mongodb://localhost:27017/bloxbashh
+MONGODB_URI=mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=rblxroll
 JWT_SECRET=your-secret-key-change-in-production
 NODE_ENV=development
 ```

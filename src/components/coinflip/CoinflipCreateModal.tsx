@@ -94,6 +94,11 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
     }
   }, [isOpen]);
 
+  // Sort inventory items by value (high to low)
+  const sortedItems = inventory?.items 
+    ? [...inventory.items].sort((a, b) => (b.value || 0) - (a.value || 0))
+    : [];
+
   if (!isVisible) return null;
 
   return (
@@ -457,7 +462,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             if (selectedItems.size > 0 && user?.id && !isCreating) {
               setIsCreating(true);
               try {
-                const response = await fetch('https://api-bash.onrender.com/coinflip/create', {
+                const response = await fetch('http://localhost:3001/coinflip/create', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
@@ -650,8 +655,8 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             <span style={{ color: '#6B7289' }}>Loading inventory...</span>
           ) : error ? (
             <span style={{ color: '#EF4444' }}>Error loading inventory</span>
-          ) : inventory?.items && inventory.items.length > 0 ? (
-            inventory.items.map((item, index) => (
+          ) : sortedItems && sortedItems.length > 0 ? (
+            sortedItems.map((item, index) => (
               <div
                 key={`${item.uniqueId}_${index}`}
                 onClick={() => toggleItemSelection(item.uniqueId)}

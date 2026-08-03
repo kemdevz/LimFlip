@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Coinflip = require('../models/Coinflip');
 const Inventory = require('../models/Inventory');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bloxbashh';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=rblxroll';
 
 async function deleteRandomCoinflips() {
   try {

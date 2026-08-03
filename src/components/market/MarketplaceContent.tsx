@@ -848,15 +848,15 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
             flexWrap: 'wrap',
             alignItems: 'flex-start',
             alignContent: 'flex-start',
-            gap: '18px',
-            marginRight: '69px',
+            gap: '12px',
+            marginRight: '20px',
             overflowY: 'auto',
           }}
         >
           {loading ? (
             <div style={{ color: '#FFFFFF', padding: '20px' }}>Loading...</div>
           ) : (
-            listings.slice(0, 12).map((listing) => (
+            listings.slice(0, 15).map((listing) => (
               <div
                 key={listing._id}
                 onClick={() => toggleSelection(listing._id)}

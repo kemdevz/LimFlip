@@ -247,19 +247,20 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Always fetch fresh avatar URL from Roblox using noblox (same as login modal)
+    // Use cached avatar URL from MongoDB if available, otherwise fetch fresh
     let avatarUrl = user.avatarUrl;
-    try {
-      const userThumbnail = await noblox.getPlayerThumbnail(user.robloxUserId, 420, 'png', false, 'Headshot');
-      avatarUrl = userThumbnail[0].imageUrl;
-      console.log('/me using noblox avatar URL:', avatarUrl);
-      
-      // Update user with fresh avatar
-      user.avatarUrl = avatarUrl;
-      await user.save();
-    } catch (error) {
-      console.error('Error fetching avatar for /me with noblox:', error);
-      avatarUrl = user.avatarUrl || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+    if (!avatarUrl || !avatarUrl.includes('tr.rbxcdn.com')) {
+      try {
+        const userThumbnail = await noblox.getPlayerThumbnail(user.robloxUserId, 420, 'png', false, 'Headshot');
+        avatarUrl = userThumbnail[0].imageUrl;
+        
+        // Update user with fresh avatar in MongoDB
+        user.avatarUrl = avatarUrl;
+        await user.save();
+      } catch (error) {
+        console.error('Error fetching avatar for /me with noblox:', error);
+        avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+      }
     }
 
     res.json({

@@ -103,18 +103,22 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
   }, [isMounted, socket]);
 
   const handleSendMessage = () => {
+    if (!user) return; // Prevent sending if not logged in
     if (!inputMessage.trim()) return;
     if (inputMessage.length > 75) return;
 
+    const token = localStorage.getItem('token');
+    if (!token) return; // Prevent sending if no token
+
     const newMessage: Message = {
-      username: user?.username || 'Anonymous',
+      username: user.username,
       message: inputMessage,
       time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      avatarUrl: user?.avatarUrl || '/assets/images/coinflip/item_1side.png',
+      avatarUrl: user.avatarUrl || '/assets/images/coinflip/item_1side.png',
       isWhale: false,
     };
 
-    socket?.emit('chat-message', newMessage);
+    socket?.emit('chat-message', { ...newMessage, token });
     setInputMessage('');
   };
   return (

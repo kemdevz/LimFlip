@@ -14,7 +14,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
   const [shouldRender, setShouldRender] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | null>(null);
   const [isWithdrawMode, setIsWithdrawMode] = useState(false);
-  const [withdrawCrypto, setWithdrawCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | null>(null);
+  const [withdrawCrypto, setWithdrawCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | 'MM2' | null>(null);
   const [isMM2Mode, setIsMM2Mode] = useState(false);
   const [isCardsMode, setIsCardsMode] = useState(false);
 
@@ -60,6 +60,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
       address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
       icon: '/assets/wallet/sol.png',
       color: 'rgba(126, 123, 217, 0.25)',
+    },
+    MM2: {
+      name: 'Murder Mystery 2',
+      address: '',
+      icon: '/assets/wallet/mm2.png',
+      color: 'rgba(255, 100, 100, 0.25)',
     },
   };
 
@@ -917,37 +923,17 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
             {!withdrawCrypto ? (
               <>
-                
-                <span
-                  style={{
-                    position: 'absolute',
-                    width: '41px',
-                    height: '23px',
-                    left: '29px',
-                    top: '74px',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontStyle: 'normal',
-                    fontWeight: 600,
-                    fontSize: '15px',
-                    lineHeight: '22px',
-                    color: '#676D7A',
-                  }}
-                >
-                  Skins
-                </span>
-
-                
                 <div
-                  onClick={() => setIsMM2Mode(true)}
                   style={{
                     position: 'absolute',
                     width: '537px',
                     height: '85px',
                     left: '29px',
-                    top: '102px',
+                    top: '74px',
                     overflow: 'hidden',
                     cursor: 'pointer',
                   }}
+                  onClick={() => setWithdrawCrypto('MM2')}
                 >
                   <div
                     style={{
@@ -992,8 +978,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       fontFamily: 'Poppins, sans-serif',
                       fontStyle: 'normal',
                       fontWeight: 600,
-                      fontSize: '14px',
-                      lineHeight: '21px',
+                      fontSize: '15px',
+                      lineHeight: '22px',
                       color: '#FFFFFF',
                     }}
                   >
@@ -1018,14 +1004,13 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   </span>
                 </div>
 
-                
                 <span
                   style={{
                     position: 'absolute',
                     width: '121px',
                     height: '23px',
                     left: '29px',
-                    top: '203px',
+                    top: '175px',
                     fontFamily: 'Poppins, sans-serif',
                     fontStyle: 'normal',
                     fontWeight: 600,
@@ -1037,14 +1022,13 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   Cryptocurrencies
                 </span>
 
-                
                 <div
                   style={{
                     position: 'absolute',
                     width: '560px',
                     height: '200px',
                     left: '28px',
-                    top: '231px',
+                    top: '203px',
                     display: 'flex',
                     flexDirection: 'row',
                     flexWrap: 'wrap',
@@ -1072,7 +1056,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                           left: '19px',
                           top: '21px',
                           background: `url(${crypto.icon})`,
-                          filter: 'drop-shadow(0px 0px 41.8px rgba(247, 147, 26, 0.25))',
+                          filter: `drop-shadow(0px 0px 41.8px ${crypto.color})`,
                           backgroundSize: 'cover',
                         }}
                       />

@@ -286,10 +286,8 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose }) => {
                     gap: '10px',
                   }}
                 >
-                  <input
-                    type="text"
-                    value={depositAddress}
-                    readOnly
+                  <button
+                    onClick={copyAddress}
                     style={{
                       flex: 1,
                       padding: '12px',
@@ -299,25 +297,17 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose }) => {
                       color: '#FFFFFF',
                       fontFamily: 'Poppins, sans-serif',
                       fontSize: '12px',
-                      outline: 'none',
-                    }}
-                  />
-                  <button
-                    onClick={copyAddress}
-                    style={{
-                      padding: '12px 20px',
-                      background: '#202634',
-                      border: '1px solid #222530',
-                      borderRadius: '8px',
-                      color: '#FFFFFF',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontSize: '14px',
                       fontWeight: 600,
                       cursor: 'pointer',
+                      outline: 'none',
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    Copy
+                    {depositAddress}
                   </button>
                 </div>
                 <p

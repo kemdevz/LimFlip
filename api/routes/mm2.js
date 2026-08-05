@@ -149,13 +149,16 @@ router.post('/deposit', verifyApiKey, async (req, res) => {
         await item.save();
       }
 
-      // Add to inventory
-      const uniqueId = `${item.itemId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      inventory.items.push({
-        uniqueId,
-        itemId: item.itemId,
-        acquiredAt: new Date()
-      });
+      // Add to inventory with quantity support
+      const quantity = itemData.quantity || 1;
+      for (let i = 0; i < quantity; i++) {
+        const uniqueId = `${item.itemId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        inventory.items.push({
+          uniqueId,
+          itemId: item.itemId,
+          acquiredAt: new Date()
+        });
+      }
     }
 
     // Recalculate total value

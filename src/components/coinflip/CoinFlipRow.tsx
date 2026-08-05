@@ -74,6 +74,32 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
     }
   };
 
+  const handleCancel = async () => {
+    if (!user || !game?._id) return;
+
+    try {
+      const response = await fetch('https://api-bash.onrender.com/coinflip/cancel/' + game._id, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to cancel game');
+      }
+    } catch (error) {
+      console.error('Cancel error:', error);
+    }
+  };
+
+  const isCreator = user && game?.creator === user.id;
+  const canCancel = game?.status === 'waiting' && isCreator;
+
   return (
     <>
       <style>{`
@@ -757,7 +783,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
 
         {game?.status !== 'completed' && (
           <div
-            onClick={handleJoin}
+            onClick={canCancel ? handleCancel : handleJoin}
             style={{
               width: '74px',
               height: '33px',
@@ -773,7 +799,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                 right: '9.46%',
                 top: '0%',
                 bottom: '0%',
-                background: '#0276FF',
+                background: canCancel ? '#FF4444' : '#0276FF',
                 borderRadius: '15px',
               }}
             />
@@ -782,7 +808,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                 position: 'absolute',
                 width: '31px',
                 height: '16px',
-                left: '18px',
+                left: canCancel ? '14px' : '18px',
                 top: '7px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
@@ -792,7 +818,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
                 color: '#FFFFFF',
               }}
             >
-              Join
+              {canCancel ? 'Cancel' : 'Join'}
             </span>
           </div>
         )}

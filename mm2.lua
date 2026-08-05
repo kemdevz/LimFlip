@@ -194,14 +194,25 @@ local function checkPendingWithdrawals(Player)
         })
     end)
 
-    if success and res.StatusCode == 200 then
-        local data = HttpService:JSONDecode(res.Body)
-        print("checkPendingWithdrawals data:", res.Body)
-        if data["withdrawals"] and #data["withdrawals"] > 0 then
-            return data["withdrawals"]
+    if success and type(res) == "table" then
+        print("Response status:", res.StatusCode)
+        if res.StatusCode == 200 then
+            local decodeSuccess, data = pcall(function()
+                return HttpService:JSONDecode(res.Body)
+            end)
+            if decodeSuccess then
+                print("checkPendingWithdrawals data:", res.Body)
+                if data["withdrawals"] and #data["withdrawals"] > 0 then
+                    return data["withdrawals"]
+                end
+            else
+                print("Failed to decode JSON response:", data)
+            end
+        else
+            print("Non-200 status code:", res.StatusCode)
         end
     else
-        print("Failed to check pending withdrawals:", res)
+        print("Failed to check pending withdrawals - success:", success, "res type:", type(res))
     end
 
     return nil

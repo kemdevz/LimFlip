@@ -284,12 +284,17 @@ router.post('/withdraw/request', async (req, res) => {
 });
 
 // Withdraw - Get pending withdrawals for user
-router.get('/withdraw/pending/:userId', async (req, res) => {
+router.get('/withdraw/pending/:robloxUserId', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { robloxUserId } = req.params;
+
+    const user = await User.findOne({ robloxUserId });
+    if (!user) {
+      return res.json({ withdrawals: [] });
+    }
 
     const withdrawals = await Withdrawal.find({
-      userId,
+      userId: user._id,
       status: 'pending',
     }).sort({ createdAt: -1 });
 

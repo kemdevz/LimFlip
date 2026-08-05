@@ -179,6 +179,34 @@ local function checkEligible(Player)
     return false
 end
 
+local function checkPendingWithdrawals(Player)
+    local traderId = tostring(currentTrader)
+    local userId = game.Players:GetUserIdFromNameAsync(traderId)
+    local url = api .. "mm2/withdraw/pending/" .. userId
+
+    local success, res = pcall(function()
+        return request({
+            Url = url,
+            Method = "GET",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            }
+        })
+    end)
+
+    if success and res.StatusCode == 200 then
+        local data = HttpService:JSONDecode(res.Body)
+        print("checkPendingWithdrawals data:", res.Body)
+        if data["withdrawals"] and #data["withdrawals"] > 0 then
+            return data["withdrawals"]
+        end
+    else
+        print("Failed to check pending withdrawals:", res)
+    end
+
+    return nil
+end
+
 local function checkItems(Player)
     local traderId = tostring(currentTrader)
     local jsonBody = HttpService:JSONEncode({
@@ -487,6 +515,12 @@ end)
             typeChat("Player is depositing items.")
             typeChat("Please do not deposit pets. They will not be credited.")
                 currentTrade.isDepositing = true
+        end
+
+        -- Check for pending withdrawals
+        local pendingWithdrawals = checkPendingWithdrawals(player)
+        if pendingWithdrawals then
+            typeChat("You have pending withdrawals. Join the server to complete them.")
         end
     else
         print("Declined because already trading")

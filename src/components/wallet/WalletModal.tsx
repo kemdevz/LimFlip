@@ -1831,7 +1831,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             />
 
             <div
-              onClick={() => window.open('https://www.roblox.com/users/11411583845/profile?friendshipSourceType=PlayerSearch', '_blank')}
+              onClick={() => window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank')}
               style={{
                 position: 'absolute',
                 width: '535px',

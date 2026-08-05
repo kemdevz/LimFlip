@@ -126,7 +126,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
       }
 
       // Open Roblox profile to trade
-      window.open('https://www.roblox.com/users/11411583845/profile?friendshipSourceType=PlayerSearch', '_blank');
+      window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank');
       
       toast.success('Withdrawal initiated! Trade the bot MM2_BUGGY in the VIP server.');
       

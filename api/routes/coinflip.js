@@ -34,6 +34,48 @@ const populateItemDetails = async (inventoryItems) => {
   );
 };
 
+// Helper function to generate unique ID
+const generateUniqueId = () => {
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Helper function to format amount
+const formatAmount = (amount) => {
+  if (amount >= 1000000) {
+    return `B$${(amount / 1000000).toFixed(1)}M`;
+  } else if (amount >= 1000) {
+    return `B$${(amount / 1000).toFixed(0)}K`;
+  } else {
+    return `B$${amount.toFixed(0)}`;
+  }
+};
+
+// Helper function to emit inventory update
+const emitInventoryUpdate = (userId, inventory) => {
+  if (io) {
+    io.emit('inventory-updated', { userId, inventory });
+  }
+};
+
+// Helper function to remove items from inventory by uniqueId
+const removeItemsFromInventory = (inventory, uniqueIds) => {
+  uniqueIds.forEach(uniqueId => {
+    const index = inventory.items.findIndex(item => item.uniqueId === uniqueId);
+    if (index !== -1) {
+      inventory.items.splice(index, 1);
+    }
+  });
+};
+
+// Helper function to create inventory item with unique ID
+const createInventoryItem = (itemId) => {
+  return {
+    uniqueId: generateUniqueId(),
+    itemId: itemId,
+    acquiredAt: new Date()
+  };
+};
+
 // Create a new coinflip game
 router.post('/create', async (req, res) => {
   try {
@@ -76,33 +118,39 @@ router.post('/create', async (req, res) => {
     await game.save();
     
     console.log('Game saved to database:', game._id);
-    
+
     // Populate creator data before emitting
     const populatedGame = await Coinflip.findById(game._id)
       .populate('creator', 'username avatarUrl')
       .populate('joiner', 'username avatarUrl');
-    
-    // Remove items from inventory by uniqueId
-    uniqueIds.forEach(uniqueId => {
-      const index = inventory.items.findIndex(item => item.uniqueId === uniqueId);
-      if (index !== -1) {
-        inventory.items.splice(index, 1);
-      }
-    });
-    await inventory.save();
-    
+
+    // Atomically remove items from inventory to prevent race condition
+    const updateResult = await Inventory.updateOne(
+      { _id: inventory._id, 'items.uniqueId': { $in: uniqueIds } },
+      { $pull: { items: { uniqueId: { $in: uniqueIds } } } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      // Items were not removed - they may have been used in another transaction
+      console.log('Race condition detected: items already used in another transaction');
+      // Rollback - delete the game
+      await Coinflip.findByIdAndDelete(game._id);
+      return res.status(400).json({ error: 'Items are no longer available' });
+    }
+
+    // Refresh inventory after atomic update
+    const updatedInventory = await Inventory.findOne({ userId });
+
     // Populate inventory items for socket emission
-    const populatedInventory = await populateItemDetails(inventory.items);
+    const populatedInventory = await populateItemDetails(updatedInventory.items);
     const responseInventory = {
-      ...inventory.toObject(),
+      ...updatedInventory.toObject(),
       items: populatedInventory
     };
-    
+
     // Emit socket event for inventory update
-    if (io) {
-      io.emit('inventory-updated', { userId, inventory: responseInventory });
-    }
-    
+    emitInventoryUpdate(userId, responseInventory);
+
     // Emit socket event for new game
     if (io) {
       io.emit('coinflip-created', { game: populatedGame });
@@ -121,107 +169,106 @@ router.post('/join/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
     const { userId, uniqueIds, betAmount } = req.body;
-    
+
     if (!userId || !uniqueIds || uniqueIds.length === 0) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    
-    // Find the game
-    const game = await Coinflip.findById(gameId);
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-    
-    // Check if game is in waiting status
-    if (game.status !== 'waiting') {
-      return res.status(400).json({ error: 'Game is not available for joining' });
-    }
-    
-    // Check if user is the creator (can't join own game)
-    const creatorId = typeof game.creator === 'object' ? game.creator._id : game.creator;
-    if (String(creatorId) === String(userId)) {
-      return res.status(400).json({ error: 'You cannot join your own game' });
-    }
-    
-    // Get user inventory
+
+    // Get user inventory first to validate items
     const inventory = await Inventory.findOne({ userId });
-    
+
     if (!inventory) {
       return res.status(404).json({ error: 'Inventory not found' });
     }
-    
+
     // Check if user owns all the items by uniqueId
     const inventoryUniqueIds = inventory.items.map(item => item.uniqueId);
     const missingItems = uniqueIds.filter(id => !inventoryUniqueIds.includes(id));
-    
+
     if (missingItems.length > 0) {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
-    
+
     // Get selected items with populated details
     const selectedItems = inventory.items.filter(item => uniqueIds.includes(item.uniqueId));
     const populatedItems = await populateItemDetails(selectedItems);
     const totalValue = populatedItems.reduce((sum, item) => sum + item.value, 0);
-    
+
+    // Atomically find and update game to prevent race condition
+    const game = await Coinflip.findOneAndUpdate(
+      { _id: gameId, status: 'waiting' },
+      { $set: { status: 'joining' } },
+      { new: true }
+    );
+
+    if (!game) {
+      return res.status(400).json({ error: 'Game is not available for joining' });
+    }
+
+    // Check if user is the creator (can't join own game)
+    const creatorId = typeof game.creator === 'object' ? game.creator._id : game.creator;
+    if (String(creatorId) === String(userId)) {
+      // Reset status back to waiting
+      await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+      return res.status(400).json({ error: 'You cannot join your own game' });
+    }
+
     // Check if bet is within 10% of game value
     const gameValue = game.totalValue;
     const minValue = gameValue * 0.9;
     const maxValue = gameValue * 1.1;
-    
-    // Format values for error message
-    const formatAmount = (amount) => {
-      if (amount >= 1000000) {
-        return `B$${(amount / 1000000).toFixed(1)}M`;
-      } else if (amount >= 1000) {
-        return `B$${(amount / 1000).toFixed(0)}K`;
-      } else {
-        return `B$${amount.toFixed(0)}`;
-      }
-    };
-    
+
     if (totalValue < minValue || totalValue > maxValue) {
-      return res.status(400).json({ 
-        error: `Bet amount must be between ${formatAmount(minValue)} and ${formatAmount(maxValue)}` 
+      // Reset status back to waiting
+      await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+      return res.status(400).json({
+        error: `Bet amount must be between ${formatAmount(minValue)} and ${formatAmount(maxValue)}`
       });
     }
-    
+
     // Update game with joiner and their items
     game.joiner = userId;
     game.joinerItems = populatedItems;
     game.items = [...game.creatorItems, ...populatedItems];
     game.totalValue += totalValue;
     game.status = 'active';
-    
+
     await game.save();
     
     console.log('Game joined successfully:', game._id);
-    
+
     // Populate game data before emitting
     const populatedGame = await Coinflip.findById(game._id)
       .populate('creator', 'username avatarUrl')
       .populate('joiner', 'username avatarUrl');
-    
-    // Remove items from inventory by uniqueId
-    uniqueIds.forEach(uniqueId => {
-      const index = inventory.items.findIndex(item => item.uniqueId === uniqueId);
-      if (index !== -1) {
-        inventory.items.splice(index, 1);
-      }
-    });
-    await inventory.save();
-    
+
+    // Atomically remove items from inventory to prevent race condition
+    const updateResult = await Inventory.updateOne(
+      { _id: inventory._id, 'items.uniqueId': { $in: uniqueIds } },
+      { $pull: { items: { uniqueId: { $in: uniqueIds } } } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      // Items were not removed - they may have been used in another transaction
+      console.log('Race condition detected: items already used in another transaction');
+      // Rollback - reset game status to waiting
+      await Coinflip.findByIdAndUpdate(game._id, { status: 'waiting', joiner: null, joinerItems: [] });
+      return res.status(400).json({ error: 'Items are no longer available' });
+    }
+
+    // Refresh inventory after atomic update
+    const updatedInventory = await Inventory.findOne({ userId });
+
     // Populate inventory items for socket emission
-    const populatedInventory = await populateItemDetails(inventory.items);
+    const populatedInventory = await populateItemDetails(updatedInventory.items);
     const responseInventory = {
-      ...inventory.toObject(),
+      ...updatedInventory.toObject(),
       items: populatedInventory
     };
-    
+
     // Emit socket event for inventory update
-    if (io) {
-      io.emit('inventory-updated', { userId, inventory: responseInventory });
-    }
-    
+    emitInventoryUpdate(userId, responseInventory);
+
     // Emit socket event for game joined
     if (io) {
       io.emit('coinflip-joined', { game: populatedGame });
@@ -282,25 +329,14 @@ router.post('/join/:gameId', async (req, res) => {
           if (taxUser) {
             let taxInventory = await Inventory.findOne({ userId: taxUser._id });
             if (!taxInventory) {
-              const newTaxItems = [];
-              taxItems.forEach(item => {
-                newTaxItems.push({
-                  uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  itemId: item.itemId,
-                  acquiredAt: new Date()
-                });
-              });
+              const newTaxItems = taxItems.map(item => createInventoryItem(item.itemId));
               taxInventory = await Inventory.create({
                 userId: taxUser._id,
                 items: newTaxItems
               });
             } else {
               taxItems.forEach(item => {
-                taxInventory.items.push({
-                  uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  itemId: item.itemId,
-                  acquiredAt: new Date()
-                });
+                taxInventory.items.push(createInventoryItem(item.itemId));
               });
               await taxInventory.save();
             }
@@ -316,25 +352,14 @@ router.post('/join/:gameId', async (req, res) => {
         // Give remaining items to winner with new unique IDs
         const winnerInventory = await Inventory.findOne({ userId: winnerId });
         if (!winnerInventory) {
-          const newInventoryItems = [];
-          itemsForWinner.forEach(item => {
-            newInventoryItems.push({
-              uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              itemId: item.itemId,
-              acquiredAt: new Date()
-            });
-          });
+          const newInventoryItems = itemsForWinner.map(item => createInventoryItem(item.itemId));
           winnerInventory = await Inventory.create({
             userId: winnerId,
             items: newInventoryItems
           });
         } else {
           itemsForWinner.forEach(item => {
-            winnerInventory.items.push({
-              uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              itemId: item.itemId,
-              acquiredAt: new Date()
-            });
+            winnerInventory.items.push(createInventoryItem(item.itemId));
           });
           await winnerInventory.save();
         }
@@ -445,9 +470,15 @@ router.post('/cancel/:gameId', async (req, res) => {
 
     console.log('Cancel request received:', { gameId, userId });
 
-    const game = await Coinflip.findById(gameId);
+    // Atomically find and update game to prevent race condition
+    const game = await Coinflip.findOneAndUpdate(
+      { _id: gameId, status: 'waiting', joiner: null },
+      { $set: { status: 'cancelling' } },
+      { new: true }
+    );
+
     if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
+      return res.status(400).json({ error: 'Game cannot be cancelled - it may already be joined or cancelled' });
     }
 
     console.log('Game found:', { gameCreator: game.creator, gameCreatorType: typeof game.creator });
@@ -456,30 +487,26 @@ router.post('/cancel/:gameId', async (req, res) => {
     const creatorId = typeof game.creator === 'object' ? game.creator._id : game.creator;
     const creatorIdString = String(creatorId);
     const userIdString = String(userId);
-    
-    console.log('ID comparison:', { 
-      creatorId, 
-      creatorIdString, 
-      userId, 
+
+    console.log('ID comparison:', {
+      creatorId,
+      creatorIdString,
+      userId,
       userIdString,
-      areEqual: creatorIdString === userIdString 
+      areEqual: creatorIdString === userIdString
     });
 
     // Check if user is the creator
     if (creatorIdString !== userIdString) {
+      // Reset status back to waiting
+      await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
       return res.status(403).json({ error: 'Only the creator can cancel the game' });
     }
 
-    // Check if game has been joined
-    const joinerId = typeof game.joiner === 'object' ? game.joiner._id : game.joiner;
-    if (joinerId) {
-      return res.status(400).json({ error: 'Cannot cancel a game that has been joined' });
-    }
-
-    // Return items to user's inventory
+    // Return items to user's inventory atomically
     const Inventory = require('../models/Inventory');
     let inventory = await Inventory.findOne({ userId });
-    
+
     if (!inventory) {
       inventory = new Inventory({
         userId,
@@ -487,22 +514,32 @@ router.post('/cancel/:gameId', async (req, res) => {
       });
     }
 
-    // Add items back to inventory
-    game.items.forEach(item => {
-      inventory.items.push({
-        itemId: item.itemId,
-        name: item.name,
-        image: item.image,
-        value: item.value
-      });
-    });
+    // Add items back to inventory with unique IDs
+    const newItems = game.items.map(item => createInventoryItem(item.itemId));
 
-    await inventory.save();
+    // Atomically add items to inventory
+    const updateResult = await Inventory.updateOne(
+      { _id: inventory._id },
+      { $push: { items: { $each: newItems } } }
+    );
 
-    // Emit inventory update event with full inventory data
-    if (io) {
-      io.emit('inventory-updated', { userId, inventory });
+    if (updateResult.modifiedCount === 0) {
+      console.log('Race condition detected: inventory update failed');
+      return res.status(500).json({ error: 'Failed to return items to inventory' });
     }
+
+    // Refresh inventory after atomic update
+    inventory = await Inventory.findOne({ userId });
+
+    // Populate inventory items for socket emission
+    const populatedInventory = await populateItemDetails(inventory.items);
+    const responseInventory = {
+      ...inventory.toObject(),
+      items: populatedInventory
+    };
+
+    // Emit inventory update event
+    emitInventoryUpdate(userId, responseInventory);
 
     // Delete the game
     await Coinflip.findByIdAndDelete(gameId);

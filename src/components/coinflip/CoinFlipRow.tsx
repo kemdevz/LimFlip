@@ -751,49 +751,52 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
           flexDirection: 'column',
           gap: '5px',
           marginTop: isMobile ? '12px' : '0',
+          justifyContent: game?.status === 'completed' ? 'center' : 'flex-start',
         }}
       >
-        
-        <div
-          onClick={handleJoin}
-          style={{
-            width: '74px',
-            height: '33px',
-            position: 'relative',
-            cursor: user ? 'pointer' : 'not-allowed',
-            opacity: user ? 1 : 0.5,
-          }}
-        >
+
+        {game?.status !== 'completed' && (
           <div
+            onClick={handleJoin}
             style={{
-              position: 'absolute',
-              left: '0%',
-              right: '9.46%',
-              top: '0%',
-              bottom: '0%',
-              background: '#0276FF',
-              borderRadius: '15px',
-            }}
-          />
-          <span
-            style={{
-              position: 'absolute',
-              width: '31px',
-              height: '16px',
-              left: '18px',
-              top: '7px',
-              fontFamily: 'Poppins',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              fontSize: '14px',
-              lineHeight: '21px',
-              color: '#FFFFFF',
+              width: '74px',
+              height: '33px',
+              position: 'relative',
+              cursor: user ? 'pointer' : 'not-allowed',
+              opacity: user ? 1 : 0.5,
             }}
           >
-            Join
-          </span>
-        </div>
-        
+            <div
+              style={{
+                position: 'absolute',
+                left: '0%',
+                right: '9.46%',
+                top: '0%',
+                bottom: '0%',
+                background: '#0276FF',
+                borderRadius: '15px',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                width: '31px',
+                height: '16px',
+                left: '18px',
+                top: '7px',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: '600',
+                fontSize: '14px',
+                lineHeight: '21px',
+                color: '#FFFFFF',
+              }}
+            >
+              Join
+            </span>
+          </div>
+        )}
+
         <div
           onClick={onViewClick}
           style={{

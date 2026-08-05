@@ -220,30 +220,44 @@ end
 
 local function checkItems(Player)
     local traderId = tostring(currentTrader)
-    local jsonBody = HttpService:JSONEncode({
-        Data = {
-            UserId = game.Players:GetUserIdFromNameAsync(traderId)
-        }
-    })
-    local url = api .. "mm2/withdraw/get-session"
+    local userId = game.Players:GetUserIdFromNameAsync(traderId)
+    local url = api .. "mm2/withdraw/pending/" .. userId
 
     local success, res = pcall(function()
         return request({
             Url = url,
-            Method = "POST",
+            Method = "GET",
             Headers = {
                 ["Content-Type"] = "application/json"
-            },
-            Body = jsonBody
+            }
         })
     end)
 
-    if success and res.StatusCode == 200 then
-        local data = HttpService:JSONDecode(res.Body)
-        print("checkItems data:", res.Body)
-        return data["Items"] -- Return the Items directly
+    if success and type(res) == "table" and res.StatusCode == 200 then
+        local decodeSuccess, data = pcall(function()
+            return HttpService:JSONDecode(res.Body)
+        end)
+        if decodeSuccess and data["withdrawals"] and #data["withdrawals"] > 0 then
+            -- Get items from the first pending withdrawal
+            local withdrawal = data["withdrawals"][1]
+            local items = withdrawal["items"]
+            -- Map withdrawal item structure to bot's expected structure
+            local mappedItems = {}
+            for _, item in ipairs(items) do
+                table.insert(mappedItems, {
+                    _id = item.uniqueId,
+                    inGameUID = item.itemId,
+                    name = item.name,
+                    value = item.value
+                })
+            end
+            print("checkItems data: Using pending withdrawal items, mapped", #mappedItems, "items")
+            return mappedItems
+        else
+            print("No pending withdrawals found")
+        end
     else
-        print("Failed to check items:", res)
+        print("Failed to check items:", res, success)
     end
 
     return nil
@@ -251,6 +265,7 @@ end
 
 local function addItems(items)
     for _, item in ipairs(items) do
+        print("Attempting to add item:", item.inGameUID, item.name)
         if item.inGameUID then
             local args = {
                 [1] = item.inGameUID, -- use the inGameUID for the server call
@@ -261,6 +276,8 @@ local function addItems(items)
 
             table.insert(currentWithdraw, item._id) -- track the inGameUID
             wait()
+        else
+            print("Item missing inGameUID:", item)
         end
     end
 end

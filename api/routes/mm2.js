@@ -77,7 +77,7 @@ router.post('/withdraw/get-session', async (req, res) => {
   }
 });
 
-// Withdraw - Confirm session (remove items from inventory)
+// Withdraw - Confirm session (remove items from inventory and mark withdrawal as completed)
 router.post('/withdraw/confirm-session', verifyApiKey, async (req, res) => {
   try {
     const { Data } = req.body;
@@ -88,23 +88,21 @@ router.post('/withdraw/confirm-session', verifyApiKey, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const inventory = await Inventory.findOne({ userId: user._id });
-    if (!inventory) {
-      return res.status(404).json({ error: 'Inventory not found' });
+    // Find and update pending withdrawal to completed
+    const withdrawal = await Withdrawal.findOneAndUpdate(
+      { userId: user._id, status: 'pending' },
+      { status: 'completed', completedAt: new Date() },
+      { sort: { createdAt: -1 } }
+    );
+
+    if (withdrawal) {
+      console.log(`Withdrawal marked as completed for user ${UserId}`);
     }
 
-    // Remove withdrawn items from inventory
-    const withdrawnIds = currentWithdraw || [];
-    inventory.items = inventory.items.filter(item => !withdrawnIds.includes(item.uniqueId));
+    // Note: Items are already removed from inventory when withdrawal request was created
+    // This endpoint just confirms the trade completion
 
-    // Recalculate total value
-    const itemIds = inventory.items.map(i => i.itemId);
-    const items = await Item.find({ itemId: { $in: itemIds } });
-    inventory.totalValue = items.reduce((sum, item) => sum + (item.value || 0), 0);
-
-    await inventory.save();
-
-    console.log(`Withdrawal confirmed for user ${UserId}: ${withdrawnIds.length} items`);
+    console.log(`Withdrawal confirmed for user ${UserId}`);
     res.json({ success: true, message: 'Withdrawal confirmed' });
   } catch (error) {
     console.error('Withdraw confirm-session error:', error);

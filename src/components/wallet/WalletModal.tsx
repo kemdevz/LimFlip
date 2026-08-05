@@ -941,7 +941,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
 
                 <div
-                  onClick={() => setIsMM2WithdrawOpen(true)}
+                  onClick={() => isWithdrawMode ? setIsMM2WithdrawOpen(true) : window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank')}
                   style={{
                     position: 'absolute',
                     width: '537px',
@@ -2044,13 +2044,13 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
 
         <div
-          onClick={() => setIsMM2WithdrawOpen(true)}
+          onClick={() => isWithdrawMode ? setIsMM2WithdrawOpen(true) : window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank')}
           style={{
             position: 'absolute',
             width: '537px',
             height: '85px',
             left: '29px',
-            top: '105px',
+            top: '102px',
             overflow: 'hidden',
             cursor: 'pointer',
           }}

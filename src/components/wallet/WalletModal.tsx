@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CardsDeposit from './CardsDeposit';
+import MM2WithdrawModal from './MM2WithdrawModal';
 import { User } from '@/types';
 
 interface WalletModalProps {
@@ -14,9 +15,10 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
   const [shouldRender, setShouldRender] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | null>(null);
   const [isWithdrawMode, setIsWithdrawMode] = useState(false);
-  const [withdrawCrypto, setWithdrawCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | 'MM2' | null>(null);
+  const [withdrawCrypto, setWithdrawCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | null>(null);
   const [isMM2Mode, setIsMM2Mode] = useState(false);
   const [isCardsMode, setIsCardsMode] = useState(false);
+  const [isMM2WithdrawOpen, setIsMM2WithdrawOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -61,17 +63,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
       icon: '/assets/wallet/sol.png',
       color: 'rgba(126, 123, 217, 0.25)',
     },
-    MM2: {
-      name: 'Murder Mystery 2',
-      address: '',
-      icon: '/assets/wallet/mm2.png',
-      color: 'rgba(255, 100, 100, 0.25)',
-    },
   };
 
   const config = selectedCrypto ? cryptoConfig[selectedCrypto] : null;
 
   return (
+    <>
     <div
       className="responsive-modal-overlay"
       style={{
@@ -87,7 +84,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         style={{
           position: 'relative',
           width: '586px',
-          height: isCardsMode ? '313px' : isMM2Mode ? '368px' : isWithdrawMode ? '528px' : selectedCrypto ? '450px' : '584px',
+          height: isCardsMode ? '313px' : isMM2Mode ? '400px' : isWithdrawMode ? '528px' : selectedCrypto ? '450px' : '584px',
           background: '#191D29',
           border: '1px solid #222530',
           borderRadius: '15px',
@@ -923,17 +920,37 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
             {!withdrawCrypto ? (
               <>
+                
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '41px',
+                    height: '23px',
+                    left: '29px',
+                    top: '74px',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '22px',
+                    color: '#676D7A',
+                  }}
+                >
+                  Skins
+                </span>
+
+
                 <div
+                  onClick={() => setIsMM2WithdrawOpen(true)}
                   style={{
                     position: 'absolute',
                     width: '537px',
                     height: '85px',
                     left: '29px',
-                    top: '74px',
+                    top: '102px',
                     overflow: 'hidden',
                     cursor: 'pointer',
                   }}
-                  onClick={() => setWithdrawCrypto('MM2')}
                 >
                   <div
                     style={{
@@ -978,8 +995,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       fontFamily: 'Poppins, sans-serif',
                       fontStyle: 'normal',
                       fontWeight: 600,
-                      fontSize: '15px',
-                      lineHeight: '22px',
+                      fontSize: '14px',
+                      lineHeight: '21px',
                       color: '#FFFFFF',
                     }}
                   >
@@ -1004,13 +1021,14 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   </span>
                 </div>
 
+                
                 <span
                   style={{
                     position: 'absolute',
                     width: '121px',
                     height: '23px',
                     left: '29px',
-                    top: '175px',
+                    top: '203px',
                     fontFamily: 'Poppins, sans-serif',
                     fontStyle: 'normal',
                     fontWeight: 600,
@@ -1022,13 +1040,14 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   Cryptocurrencies
                 </span>
 
+                
                 <div
                   style={{
                     position: 'absolute',
                     width: '560px',
                     height: '200px',
                     left: '28px',
-                    top: '203px',
+                    top: '231px',
                     display: 'flex',
                     flexDirection: 'row',
                     flexWrap: 'wrap',
@@ -1056,7 +1075,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                           left: '19px',
                           top: '21px',
                           background: `url(${crypto.icon})`,
-                          filter: `drop-shadow(0px 0px 41.8px ${crypto.color})`,
+                          filter: 'drop-shadow(0px 0px 41.8px rgba(247, 147, 26, 0.25))',
                           backgroundSize: 'cover',
                         }}
                       />
@@ -1593,162 +1612,272 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
           </>
         )}
 
-        
+
         {isMM2Mode && (
           <>
-            
             <div
               style={{
                 position: 'absolute',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                left: '62px',
-                top: '32px',
+                width: '240px',
+                height: '32px',
+                left: '27px',
+                top: '22px',
               }}
             >
-              <svg
-                width="23"
-                height="20"
-                viewBox="0 0 23 20"
-                fill="none"
+              <img
+                src="/assets/market/market.svg"
+                alt="Withdraw"
                 style={{
                   position: 'absolute',
-                  left: '-28px',
-                  top: '2px',
+                  width: '30px',
+                  height: '30px',
+                  left: '0px',
+                  top: '0px',
                 }}
-              >
-                <path
-                  d="M4.6 19.7251C3.335 19.7251 2.25208 19.2423 1.35125 18.2766 0.450417 17.3109 0 16.15 0 14.7939V4.93128C0 3.57518 0.450417 2.41427 1.35125 1.44856C2.25208 0.482855 3.335 0 4.6 0H18.4C19.665 0 20.7479 0.482855 21.6488 1.44856C22.5496 2.41427 23 3.57518 23 4.93128V14.7939C23 16.15 22.5496 17.3109 21.6488 18.2766C20.7479 19.2423 19.665 19.7251 18.4 19.7251H4.6ZM4.6 4.93128H18.4C18.8217 4.93128 19.2242 4.98265 19.6075 5.08539 19.9908 5.18812 20.355 5.3525 20.7 5.57851V4.93128C20.7 4.25323 20.475 3.67298 20.0249 3.19054 19.5749 2.7081 19.0333 2.46646 18.4 2.46564H4.6C3.9675 2.46564 3.42623 2.70727 2.9762 3.19054C2.52617 3.67381 2.30077 4.25405 2.3 4.93128V5.57851C2.645 5.3525 3.00917 5.18812 3.3925 5.08539 3.77583 4.98265 4.17833 4.93128 4.6 4.93128ZM2.4725 8.93795L15.2662 12.2666C15.4387 12.3077 15.6113 12.3077 15.7838 12.2666C15.9563 12.2255 16.1192 12.1433 16.2725 12.02L20.2687 8.44482C20.0579 8.13662 19.7896 7.88512 19.4637 7.69034 19.1379 7.49555 18.7833 7.39775 18.4 7.39693H4.6C4.10167 7.39693 3.66582 7.53582 3.29245 7.81362 2.91908 8.09142 2.64577 8.46619 2.4725 8.93795Z"
-                  fill="#006EFF"
-                />
-              </svg>
+              />
               <span
                 style={{
-                  width: '142px',
-                  height: '24px',
-                  fontFamily: 'Poppins, sans-serif',
+                  position: 'absolute',
+                  width: '123px',
+                  height: '33px',
+                  left: '47px',
+                  top: '0px',
+                  fontFamily: 'Poppins',
                   fontStyle: 'normal',
                   fontWeight: 600,
-                  fontSize: '18px',
-                  lineHeight: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
+                  fontSize: '22px',
+                  lineHeight: '33px',
                   color: '#FFFFFF',
                 }}
               >
-                Wallet
+                Withdraw
               </span>
             </div>
 
-            
+            <div
+              style={{
+                position: 'absolute',
+                width: '722px',
+                height: '48px',
+                left: '27px',
+                top: '75px',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                gap: '7px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'relative',
+                  width: '618px',
+                  height: '48px',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '618px',
+                    height: '48px',
+                    left: '0px',
+                    top: '0px',
+                    border: '1.5px solid #404763',
+                    borderRadius: '15px',
+                  }}
+                />
+                <img
+                  src="/assets/market/search.svg"
+                  alt="Search"
+                  style={{
+                    position: 'absolute',
+                    width: '20px',
+                    height: '20px',
+                    left: '30px',
+                    top: '14px',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '125px',
+                    height: '23px',
+                    left: '62px',
+                    top: '12px',
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '22px',
+                    color: '#737991',
+                  }}
+                >
+                  Search for items
+                </span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                position: 'absolute',
+                width: '212px',
+                height: '53px',
+                left: '657px',
+                top: '71px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '190px',
+                  height: '49px',
+                  left: '0px',
+                  top: '4px',
+                  border: '1.5px solid #404763',
+                  borderRadius: '15px',
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '84px',
+                  height: '23px',
+                  left: '44px',
+                  top: '17px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  lineHeight: '22px',
+                  color: '#737991',
+                }}
+              >
+                High to low
+              </span>
+              <img
+                src="/assets/market/dropdown.svg"
+                alt="Dropdown"
+                style={{
+                  position: 'absolute',
+                  width: '12px',
+                  height: '7px',
+                  right: '40px',
+                  top: '23px',
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                position: 'absolute',
+                width: '190px',
+                height: '53px',
+                left: '857px',
+                top: '71px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '190px',
+                  height: '50px',
+                  left: '0px',
+                  top: '3px',
+                  border: '1.5px solid #404763',
+                  borderRadius: '15px',
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '86px',
+                  height: '23px',
+                  left: '26px',
+                  top: '16px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  lineHeight: '22px',
+                  color: '#737991',
+                }}
+              >
+                Filter from..
+              </span>
+              <img
+                src="/assets/market/dropdown.svg"
+                alt="Dropdown"
+                style={{
+                  position: 'absolute',
+                  width: '12px',
+                  height: '7px',
+                  right: '20px',
+                  top: '23px',
+                }}
+              />
+            </div>
+
             <div
               style={{
                 position: 'absolute',
                 width: '535px',
                 height: '200px',
                 left: '26px',
-                top: '70px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '0px',
-                gap: '14px',
+                top: '140px',
+                background: 'url(/assets/wallet/bot.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: '15px',
+              }}
+            />
+
+            <div
+              onClick={() => window.open('https://www.roblox.com/users/11411583845/profile?friendshipSourceType=PlayerSearch', '_blank')}
+              style={{
+                position: 'absolute',
+                width: '535px',
+                height: '54px',
+                left: '26px',
+                top: '260px',
+                cursor: 'pointer',
               }}
             >
-              
               <div
                 style={{
+                  position: 'absolute',
                   width: '535px',
-                  height: '6px',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '534px',
-                    height: '6px',
-                    left: '0px',
-                    top: '0px',
-                    background: '#424964',
-                    borderRadius: '27px',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '390px',
-                    height: '6px',
-                    left: '0px',
-                    top: '0px',
-                    background: '#0276FF',
-                    borderRadius: '27px',
-                  }}
-                />
-              </div>
-
-              
-              <div
-                style={{
-                  width: '535px',
-                  height: '112px',
-                  background: 'url(/assets/wallet/bot.png)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  height: '54px',
+                  left: '0px',
+                  top: '0px',
+                  background: '#0276FF',
                   borderRadius: '15px',
                 }}
               />
-
-              
-              <div
-                onClick={() => window.open('https://www.roblox.com/users/11411583845/profile?friendshipSourceType=PlayerSearch', '_blank')}
+              <span
                 style={{
-                  width: '535px',
-                  height: '54px',
-                  position: 'relative',
-                  cursor: 'pointer',
+                  position: 'absolute',
+                  width: '136px',
+                  height: '27px',
+                  left: '197px',
+                  top: '13.5px',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '18px',
+                  lineHeight: '27px',
+                  color: '#FFFFFF',
                 }}
               >
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '535px',
-                    height: '54px',
-                    left: '0px',
-                    top: '0px',
-                    background: '#0276FF',
-                    borderRadius: '15px',
-                  }}
-                />
-                <span
-                  style={{
-                    position: 'absolute',
-                    width: '136px',
-                    height: '27px',
-                    left: '197px',
-                    top: '13.5px',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontStyle: 'normal',
-                    fontWeight: 600,
-                    fontSize: '18px',
-                    lineHeight: '27px',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  Join VIP Server
-                </span>
-              </div>
+                Join VIP Server
+              </span>
             </div>
 
-            
             <span
               style={{
                 position: 'absolute',
                 width: '500px',
                 height: '42px',
                 left: '28px',
-                top: '289px',
+                top: '329px',
                 fontFamily: 'Poppins, sans-serif',
                 fontStyle: 'normal',
                 fontWeight: 600,
@@ -1757,7 +1886,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                 color: '#FFFFFF',
               }}
             >
-              To initiate Deposit process, trade the bot MM2_BUGGY in the Lobby from the vip provided below within the timeframe.
+              To initiate Withdraw process, trade the bot MM2_BUGGY in the Lobby from the vip provided below within the timeframe.
             </span>
           </>
         )}
@@ -1913,9 +2042,9 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
           Skins
         </span>
 
-        
+
         <div
-          onClick={() => setIsMM2Mode(true)}
+          onClick={() => setIsMM2WithdrawOpen(true)}
           style={{
             position: 'absolute',
             width: '537px',
@@ -2632,5 +2761,11 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         )}
       </div>
     </div>
+
+    <MM2WithdrawModal
+      isOpen={isMM2WithdrawOpen}
+      onClose={() => setIsMM2WithdrawOpen(false)}
+    />
+    </>
   );
 }

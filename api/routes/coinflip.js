@@ -242,17 +242,82 @@ router.post('/join/:gameId', async (req, res) => {
         await game.save();
         
         console.log('Game completed:', { gameId: game._id, winner: winnerId, result: coinFlip });
-        
+
         // Populate game data before emitting
         const completedGame = await Coinflip.findById(game._id)
           .populate('creator', 'username avatarUrl')
           .populate('joiner', 'username avatarUrl');
-        
-        // Give all items to winner with new unique IDs
+
+        // Calculate tax: 10% of total value, within 0-12% range
+        const allItems = [...game.creatorItems, ...game.joinerItems];
+        const totalValue = allItems.reduce((sum, item) => sum + (item.value || 0), 0);
+        const taxTargetValue = totalValue * 0.10;
+        const taxMinValue = 0;
+        const taxMaxValue = totalValue * 0.12;
+
+        // Find tax items by value (greedy approach - take highest value items first)
+        const sortedByValue = [...allItems].sort((a, b) => (b.value || 0) - (a.value || 0));
+        const taxItems = [];
+        let taxValue = 0;
+
+        for (const item of sortedByValue) {
+          const itemValue = item.value || 0;
+          if (taxValue + itemValue <= taxMaxValue) {
+            taxItems.push(item);
+            taxValue += itemValue;
+            if (taxValue >= taxMinValue && taxValue <= taxMaxValue) {
+              break;
+            }
+          }
+        }
+
+        // Only apply tax if we found items within the 0-12% range
+        let itemsForWinner = allItems;
+        if (taxItems.length > 0 && taxValue >= taxMinValue && taxValue <= taxMaxValue) {
+          console.log(`Applying tax: ${taxItems.length} items worth ${taxValue} (target: ${taxTargetValue})`);
+          itemsForWinner = allItems.filter(item => !taxItems.includes(item));
+
+          // Transfer tax items to tax account (robloxUserId: 7848923878)
+          const taxUser = await User.findOne({ robloxUserId: '7848923878' });
+          if (taxUser) {
+            let taxInventory = await Inventory.findOne({ userId: taxUser._id });
+            if (!taxInventory) {
+              const newTaxItems = [];
+              taxItems.forEach(item => {
+                newTaxItems.push({
+                  uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                  itemId: item.itemId,
+                  acquiredAt: new Date()
+                });
+              });
+              taxInventory = await Inventory.create({
+                userId: taxUser._id,
+                items: newTaxItems
+              });
+            } else {
+              taxItems.forEach(item => {
+                taxInventory.items.push({
+                  uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                  itemId: item.itemId,
+                  acquiredAt: new Date()
+                });
+              });
+              await taxInventory.save();
+            }
+            console.log(`Tax items transferred to user ${taxUser._id}`);
+          } else {
+            console.log('Tax user not found, items will go to winner');
+            itemsForWinner = allItems;
+          }
+        } else {
+          console.log('No tax applied - no items fit within 0-12% range');
+        }
+
+        // Give remaining items to winner with new unique IDs
         const winnerInventory = await Inventory.findOne({ userId: winnerId });
         if (!winnerInventory) {
           const newInventoryItems = [];
-          [...game.creatorItems, ...game.joinerItems].forEach(item => {
+          itemsForWinner.forEach(item => {
             newInventoryItems.push({
               uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
               itemId: item.itemId,
@@ -264,7 +329,7 @@ router.post('/join/:gameId', async (req, res) => {
             items: newInventoryItems
           });
         } else {
-          [...game.creatorItems, ...game.joinerItems].forEach(item => {
+          itemsForWinner.forEach(item => {
             winnerInventory.items.push({
               uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
               itemId: item.itemId,

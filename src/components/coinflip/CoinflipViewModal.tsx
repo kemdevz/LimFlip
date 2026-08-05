@@ -96,6 +96,14 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
     }
   }, [isOpen, game?.status]);
 
+  // Ensure video plays when showVideo becomes true
+  useEffect(() => {
+    if (showVideo && videoRef.current && game?.status === 'completed') {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(err => console.log('Video play error:', err));
+    }
+  }, [showVideo, game?.status]);
+
   if (!shouldRender) return null;
 
   return (

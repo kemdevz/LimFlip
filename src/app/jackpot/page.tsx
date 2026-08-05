@@ -6,9 +6,6 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import JackpotStats from './components/JackpotStats';
-import JackpotContainer from './components/JackpotContainer';
-import JackpotWheel from './components/JackpotWheel';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
 import MyListingsModal from '@/components/market/MyListingsModal';
 import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
@@ -42,7 +39,7 @@ export default function JackpotPage() {
 
   return (
     <div className="page-shell">
-      
+
       <div
         className="page-bg page-bg--main"
         style={{
@@ -50,7 +47,7 @@ export default function JackpotPage() {
         }}
       />
 
-      
+
       <div
         className="absolute inset-0"
         style={{
@@ -83,11 +80,37 @@ export default function JackpotPage() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             padding: isMobile ? '20px 12px' : '40px 50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <JackpotStats />
-          <JackpotContainer />
-          <JackpotWheel />
+          <div
+            style={{
+              textAlign: 'center',
+              color: '#FFFFFF',
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: isMobile ? '32px' : '48px',
+                fontWeight: 700,
+                marginBottom: '16px',
+              }}
+            >
+              Coming Soon
+            </h1>
+            <p
+              style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: isMobile ? '16px' : '20px',
+                color: '#8B95A3',
+              }}
+            >
+              Jackpot is currently under development. Check back later!
+            </p>
+          </div>
         </div>
       </div>
       <ValidateFairnessModal

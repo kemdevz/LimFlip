@@ -20,6 +20,21 @@ export default function SendButton({ onSend }: SendButtonProps) {
         top: '5px',
         opacity: 0.44,
         cursor: 'pointer',
+        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.opacity = '0.7';
+        e.currentTarget.style.transform = 'scale(1.05)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = '0.44';
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.transform = 'scale(0.95)';
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.transform = 'scale(1.05)';
       }}
     >
       <div
@@ -31,6 +46,7 @@ export default function SendButton({ onSend }: SendButtonProps) {
           top: isMobile ? '0px' : '-0.97px',
           background: '#1F232F',
           borderRadius: '10.6755px',
+          transition: 'background 0.2s ease',
         }}
       />
       <img

@@ -19,6 +19,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
   const [isVisible, setIsVisible] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [animatedAmount, setAnimatedAmount] = useState(0);
+  const [selectedSide, setSelectedSide] = useState<'tails' | 'heads'>('tails');
   const isMobile = useIsMobile();
   
   // Get user from useAuth hook
@@ -163,10 +164,11 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           }}
         />
 
-        
+
         {!isMobile && (
           <>
             <div
+              onClick={() => setSelectedSide('tails')}
               style={{
                 position: 'absolute',
                 width: '41px',
@@ -177,10 +179,14 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
-                filter: 'drop-shadow(0px 0px 8.3px #666666)',
+                filter: selectedSide === 'tails' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+                opacity: selectedSide === 'tails' ? 1 : 0.5,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
               }}
             />
             <div
+              onClick={() => setSelectedSide('heads')}
               style={{
                 position: 'absolute',
                 width: '41px',
@@ -191,7 +197,10 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
-                opacity: 0.5,
+                filter: selectedSide === 'heads' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+                opacity: selectedSide === 'heads' ? 1 : 0.5,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
               }}
             />
           </>
@@ -471,6 +480,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
                     userId: user.id,
                     uniqueIds: Array.from(selectedItems),
                     betAmount: totalSelectedAmount,
+                    selectedCoin: selectedSide,
                   }),
                 });
 

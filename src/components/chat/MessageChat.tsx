@@ -28,15 +28,15 @@ export default function MessageChat({
         @keyframes messageSlideIn {
           0% {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(20px) scale(0.95);
           }
           100% {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
         .message-animate {
-          animation: messageSlideIn 0.3s ease-out forwards;
+          animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `;
       document.head.appendChild(style);

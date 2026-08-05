@@ -8,6 +8,12 @@ const User = require('../models/User');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
+let io;
+
+const setIo = (socketIo) => {
+  io = socketIo;
+};
+
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -123,10 +129,32 @@ router.post('/create', authenticateToken, async (req, res) => {
     });
     
     await listing.save();
-    
+
+    // Fetch updated inventory with populated item details
+    const updatedInventory = await Inventory.findOne({ userId: req.userId });
+    const populatedInventory = updatedInventory ? {
+      ...updatedInventory.toObject(),
+      items: await Promise.all(updatedInventory.items.map(async (item) => {
+        const itemDetails = await Item.findOne({ itemId: item.itemId });
+        return {
+          ...item.toObject(),
+          name: itemDetails?.name || item.name,
+          image: itemDetails?.image || item.image,
+          rarity: itemDetails?.rarity || item.rarity,
+          value: itemDetails?.value || item.value,
+          category: itemDetails?.category || item.category
+        };
+      }))
+    } : null;
+
+    // Emit inventory update event
+    if (io) {
+      io.emit('inventory-updated', { userId: req.userId, inventory: populatedInventory });
+    }
+
     // Populate item details for response
     await listing.populate('item', 'name image rarity value category');
-    
+
     res.status(201).json(listing);
   } catch (error) {
     console.error('Error creating listing:', error);
@@ -218,10 +246,16 @@ router.post('/buy/:listingId', authenticateToken, async (req, res) => {
     await buyer.save();
     await seller.save();
     await listing.save();
-    
+
+    // Emit inventory update events for both buyer and seller
+    if (io) {
+      io.emit('inventory-updated', { userId: req.userId, inventory: buyerInventory });
+      io.emit('inventory-updated', { userId: listing.seller._id.toString(), inventory: sellerInventory });
+    }
+
     // Populate buyer info for response
     await listing.populate('buyer', 'username avatarUrl');
-    
+
     res.json(listing);
   } catch (error) {
     console.error('Error buying listing:', error);
@@ -275,4 +309,4 @@ router.get('/recently-sold', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, setIo };

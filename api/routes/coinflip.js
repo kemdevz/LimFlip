@@ -434,9 +434,9 @@ router.post('/cancel/:gameId', async (req, res) => {
 
     await inventory.save();
 
-    // Emit inventory update event
+    // Emit inventory update event with full inventory data
     if (io) {
-      io.emit('inventory-updated', { userId });
+      io.emit('inventory-updated', { userId, inventory });
     }
 
     // Delete the game

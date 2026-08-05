@@ -49,6 +49,7 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
             background: '#1F232F',
             borderRadius: '7.76401px',
             position: 'relative',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
         <input
@@ -72,6 +73,7 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
             background: 'transparent',
             border: 'none',
             outline: 'none',
+            transition: 'all 0.2s ease',
           }}
         />
 
@@ -91,6 +93,13 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
             width: isMobile ? '22px' : 'min(1.5vw, 19px)',
             height: isMobile ? '22px' : 'min(1.5vw, 19px)',
             cursor: 'pointer',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = isMobile ? 'translateY(-50%) scale(1.1)' : 'scale(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = isMobile ? 'translateY(-50%) scale(1)' : 'scale(1)';
           }}
         />
         </div>

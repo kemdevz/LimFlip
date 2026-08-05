@@ -41,7 +41,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
       setTimeout(() => setIsVisible(true), 10);
       setCountdown(5);
       setProgress(100);
-      
+
       // Countdown animation
       const countdownInterval = setInterval(() => {
         setCountdown((prev) => {
@@ -74,13 +74,22 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
         clearInterval(countdownInterval);
         clearInterval(progressInterval);
       };
+    } else if (isOpen && game?.status === 'completed') {
+      // Modal is open for a completed game - play video then show result
+      setShouldRender(true);
+      setTimeout(() => setIsVisible(true), 10);
+      setShowOrange(true);
+      // Show video after short delay
+      setTimeout(() => {
+        setShowVideo(true);
+      }, 500);
     } else if (isOpen) {
       // Modal is open but game is not active yet (waiting for joiner)
       setShouldRender(true);
       setTimeout(() => setIsVisible(true), 10);
     } else {
       setIsVisible(false);
-      setTimeout(() => setShouldRender(false), 200);
+      setTimeout(() => setShouldRender(false), 300);
       setShowOrange(false);
       setShowVideo(false);
       setVideoEnded(false);
@@ -111,13 +120,13 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
           height: isMobile ? '100vh' : '650px',
           left: isMobile ? '0' : '50%',
           top: isMobile ? '0' : '50%',
-          transform: isMobile ? 'none' : `translate(-50%, -50%) ${isVisible ? 'scale(1)' : 'scale(0.9)'}`,
+          transform: isMobile ? 'none' : `translate(-50%, -50%) scale(${isVisible ? 1 : 0.9})`,
           maxHeight: isMobile ? '100vh' : '650px',
           overflow: 'hidden',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           opacity: isVisible ? 1 : 0,
-          transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -171,11 +180,11 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
 
         
         
-          
+
           {showVideo && (
             <video
               ref={videoRef}
-              src="/assets/svg/coinflip/blue.webm"
+              src={game?.result === 'heads' ? '/assets/svg/coinflip/blue.webm' : '/assets/svg/coinflip/tails.webm'}
               autoPlay
               muted
               onEnded={() => {
@@ -324,6 +333,8 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  marginLeft: isMobile ? '0' : '30px',
+                  marginTop: isMobile ? '0' : '30px',
                 }}
               >
                 <svg
@@ -897,182 +908,115 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
             </span>
           </div>
 
-          
-          {!isMobile && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '0px',
-                gap: '12px',
-                position: 'absolute',
-                width: '301px',
-                height: 'auto',
-                left: '100px',
-                top: '305px',
-              }}
-            >
-              {game?.creatorItems?.map((item: any, i: number) => (
-                <div
-                  key={`creator-${item.itemId || item.name}-${i}`}
-                  style={{
-                    width: '301px',
-                    height: '38px',
-                    position: 'relative',
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      position: 'absolute',
-                      width: '38px',
-                      height: '38px',
-                      left: '0px',
-                      top: '0px',
-                      borderRadius: '100px',
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      width: '142px',
-                      height: '24px',
-                      left: '62px',
-                      top: '8px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {item.name}
-                  </span>
-                  <span
-                    style={{
-                      position: 'absolute',
-                      width: 'auto',
-                      height: '24px',
-                      right: '13px',
-                      top: '8px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {formatAmount(item.value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+      
+{!isMobile && (
+<div
+style={{
+position: 'absolute',
+width: '301px',
+height: '138px',
+left: '100px',
+top: '305px',
+overflowY: 'auto',
+scrollbarWidth: 'thin',
+}}
+>
+<div
+style={{
+display: 'flex',
+flexDirection: 'column',
+alignItems: 'flex-start',
+padding: '0px',
+gap: '12px',
+}}
+>
+{game?.creatorItems?.map((item: any, i: number) => (
+<div
+key={`creator-${item.itemId || item.name}-${i}`}
+style={{
+width: '301px',
+height: '38px',
+position: 'relative',
+}}
+>
+<img
+src={item.image}
+alt={item.name}
+style={{
+position: 'absolute',
+width: '38px',
+height: '38px',
+left: '0px',
+top: '0px',
+borderRadius: '100px',
+}}
+/>
+<span
+style={{
+position: 'absolute',
+width: '142px',
+height: '24px',
+left: '62px',
+top: '8px',
+fontFamily: 'Poppins, sans-serif',
+fontStyle: 'normal',
+fontWeight: '600',
+fontSize: '15px',
+lineHeight: '24px',
+display: 'flex',
+alignItems: 'center',
+color: '#FFFFFF',
+}}
+>
+{item.name}
+</span>
+<span
+style={{
+position: 'absolute',
+width: 'auto',
+height: '24px',
+right: '13px',
+top: '8px',
+fontFamily: 'Poppins, sans-serif',
+fontStyle: 'normal',
+fontWeight: '600',
+fontSize: '15px',
+lineHeight: '24px',
+display: 'flex',
+alignItems: 'center',
+color: '#FFFFFF',
+}}
+>
+{formatAmount(item.value)}
+</span>
+</div>
+))}
+</div>
+</div>
+)}
 
           
           {!isMobile && (
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '0px',
-                gap: '12px',
                 position: 'absolute',
                 width: '301px',
-                height: 'auto',
+                height: '138px',
                 left: '460px',
                 top: '305px',
+                overflowY: 'auto',
+                scrollbarWidth: 'thin',
               }}
             >
-              {game?.joinerItems?.map((item: any, i: number) => (
-                <div
-                  key={`joiner-${item.itemId || item.name}-${i}`}
-                  style={{
-                    width: '301px',
-                    height: '38px',
-                    position: 'relative',
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      position: 'absolute',
-                      width: '38px',
-                      height: '38px',
-                      left: '0px',
-                      top: '0px',
-                      borderRadius: '100px',
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      width: '142px',
-                      height: '24px',
-                      left: '62px',
-                      top: '8px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {item.name}
-                  </span>
-                  <span
-                    style={{
-                      position: 'absolute',
-                      width: 'auto',
-                      height: '24px',
-                      right: '13px',
-                      top: '8px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      lineHeight: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {formatAmount(item.value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          
-          {!isMobile && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '0px',
-                gap: '12px',
-                position: 'absolute',
-                width: '301px',
-                height: 'auto',
-                left: '460px',
-                top: '305px',
-              }}
-            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  padding: '0px',
+                  gap: '12px',
+                }}
+              >
               {game?.joiner && game?.joinerItems?.map((item: any, i: number) => (
                 <div
                   key={i}
@@ -1134,6 +1078,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                   </span>
                 </div>
               ))}
+              </div>
             </div>
           )}
 

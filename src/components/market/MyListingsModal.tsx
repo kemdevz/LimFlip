@@ -103,7 +103,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
       setTimeout(() => setIsVisible(true), 10);
     } else {
       setIsVisible(false);
-      setTimeout(() => setShouldRender(false), 200);
+      setTimeout(() => setShouldRender(false), 300);
     }
   }, [isOpen]);
 
@@ -116,7 +116,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
         background: 'rgba(0, 0, 0, 0.5)',
         zIndex: 10000,
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.15s ease-in-out',
+        transition: 'opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         pointerEvents: isVisible ? 'auto' : 'none',
       }}
       onClick={onClose}
@@ -128,7 +128,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
           width: '1066px',
           height: '701px',
           transform: isVisible ? 'scale(1)' : 'scale(0.95)',
-          transition: 'transform 0.15s ease-in-out',
+          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           filter: 'drop-shadow(0px 4px 27.2px rgba(0, 0, 0, 0.25))',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -294,7 +294,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               position: 'absolute',
               width: '12px',
               height: '7px',
-              right: '45 px',
+              right: '40px',
               top: '23px',
             }}
           />

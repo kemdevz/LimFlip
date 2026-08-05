@@ -95,36 +95,21 @@ router.post('/create', async (req, res) => {
     // Check if user owns all the items by uniqueId
     const inventoryUniqueIds = inventory.items.map(item => item.uniqueId);
     const missingItems = uniqueIds.filter(id => !inventoryUniqueIds.includes(id));
-    
+
     if (missingItems.length > 0) {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
-    
-    // Get selected items with populated details
+
+    if (inventory.items.length === 0 || inventory.items.length < uniqueIds.length) {
+      return res.status(400).json({ error: 'Your inventory does not have enough items' });
+    }
+
+    // Get selected items with populated details BEFORE removing
     const selectedItems = inventory.items.filter(item => uniqueIds.includes(item.uniqueId));
     const populatedItems = await populateItemDetails(selectedItems);
     const totalValue = populatedItems.reduce((sum, item) => sum + item.value, 0);
-    
-    // Create game in database
-    const game = new Coinflip({
-      creator: userId,
-      creatorItems: populatedItems,
-      items: populatedItems,
-      totalValue,
-      status: 'waiting',
-      selectedCoin: selectedCoin || 'heads',
-    });
-    
-    await game.save();
-    
-    console.log('Game saved to database:', game._id);
 
-    // Populate creator data before emitting
-    const populatedGame = await Coinflip.findById(game._id)
-      .populate('creator', 'username avatarUrl')
-      .populate('joiner', 'username avatarUrl');
-
-    // Atomically remove items from inventory to prevent race condition
+    // Atomically remove items from inventory FIRST to prevent duping
     const updateResult = await Inventory.updateOne(
       { _id: inventory._id, 'items.uniqueId': { $in: uniqueIds } },
       { $pull: { items: { uniqueId: { $in: uniqueIds } } } }
@@ -133,10 +118,27 @@ router.post('/create', async (req, res) => {
     if (updateResult.modifiedCount === 0) {
       // Items were not removed - they may have been used in another transaction
       console.log('Race condition detected: items already used in another transaction');
-      // Rollback - delete the game
-      await Coinflip.findByIdAndDelete(game._id);
       return res.status(400).json({ error: 'Items are no longer available' });
     }
+
+    // Create game in database AFTER items are removed
+    const game = new Coinflip({
+      creator: userId,
+      creatorItems: populatedItems,
+      items: populatedItems,
+      totalValue,
+      status: 'waiting',
+      selectedCoin: selectedCoin || 'heads',
+    });
+
+    await game.save();
+
+    console.log('Game saved to database:', game._id);
+
+    // Populate creator data before emitting
+    const populatedGame = await Coinflip.findById(game._id)
+      .populate('creator', 'username avatarUrl')
+      .populate('joiner', 'username avatarUrl');
 
     // Refresh inventory after atomic update
     const updatedInventory = await Inventory.findOne({ userId });

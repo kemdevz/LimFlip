@@ -97,8 +97,21 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
     }
   };
 
-  const isCreator = user && game?.creator === user.id;
+  const isCreator = user && (game?.creator === user.id || game?.creator?._id === user.id || String(game?.creator) === String(user.id));
   const canCancel = game?.status === 'waiting' && isCreator;
+
+  console.log('Cancel button check:', {
+    userExists: !!user,
+    userId: user?.id,
+    gameCreator: game?.creator,
+    gameCreatorType: typeof game?.creator,
+    gameCreatorId: game?.creator?._id,
+    gameCreatorString: String(game?.creator),
+    userIdString: String(user?.id),
+    isCreator,
+    gameStatus: game?.status,
+    canCancel,
+  });
 
   return (
     <>
@@ -806,9 +819,9 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
             <span
               style={{
                 position: 'absolute',
-                width: '31px',
+                width: canCancel ? '42px' : '31px',
                 height: '16px',
-                left: canCancel ? '14px' : '18px',
+                left: canCancel ? '16px' : '18px',
                 top: '7px',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',

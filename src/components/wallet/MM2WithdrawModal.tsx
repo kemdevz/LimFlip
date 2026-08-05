@@ -98,38 +98,38 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
       return;
     }
 
-    if (!user?.robloxUserId) {
-      toast.error('Roblox account not linked');
+    if (!user?.id) {
+      toast.error('User not logged in');
       return;
     }
 
     setIsWithdrawing(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
-      
-      const response = await fetch(`${API_URL}/mm2/withdraw/get-session`, {
+
+      // Create withdrawal request
+      const response = await fetch(`${API_URL}/mm2/withdraw/request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          Data: {
-            UserId: user.robloxUserId,
-          },
+          userId: user.id,
+          itemIds: Array.from(selectedItems),
         }),
       });
 
       const data = await response.json();
 
-      if (!response.ok || !data.Exists) {
-        throw new Error('Failed to initiate withdrawal session');
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create withdrawal request');
       }
 
       // Open Roblox profile to trade
       window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank');
-      
+
       toast.success('Withdrawal initiated! Trade the bot MM2_BUGGY in the VIP server.');
-      
+
       // Clear selection
       setSelectedItems(new Set());
       await fetchInventory();

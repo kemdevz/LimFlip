@@ -213,10 +213,25 @@ router.post('/withdraw/request', async (req, res) => {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
 
-    // Get item details
+    // Get item details before removing
     const selectedItems = inventory.items.filter(item => itemIds.includes(item.uniqueId));
     const itemIdsList = selectedItems.map(item => item.itemId);
     const items = await Item.find({ itemId: { $in: itemIdsList } });
+
+    // Atomically remove items from inventory to prevent race condition
+    const updateResult = await Inventory.updateOne(
+      { _id: inventory._id, 'items.uniqueId': { $in: itemIds } },
+      { $pull: { items: { uniqueId: { $in: itemIds } } } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      // Items were not removed - they may have been used in another transaction
+      console.log('Race condition detected: items already used in another transaction');
+      return res.status(400).json({ error: 'Items are no longer available' });
+    }
+
+    // Refresh inventory after atomic update
+    const updatedInventory = await Inventory.findOne({ userId: user._id });
 
     // Create withdrawal request
     const withdrawalItems = selectedItems.map(invItem => {
@@ -249,6 +264,10 @@ router.post('/withdraw/request', async (req, res) => {
         withdrawalId: withdrawal._id.toString(),
         itemCount: withdrawalItems.length,
         totalValue: withdrawalItems.reduce((sum, item) => sum + item.value, 0),
+      });
+      io.emit('inventory-updated', {
+        userId: user._id.toString(),
+        inventory: updatedInventory,
       });
     }
 

@@ -15,7 +15,7 @@ load_dotenv()
 
 # Configuration
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN') or 'MTUzNDk3MDI3NzYwNjMzMDQ2OA.GPQpaW.Iup_pkga4HOpjei3OwI7Bdz25LDp_JHU4nEaRk'
-MONGODB_URI = "mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=rblxroll"
+MONGODB_URI = "mongodb+srv://STARFlip:admin@rblxroll.yngfjf8.mongodb.net/bloxbash?retryWrites=true&w=majority&appName=bloxbashh"
 REWARD_PER_INVITE = 0.10  # $0.10 per invite
 European_TZ = pytz.timezone('Europe/Bucharest')
 
@@ -36,8 +36,22 @@ def connect_mongodb():
     global mongo_client, db
     try:
         mongo_client = pymongo.MongoClient(MONGODB_URI)
-        db = mongo_client['bloxbashh']
-        print("Connected to MongoDB")
+        db = mongo_client['bloxbash']
+        print(f"Connected to MongoDB: {MONGODB_URI}")
+        # Test connection
+        users_collection = db['users']
+        count = users_collection.count_documents({})
+        print(f"Database contains {count} users")
+        
+        # List all collections
+        collections = db.list_collection_names()
+        print(f"Available collections: {collections}")
+        
+        # Try to find a sample user
+        sample_user = users_collection.find_one()
+        if sample_user:
+            print(f"Sample user found: {sample_user.get('username', 'N/A')}")
+        
         return True
     except Exception as e:
         print(f"Failed to connect to MongoDB: {e}")
@@ -57,6 +71,33 @@ def is_past_midnight_European():
 def generate_verification_code():
     """Generate a random 6-character verification code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+async def get_roblox_user_id(username):
+    """Get Roblox user ID from username"""
+    try:
+        # Search for user
+        search_response = requests.get(
+            f'https://users.roblox.com/v1/users/search?keyword={username}&limit=10'
+        )
+        search_data = search_response.json()
+
+        if 'data' not in search_data or not search_data['data']:
+            return None, "User not found"
+
+        # Find exact match
+        user_data = None
+        for user in search_data['data']:
+            if user['name'].lower() == username.lower():
+                user_data = user
+                break
+
+        if not user_data:
+            return None, "User not found"
+
+        return str(user_data['id']), None
+
+    except Exception as e:
+        return None, f"Error fetching Roblox data: {e}"
 
 async def get_roblox_user_description(username):
     """Get user description from Roblox API"""
@@ -165,15 +206,33 @@ async def on_member_join(member):
 
 async def reward_inviter(discord_id, guild):
     """Reward the inviter with balance using MongoDB directly"""
-    if not db:
+    if db is None:
         print("MongoDB not connected, cannot reward user")
         return
-    
+
     try:
-        # Find user by Discord ID in MongoDB
         users_collection = db['users']
+
+        # First try to find user by Discord ID (if they've linked their account)
         user = users_collection.find_one({'discordId': discord_id})
-        
+
+        # If not found by Discord ID, try to find by Discord username
+        if not user:
+            try:
+                inviter = await guild.fetch_member(int(discord_id))
+                if inviter:
+                    # Try to find user by username (case-insensitive)
+                    user = users_collection.find_one({'username': inviter.name})
+                    if user:
+                        # Auto-link their Discord ID to their account
+                        users_collection.update_one(
+                            {'_id': user['_id']},
+                            {'$set': {'discordId': discord_id}}
+                        )
+                        print(f"Auto-linked Discord ID {discord_id} to user {user.get('username')}")
+            except Exception as e:
+                print(f"Could not fetch inviter for auto-linking: {e}")
+
         if user:
             # Update user balance
             new_balance = (user.get('balance', 0) or 0) + REWARD_PER_INVITE
@@ -181,7 +240,7 @@ async def reward_inviter(discord_id, guild):
                 {'_id': user['_id']},
                 {'$set': {'balance': new_balance}}
             )
-            
+
             print(f"Successfully rewarded {user.get('username', discord_id)} with ${REWARD_PER_INVITE}")
 
             # Try to send DM to inviter
@@ -201,8 +260,8 @@ async def reward_inviter(discord_id, guild):
             except Exception as e:
                 print(f"Could not send DM to inviter: {e}")
         else:
-            print(f"No user found with Discord ID {discord_id}")
-            
+            print(f"No user found with Discord ID {discord_id} or matching username")
+
     except Exception as e:
         print(f"Error rewarding inviter: {e}")
 
@@ -234,10 +293,62 @@ async def invites_slash(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="link", description="Link your Discord account to your platform account")
-async def link_slash(interaction: discord.Interaction, username: str):
-    """Link Discord account to platform account with Roblox verification"""
-    if not db:
+@bot.tree.command(name="leaderboard", description="View the invite leaderboard")
+async def leaderboard_slash(interaction: discord.Interaction):
+    """View the invite leaderboard"""
+    if is_past_midnight_European():
+        embed = discord.Embed(
+            title="⏰ Invite Tracking Ended",
+            description="Invite tracking has ended (past midnight European time)",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+
+    # Sort user_invites by count (descending)
+    sorted_invites = sorted(user_invites.items(), key=lambda x: x[1], reverse=True)
+    
+    # Take top 10
+    top_10 = sorted_invites[:10]
+    
+    embed = discord.Embed(
+        title="🏆 Invite Leaderboard",
+        description="Top inviters in the server",
+        color=0xFFD700
+    )
+    
+    if not top_10:
+        embed.add_field(name="No invites yet", value="Be the first to invite someone!", inline=False)
+    else:
+        leaderboard_text = ""
+        for i, (user_id, count) in enumerate(top_10, 1):
+            try:
+                # Try to get the user's name
+                user = await interaction.guild.fetch_member(int(user_id))
+                name = user.display_name
+            except:
+                name = f"User {user_id}"
+            
+            medal = ""
+            if i == 1:
+                medal = "🥇"
+            elif i == 2:
+                medal = "🥈"
+            elif i == 3:
+                medal = "🥉"
+            
+            leaderboard_text += f"{medal} **{i}.** {name} - {count} invites (${count * REWARD_PER_INVITE:.2f})\n"
+        
+        embed.add_field(name="Top 10 Inviters", value=leaderboard_text, inline=False)
+    
+    embed.set_footer(text="Invite tracking ends at midnight European time")
+    
+    await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="link", description="Link your Discord account to your Roblox account")
+async def link_slash(interaction: discord.Interaction, roblox_username: str):
+    """Link Discord account to Roblox account with verification"""
+    if db is None:
         embed = discord.Embed(
             title="❌ Database Error",
             description="Database not connected",
@@ -247,13 +358,30 @@ async def link_slash(interaction: discord.Interaction, username: str):
         return
 
     try:
+        # Get Roblox user ID from username
+        roblox_user_id, error = await get_roblox_user_id(roblox_username)
+
+        if error:
+            embed = discord.Embed(
+                title="❌ Error",
+                description=f"Error fetching Roblox user: {error}",
+                color=0xFF6B6B
+            )
+            await interaction.response.send_message(embed=embed)
+            return
+
+        print(f"DEBUG: Roblox username '{roblox_username}' -> Roblox ID '{roblox_user_id}'")
+
         users_collection = db['users']
-        user = users_collection.find_one({'username': username})
+        # Search for user by robloxUserId
+        user = users_collection.find_one({'robloxUserId': roblox_user_id})
+
+        print(f"DEBUG: Database search for robloxUserId '{roblox_user_id}' -> {user is not None}")
 
         if not user:
             embed = discord.Embed(
                 title="❌ User Not Found",
-                description=f"User '{username}' not found on the platform",
+                description=f"Roblox account '{roblox_username}' not found on the platform. Make sure you've registered on the site first.",
                 color=0xFF6B6B
             )
             await interaction.response.send_message(embed=embed)
@@ -266,13 +394,14 @@ async def link_slash(interaction: discord.Interaction, username: str):
         # Store pending verification
         pending_verifications[discord_id] = {
             'code': code,
-            'username': username,
+            'roblox_username': roblox_username,
+            'roblox_user_id': roblox_user_id,
             'timestamp': datetime.now()
         }
 
         embed = discord.Embed(
             title="🔐 Verification Required",
-            description=f"To verify you own the Roblox account **{username}**, please add this code to your Roblox profile description:",
+            description=f"To verify you own the Roblox account **{roblox_username}**, please add this code to your Roblox profile description:",
             color=0xFFA500
         )
         embed.add_field(name="Verification Code", value=f"**{code}**", inline=False)
@@ -292,7 +421,7 @@ async def link_slash(interaction: discord.Interaction, username: str):
 @bot.tree.command(name="verify", description="Complete account verification after adding code to Roblox description")
 async def verify_slash(interaction: discord.Interaction):
     """Verify the code in Roblox description"""
-    if not db:
+    if db is None:
         embed = discord.Embed(
             title="❌ Database Error",
             description="Database not connected",
@@ -325,11 +454,11 @@ async def verify_slash(interaction: discord.Interaction):
         await interaction.response.send_message(embed=embed)
         return
 
-    username = verification['username']
+    roblox_username = verification['roblox_username']
     code = verification['code']
 
     # Get Roblox user description
-    description, error = await get_roblox_user_description(username)
+    description, error = await get_roblox_user_description(roblox_username)
 
     if error:
         embed = discord.Embed(
@@ -346,7 +475,7 @@ async def verify_slash(interaction: discord.Interaction):
         try:
             users_collection = db['users']
             users_collection.update_one(
-                {'username': username},
+                {'robloxUserId': verification['roblox_user_id']},
                 {'$set': {'discordId': discord_id}}
             )
 
@@ -355,10 +484,10 @@ async def verify_slash(interaction: discord.Interaction):
 
             embed = discord.Embed(
                 title="✅ Account Linked Successfully",
-                description=f"Your Discord account has been linked to {username}",
+                description=f"Your Discord account has been linked to Roblox account {roblox_username}",
                 color=0x4CAF50
             )
-            embed.add_field(name="Username", value=username, inline=True)
+            embed.add_field(name="Roblox Username", value=roblox_username, inline=True)
             embed.add_field(name="Discord ID", value=discord_id, inline=True)
             embed.set_footer(text="You can now earn rewards for invites!")
 
@@ -433,9 +562,9 @@ async def check_invites(ctx):
     await ctx.send(embed=embed)
 
 @bot.command(name='link')
-async def link_account(ctx, username: str):
-    """Link Discord account to platform account with Roblox verification"""
-    if not db:
+async def link_account(ctx, roblox_username: str):
+    """Link Discord account to Roblox account with verification"""
+    if db is None:
         embed = discord.Embed(
             title="❌ Database Error",
             description="Database not connected",
@@ -445,13 +574,26 @@ async def link_account(ctx, username: str):
         return
 
     try:
+        # Get Roblox user ID from username
+        roblox_user_id, error = await get_roblox_user_id(roblox_username)
+
+        if error:
+            embed = discord.Embed(
+                title="❌ Error",
+                description=f"Error fetching Roblox user: {error}",
+                color=0xFF6B6B
+            )
+            await ctx.send(embed=embed)
+            return
+
         users_collection = db['users']
-        user = users_collection.find_one({'username': username})
+        # Search for user by robloxUserId
+        user = users_collection.find_one({'robloxUserId': roblox_user_id})
 
         if not user:
             embed = discord.Embed(
                 title="❌ User Not Found",
-                description=f"User '{username}' not found on the platform",
+                description=f"Roblox account '{roblox_username}' not found on the platform. Make sure you've registered on the site first.",
                 color=0xFF6B6B
             )
             await ctx.send(embed=embed)
@@ -464,13 +606,14 @@ async def link_account(ctx, username: str):
         # Store pending verification
         pending_verifications[discord_id] = {
             'code': code,
-            'username': username,
+            'roblox_username': roblox_username,
+            'roblox_user_id': roblox_user_id,
             'timestamp': datetime.now()
         }
 
         embed = discord.Embed(
             title="🔐 Verification Required",
-            description=f"To verify you own the Roblox account **{username}**, please add this code to your Roblox profile description:",
+            description=f"To verify you own the Roblox account **{roblox_username}**, please add this code to your Roblox profile description:",
             color=0xFFA500
         )
         embed.add_field(name="Verification Code", value=f"**{code}**", inline=False)
@@ -490,7 +633,7 @@ async def link_account(ctx, username: str):
 @bot.command(name='verify')
 async def verify_account(ctx):
     """Verify the code in Roblox description"""
-    if not db:
+    if db is None:
         embed = discord.Embed(
             title="❌ Database Error",
             description="Database not connected",
@@ -523,11 +666,11 @@ async def verify_account(ctx):
         await ctx.send(embed=embed)
         return
 
-    username = verification['username']
+    roblox_username = verification['roblox_username']
     code = verification['code']
 
     # Get Roblox user description
-    description, error = await get_roblox_user_description(username)
+    description, error = await get_roblox_user_description(roblox_username)
 
     if error:
         embed = discord.Embed(
@@ -544,7 +687,7 @@ async def verify_account(ctx):
         try:
             users_collection = db['users']
             users_collection.update_one(
-                {'username': username},
+                {'robloxUserId': verification['roblox_user_id']},
                 {'$set': {'discordId': discord_id}}
             )
 
@@ -553,10 +696,10 @@ async def verify_account(ctx):
 
             embed = discord.Embed(
                 title="✅ Account Linked Successfully",
-                description=f"Your Discord account has been linked to {username}",
+                description=f"Your Discord account has been linked to Roblox account {roblox_username}",
                 color=0x4CAF50
             )
-            embed.add_field(name="Username", value=username, inline=True)
+            embed.add_field(name="Roblox Username", value=roblox_username, inline=True)
             embed.add_field(name="Discord ID", value=discord_id, inline=True)
             embed.set_footer(text="You can now earn rewards for invites!")
 

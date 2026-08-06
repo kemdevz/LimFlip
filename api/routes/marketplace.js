@@ -224,11 +224,13 @@ router.post('/buy/:listingId', authenticateToken, async (req, res) => {
     
     const [removedItem] = sellerInventory.items.splice(sellerItemIndex, 1);
     
-    // Add item to buyer's inventory
+    // Add item to buyer's inventory with marketplace source
     buyerInventory.items.push({
       uniqueId: removedItem.uniqueId,
       itemId: removedItem.itemId,
-      acquiredAt: new Date()
+      acquiredAt: new Date(),
+      source: 'marketplace',
+      wagered: false
     });
     
     // Transfer balance

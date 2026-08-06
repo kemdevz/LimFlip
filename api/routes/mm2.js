@@ -216,10 +216,22 @@ router.post('/withdraw/request', async (req, res) => {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
 
+    // Check if any marketplace-bought items haven't been wagered yet
+    const selectedItems = inventory.items.filter(item => itemIds.includes(item.uniqueId));
+    const unwageredMarketplaceItems = selectedItems.filter(
+      item => item.source === 'marketplace' && !item.wagered
+    );
+
+    if (unwageredMarketplaceItems.length > 0) {
+      return res.status(400).json({
+        error: 'You cannot withdraw marketplace-bought items until they have been wagered',
+        unwageredItems: unwageredMarketplaceItems.map(item => item.uniqueId)
+      });
+    }
+
     // Allow withdrawing last item - no inventory length check needed
 
     // Get item details before removing
-    const selectedItems = inventory.items.filter(item => itemIds.includes(item.uniqueId));
     const itemIdsList = selectedItems.map(item => item.itemId);
     const items = await Item.find({ itemId: { $in: itemIdsList } });
 

@@ -13,6 +13,15 @@ const inventoryItemSchema = new mongoose.Schema({
   acquiredAt: {
     type: Date,
     default: Date.now
+  },
+  source: {
+    type: String,
+    enum: ['marketplace', 'wager', 'other'],
+    default: 'other'
+  },
+  wagered: {
+    type: Boolean,
+    default: false
   }
 });
 

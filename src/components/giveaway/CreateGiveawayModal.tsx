@@ -78,7 +78,13 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
     .filter(item => selectedItems.has(item.uniqueId))
     .reduce((sum, item) => sum + (item.value || 0), 0);
   const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.value || 0), 0);
-  const formatAmount = (amount: number) => `B$${(amount / 1000).toFixed(1)}k`;
+  const formatAmount = (amount: number) => {
+    if (amount >= 1000) {
+      return `B$${(amount / 1000).toFixed(1)}k`;
+    } else {
+      return `B$${amount}`;
+    }
+  };
 
   const handleCreateGiveaway = async () => {
     if (selectedItems.size === 0 || !duration) {

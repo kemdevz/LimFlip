@@ -15,7 +15,7 @@ const userStatsRoutes = require('./routes/userStats');
 const { router: marketplaceRoutes, setIo: setMarketplaceIo } = require('./routes/marketplace');
 const { router: mm2Routes, setIo: setMm2Io } = require('./routes/mm2');
 const { router: depositRoutes, setIo: setDepositIo } = require('./routes/deposit');
-const giveawayRoutes = require('./routes/giveaway');
+const { router: giveawayRoutes, setIo: setGiveawayIo } = require('./routes/giveaway');
 const messagesRoutes = require('./routes/messages');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -41,8 +41,9 @@ setIo(io);
 setMm2Io(io);
 setMarketplaceIo(io);
 setDepositIo(io);
+setGiveawayIo(io);
 
-let onlineUsers = 9;
+let onlineUsers = 9; // Start with 9 fake online users
 
 io.on('connection', (socket) => {
   onlineUsers++;

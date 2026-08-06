@@ -2,9 +2,20 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const Giveaway = require('../models/Giveaway');
 const User = require('../models/User');
+const Coinflip = require('../models/Coinflip');
+const Inventory = require('../models/Inventory');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
+// Get io instance from server (will be set by server.js)
+let io;
+
+const setIo = (socketIo) => {
+  io = socketIo;
+};
+
+module.exports = { router, setIo };
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -42,17 +53,22 @@ router.post('/create', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Calculate total value
-    const totalValue = items.reduce((sum, item) => sum + (item.value || 0), 0);
-
-    // Check if user has enough balance
-    if (user.balance < totalValue) {
-      return res.status(400).json({ error: 'Insufficient balance' });
+    // Get user inventory
+    const inventory = await Inventory.findOne({ userId: req.userId });
+    if (!inventory) {
+      return res.status(400).json({ error: 'Inventory not found' });
     }
 
-    // Deduct from user balance
-    user.balance -= totalValue;
-    await user.save();
+    // Check if user owns all the items by itemId
+    const inventoryItemIds = inventory.items.map(item => item.itemId);
+    const missingItems = items.filter(item => !inventoryItemIds.includes(item.itemId));
+
+    if (missingItems.length > 0) {
+      return res.status(400).json({ error: 'You do not own all the selected items' });
+    }
+
+    // Calculate total value
+    const totalValue = items.reduce((sum, item) => sum + (item.value || 0), 0);
 
     // Calculate end time
     const endsAt = new Date();
@@ -69,6 +85,24 @@ router.post('/create', authenticateToken, async (req, res) => {
     });
 
     await giveaway.save();
+
+    // Emit socket event for new giveaway
+    if (io) {
+      io.emit('giveaway-created', {
+        id: giveaway._id,
+        creator: {
+          id: user._id,
+          username: user.username,
+          avatarUrl: user.avatarUrl
+        },
+        items,
+        totalValue,
+        duration: parseInt(duration),
+        endsAt,
+        status: giveaway.status,
+        participantCount: 1
+      });
+    }
 
     res.json({
       message: 'Giveaway created successfully',
@@ -151,9 +185,32 @@ router.post('/:giveawayId/join', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Giveaway has ended' });
     }
 
+    // Check if user has completed a coinflip in the last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentCoinflip = await Coinflip.findOne({
+      $or: [
+        { creator: req.userId },
+        { joiner: req.userId }
+      ],
+      status: 'completed',
+      completedAt: { $gte: twentyFourHoursAgo }
+    });
+
+    if (!recentCoinflip) {
+      return res.status(400).json({ error: 'You must complete a coinflip within the last 24 hours to join a giveaway' });
+    }
+
     // Add user to participants
     giveaway.participants.push(req.userId);
     await giveaway.save();
+
+    // Emit socket event for giveaway join
+    if (io) {
+      io.emit('giveaway-joined', {
+        giveawayId: giveaway._id,
+        participantCount: giveaway.participants.length
+      });
+    }
 
     res.json({
       message: 'Joined giveaway successfully',

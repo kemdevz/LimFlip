@@ -149,10 +149,25 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       setMessages((prev) => [...prev, data]);
     });
 
+    socket.on('giveaway-joined', (data: { giveawayId: string; participantCount: number }) => {
+      if (giveaway && giveaway.id === data.giveawayId) {
+        setGiveaway({
+          ...giveaway,
+          participantCount: data.participantCount,
+        });
+      }
+    });
+
+    socket.on('giveaway-created', (data: GiveawayData) => {
+      setGiveaway(data);
+    });
+
     return () => {
       socket.off('chat-message');
+      socket.off('giveaway-joined');
+      socket.off('giveaway-created');
     };
-  }, [isMounted, socket]);
+  }, [isMounted, socket, giveaway]);
 
   const handleSendMessage = () => {
     if (!user) return; // Prevent sending if not logged in

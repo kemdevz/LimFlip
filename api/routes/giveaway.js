@@ -67,6 +67,11 @@ router.post('/create', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
 
+    // Remove items from inventory
+    const itemIdsToRemove = items.map(item => item.itemId);
+    inventory.items = inventory.items.filter(item => !itemIdsToRemove.includes(item.itemId));
+    await inventory.save();
+
     // Calculate total value
     const totalValue = items.reduce((sum, item) => sum + (item.value || 0), 0);
 
@@ -268,4 +273,4 @@ router.get('/:giveawayId', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, setIo };

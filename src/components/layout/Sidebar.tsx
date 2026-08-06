@@ -9,6 +9,7 @@ import MessageChat from '../chat/MessageChat';
 import ChatInput from '../chat/ChatInput';
 import SendButton from '../chat/SendButton';
 import GiveawayCard from '../giveaway/GiveawayCard';
+import { toast } from '../Toast';
 import Link from 'next/link';
 import { Message } from '@/types';
 
@@ -89,9 +90,10 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
           ...giveaway,
           participantCount: data.participantCount,
         });
-        console.log('Successfully joined giveaway');
+        toast.success('Successfully joined giveaway!');
       } else {
         console.error('Failed to join giveaway:', data.error);
+        toast.error(data.error || 'Failed to join giveaway');
       }
     } catch (error) {
       console.error('Error joining giveaway:', error);

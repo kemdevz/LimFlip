@@ -254,11 +254,77 @@ router.get('/me', async (req, res) => {
       id: user._id.toString(),
       username: user.username,
       robloxUserId: user.robloxUserId,
-      avatarUrl: avatarUrl
+      avatarUrl: avatarUrl,
+      balance: user.balance || 0
     });
   } catch (error) {
     console.error('Get me error:', error);
     res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Reward user for Discord invite
+router.post('/reward-invite', async (req, res) => {
+  try {
+    const { discord_id, amount } = req.body;
+
+    if (!discord_id || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Find user by Discord ID (you'll need to add discordId field to User schema)
+    const user = await User.findOne({ discordId: discord_id });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found with this Discord ID' });
+    }
+
+    // Update user balance
+    user.balance = (user.balance || 0) + amount;
+    await user.save();
+
+    console.log(`Rewarded user ${user.username} with $${amount} for Discord invite`);
+
+    res.json({
+      success: true,
+      newBalance: user.balance,
+      reward: amount
+    });
+  } catch (error) {
+    console.error('Reward invite error:', error);
+    res.status(500).json({ error: 'Failed to reward user' });
+  }
+});
+
+// Link Discord account to user
+router.post('/link-discord', async (req, res) => {
+  try {
+    const { discord_id, username } = req.body;
+
+    if (!discord_id || !username) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Find user by username
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user with Discord ID
+    user.discordId = discord_id;
+    await user.save();
+
+    console.log(`Linked Discord ID ${discord_id} to user ${username}`);
+
+    res.json({
+      success: true,
+      message: 'Discord account linked successfully'
+    });
+  } catch (error) {
+    console.error('Link Discord error:', error);
+    res.status(500).json({ error: 'Failed to link Discord account' });
   }
 });
 

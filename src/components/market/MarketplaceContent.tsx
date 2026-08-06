@@ -1019,7 +1019,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
               <span
                 style={{
                   position: 'absolute',
-                  width: '91px',
+                  width: '180px',
                   height: '21px',
                   left: '13px',
                   top: '184px',
@@ -1029,6 +1029,9 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   fontSize: '14px',
                   lineHeight: '21px',
                   color: '#FFFFFF',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {listing.item.name}
@@ -1050,10 +1053,10 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   color: '#737E98',
                 }}
               >
-                ${(listing.price / 1000).toFixed(2)}$
+                ${listing.price}
               </span>
 
-              
+
               <span
                 style={{
                   position: 'absolute',
@@ -1069,7 +1072,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   color: '#0276FF',
                 }}
               >
-                ${(listing.price / listing.item.value * 1000).toFixed(2)}/1k
+                {listing.item.value > 0 ? `${(listing.price / listing.item.value * 1000).toFixed(2)}/1k` : ''}
               </span>
 
               

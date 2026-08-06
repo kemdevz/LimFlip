@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1000
   },
+  discordId: {
+    type: String,
+    default: null
+  },
   verifiedAt: {
     type: Date,
     default: null

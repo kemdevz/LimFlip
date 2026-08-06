@@ -14,6 +14,10 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  assetId: {
+    type: String,
+    default: ''
+  },
   rarity: {
     type: String,
     enum: ['common', 'uncommon', 'rare', 'legendary', 'mythic'],

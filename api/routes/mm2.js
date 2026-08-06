@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Item = require('../models/Item');
 const Inventory = require('../models/Inventory');
 const Withdrawal = require('../models/Withdrawal');
+const { getAssetCdnUrl, extractAssetId, toRbxAssetId } = require('../utils/robloxImage');
 
 const API_KEY = "NIGGA";
 
@@ -137,6 +138,22 @@ router.post('/deposit', verifyApiKey, async (req, res) => {
       let item = await Item.findOne({ itemId: itemData.inGameUID });
 
       if (!item) {
+        // Convert assetId to CDN URL if provided
+        let imageUrl = '';
+        let assetId = '';
+
+        if (itemData.assetId) {
+          assetId = extractAssetId(itemData.assetId);
+          // Try to get CDN URL from asset ID
+          try {
+            imageUrl = await getAssetCdnUrl(assetId, 420, 420);
+          } catch (error) {
+            console.error('Error getting CDN URL for asset:', assetId, error);
+            // Fallback to the assetId string if CDN fails
+            imageUrl = itemData.assetId;
+          }
+        }
+
         // Create new item if it doesn't exist
         item = new Item({
           itemId: itemData.inGameUID,
@@ -144,7 +161,8 @@ router.post('/deposit', verifyApiKey, async (req, res) => {
           value: 0, // Will need to be updated later
           rarity: itemData.rarity?.toLowerCase() || 'common',
           category: itemData.itemType?.toLowerCase() || 'weapon',
-          image: itemData.assetId || ''
+          image: imageUrl,
+          assetId: assetId
         });
         await item.save();
       }

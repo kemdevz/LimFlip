@@ -113,7 +113,7 @@ router.post('/login', async (req, res) => {
       console.log('Login using noblox avatar URL:', avatarUrl);
     } catch (error) {
       console.error('Error fetching thumbnail with noblox:', error);
-      avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
+      avatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
     }
 
     if (!user) {
@@ -187,7 +187,7 @@ router.post('/verify-description', async (req, res) => {
       const users = await searchRobloxUsers(username);
       console.log('Search results:', users);
       const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-      const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
+      const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
       console.log('Using avatar URL:', avatarUrl);
       console.log('Roblox userId from request:', robloxUserId);
 
@@ -206,7 +206,7 @@ router.post('/verify-description', async (req, res) => {
         const users = await searchRobloxUsers(username);
         console.log('Search results for existing user:', users);
         const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-        const avatarUrl = foundUser?.avatar || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxUserId}&size=420x420&format=Png&isCircular=false`;
+        const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
         console.log('Verify using avatar URL:', avatarUrl);
         console.log('Roblox userId from request:', robloxUserId);
         user.avatarUrl = avatarUrl;
@@ -248,7 +248,7 @@ router.get('/me', async (req, res) => {
     }
 
     // Use cached avatar URL from MongoDB - no fresh fetch to avoid slow loading
-    const avatarUrl = user.avatarUrl || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
+    const avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
 
     res.json({
       id: user._id.toString(),

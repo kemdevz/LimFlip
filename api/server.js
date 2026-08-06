@@ -42,7 +42,7 @@ setMm2Io(io);
 setMarketplaceIo(io);
 setDepositIo(io);
 
-let onlineUsers = 0;
+let onlineUsers = 9;
 
 io.on('connection', (socket) => {
   onlineUsers++;

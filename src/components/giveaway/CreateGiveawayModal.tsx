@@ -5,13 +5,27 @@ import CoinflipItemCard from '../coinflip/CoinflipItemCard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/hooks/useAuth';
 
+interface InventoryItem {
+  uniqueId: string;
+  itemId: string;
+  name: string;
+  image: string;
+  rarity: string;
+  value: number;
+  category: string;
+  acquiredAt: string;
+  source?: string;
+  wagered?: boolean;
+}
+
 interface CreateGiveawayModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClose }) => {
-  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const [duration, setDuration] = useState('');
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -21,21 +35,50 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
   const isMobile = useIsMobile();
   const { user } = useAuth();
 
-  const toggleItemSelection = (index: number) => {
+  const toggleItemSelection = (uniqueId: string) => {
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
+      if (newSet.has(uniqueId)) {
+        newSet.delete(uniqueId);
       } else {
-        newSet.add(index);
+        newSet.add(uniqueId);
       }
       return newSet;
     });
   };
 
-  const ITEM_VALUE = 43.8; // Each item is worth 43.8K
-  const totalSelectedAmount = selectedItems.size * ITEM_VALUE;
-  const formatAmount = (amount: number) => `B$${amount.toFixed(1)}k`;
+  // Fetch user inventory
+  useEffect(() => {
+    if (!user || !isOpen) return;
+
+    const fetchInventory = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        if (data.items) {
+          setInventory(data.items);
+        }
+      } catch (error) {
+        console.error('Error fetching inventory:', error);
+      }
+    };
+
+    fetchInventory();
+  }, [user, isOpen]);
+
+  const totalSelectedAmount = inventory
+    .filter(item => selectedItems.has(item.uniqueId))
+    .reduce((sum, item) => sum + (item.value || 0), 0);
+  const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.value || 0), 0);
+  const formatAmount = (amount: number) => `B$${(amount / 1000).toFixed(1)}k`;
 
   const handleCreateGiveaway = async () => {
     if (selectedItems.size === 0 || !duration) {
@@ -53,21 +96,17 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
         return;
       }
 
-      // Convert selected items to item objects
-      const items = Array.from(selectedItems).map((index) => ({
-        itemId: `item_${index}`,
-        name: `Item ${index}`,
-        image: [
-          '/assets/images/coinflip/knife.png',
-          '/assets/images/coinflip/chroma.png',
-          '/assets/images/coinflip/gun.png',
-          '/assets/images/coinflip/candy.png',
-          '/assets/images/coinflip/luger.png',
-        ][index % 5],
-        rarity: 'Legendary',
-        value: ITEM_VALUE,
-        category: 'Weapon'
-      }));
+      // Convert selected items to item objects from inventory
+      const items = inventory
+        .filter(item => selectedItems.has(item.uniqueId))
+        .map(item => ({
+          itemId: item.itemId,
+          name: item.name,
+          image: item.image,
+          rarity: item.rarity,
+          value: item.value,
+          category: item.category
+        }));
 
       const response = await fetch('https://api-bash.onrender.com/giveaway/create', {
         method: 'POST',
@@ -244,7 +283,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
               flexGrow: 0,
             }}
           >
-            Inventory Value: <span style={{ color: '#006EFF' }}>B$1.2m</span>
+            Inventory Value: <span style={{ color: '#006EFF' }}>{formatAmount(totalInventoryValue)}</span>
           </span>
           <span
             style={{
@@ -261,7 +300,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
               flexGrow: 0,
             }}
           >
-            B$43.8K - B$44.6k
+            {inventory.length > 0 ? `${formatAmount(Math.min(...inventory.map(i => i.value || 0)))} - ${formatAmount(Math.max(...inventory.map(i => i.value || 0)))}` : 'N/A'}
           </span>
         </div>
 
@@ -626,7 +665,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
           </div>
         </div>
 
-        
+
         <div
           style={{
             display: 'flex',
@@ -644,35 +683,21 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
             overflowY: 'auto',
           }}
         >
-          
-          {[
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-          ].map((imageSrc, index) => (
+
+          {inventory.map((item) => (
             <div
-              key={index}
-              onClick={() => toggleItemSelection(index)}
+              key={item.uniqueId}
+              onClick={() => toggleItemSelection(item.uniqueId)}
               style={{
                 position: 'relative',
                 width: isMobile ? 'calc(50% - 4px)' : '159.29px',
                 height: isMobile ? 'auto' : '203.81px',
                 cursor: 'pointer',
                 flex: 'none',
-                order: index,
                 flexGrow: 0,
               }}
             >
-              {selectedItems.has(index) && (
+              {selectedItems.has(item.uniqueId) && (
                 <div
                   style={{
                     position: 'absolute',
@@ -686,9 +711,30 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
                   }}
                 />
               )}
-              <CoinflipItemCard imageSrc={imageSrc} />
+              <CoinflipItemCard
+                imageSrc={item.image}
+                itemName={item.name}
+                itemValue={item.value}
+              />
             </div>
           ))}
+
+          {inventory.length === 0 && (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#585D76',
+                fontSize: '16px',
+                fontFamily: 'Poppins, sans-serif',
+              }}
+            >
+              No items in inventory
+            </div>
+          )}
         </div>
 
         

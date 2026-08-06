@@ -35,6 +35,16 @@ interface GiveawayCardProps {
 
 export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Calculate countdown from endsAt
   useEffect(() => {
@@ -76,18 +86,18 @@ export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
     <div
       style={{
         position: 'absolute',
-        width: '331px',
-        height: '152px',
-        left: '10px',
-        top: '186px',
+        width: isMobile ? 'calc(100% - 20px)' : '331px',
+        height: isMobile ? '140px' : '152px',
+        left: isMobile ? '10px' : '10px',
+        top: isMobile ? '0px' : '186px',
         overflow: 'hidden',
       }}
     >
       <div
         style={{
           position: 'absolute',
-          width: '331px',
-          height: '152px',
+          width: isMobile ? '100%' : '331px',
+          height: isMobile ? '140px' : '152px',
           left: '0px',
           top: '0px',
           background: '#131621',
@@ -127,12 +137,12 @@ export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
           flexDirection: 'row',
           alignItems: 'center',
           padding: '0px',
-          gap: '9px',
+          gap: isMobile ? '6px' : '9px',
           position: 'absolute',
-          width: '232px',
+          width: isMobile ? 'calc(100% - 34px)' : '232px',
           height: '21px',
-          left: '17px',
-          top: '74px',
+          left: isMobile ? '17px' : '17px',
+          top: isMobile ? '65px' : '74px',
         }}
       >
         <div
@@ -331,10 +341,10 @@ export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
         onClick={onJoin}
         style={{
           position: 'absolute',
-          width: '300px',
-          height: '33px',
-          left: '17px',
-          top: '106px',
+          width: isMobile ? 'calc(100% - 34px)' : '300px',
+          height: isMobile ? '30px' : '33px',
+          left: isMobile ? '17px' : '17px',
+          top: isMobile ? '95px' : '106px',
           background: '#0276FF',
           borderRadius: '11px',
           cursor: giveaway ? 'pointer' : 'default',

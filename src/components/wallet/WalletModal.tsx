@@ -17,6 +17,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
   const [isWithdrawMode, setIsWithdrawMode] = useState(false);
   const [withdrawCrypto, setWithdrawCrypto] = useState<'BTC' | 'ETH' | 'LTC' | 'USDT' | 'SOL' | null>(null);
   const [isMM2Mode, setIsMM2Mode] = useState(false);
+  const [isMM2DepositMode, setIsMM2DepositMode] = useState(false);
   const [isCardsMode, setIsCardsMode] = useState(false);
   const [isMM2WithdrawOpen, setIsMM2WithdrawOpen] = useState(false);
 
@@ -84,7 +85,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         style={{
           position: 'relative',
           width: '586px',
-          height: isCardsMode ? '313px' : isMM2Mode ? '400px' : isWithdrawMode ? '528px' : selectedCrypto ? '450px' : '584px',
+          height: isCardsMode ? '313px' : isMM2Mode ? '400px' : isMM2DepositMode ? '500px' : isWithdrawMode ? '528px' : selectedCrypto ? '450px' : '584px',
           background: '#191D29',
           border: '1px solid #222530',
           borderRadius: '15px',
@@ -96,91 +97,93 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         
-        <div
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            left: '62px',
-            top: '32px',
-          }}
-        >
-          <svg
-            width="23"
-            height="20"
-            viewBox="0 0 23 20"
-            fill="none"
+        {!isMM2DepositMode && !isMM2Mode && !isCardsMode && (
+          <div
             style={{
               position: 'absolute',
-              left: '-28px',
-              top: '2px',
-            }}
-          >
-            <path
-              d="M4.6 19.7251C3.335 19.7251 2.25208 19.2423 1.35125 18.2766C0.450417 17.3109 0 16.15 0 14.7939V4.93128C0 3.57518 0.450417 2.41427 1.35125 1.44856C2.25208 0.482855 3.335 0 4.6 0H18.4C19.665 0 20.7479 0.482855 21.6488 1.44856C22.5496 2.41427 23 3.57518 23 4.93128V14.7939C23 16.15 22.5496 17.3109 21.6488 18.2766C20.7479 19.2423 19.665 19.7251 18.4 19.7251H4.6ZM4.6 4.93128H18.4C18.8217 4.93128 19.2242 4.98265 19.6075 5.08539C19.9908 5.18812 20.355 5.3525 20.7 5.57851V4.93128C20.7 4.25323 20.475 3.67298 20.0249 3.19054C19.5749 2.7081 19.0333 2.46646 18.4 2.46564H4.6C3.9675 2.46564 3.42623 2.70727 2.9762 3.19054C2.52617 3.67381 2.30077 4.25405 2.3 4.93128V5.57851C2.645 5.3525 3.00917 5.18812 3.3925 5.08539C3.77583 4.98265 4.17833 4.93128 4.6 4.93128ZM2.4725 8.93795L15.2662 12.2666C15.4387 12.3077 15.6113 12.3077 15.7838 12.2666C15.9563 12.2255 16.1192 12.1433 16.2725 12.02L20.2687 8.44482C20.0579 8.13662 19.7896 7.88512 19.4637 7.69034C19.1379 7.49555 18.7833 7.39775 18.4 7.39693H4.6C4.10167 7.39693 3.66582 7.53582 3.29245 7.81362C2.91908 8.09142 2.64577 8.46619 2.4725 8.93795Z"
-              fill="#006EFF"
-            />
-          </svg>
-          <span
-            style={{
-              width: '142px',
-              height: '24px',
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: 600,
-              fontSize: '18px',
-              lineHeight: '24px',
               display: 'flex',
               alignItems: 'center',
-              color: '#FFFFFF',
+              gap: '10px',
+              left: '62px',
+              top: '32px',
             }}
           >
-            Wallet
-          </span>
-          {selectedCrypto && (
-            <div
-              onClick={() => setSelectedCrypto(null)}
+            <svg
+              width="23"
+              height="20"
+              viewBox="0 0 23 20"
+              fill="none"
               style={{
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginLeft: '20px',
+                position: 'absolute',
+                left: '-28px',
+                top: '2px',
               }}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ transform: 'rotate(180deg)' }}
-              >
-                <path
-                  d="M12 4V20M12 4L8 8M12 4L16 8"
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span
+              <path
+                d="M4.6 19.7251C3.335 19.7251 2.25208 19.2423 1.35125 18.2766C0.450417 17.3109 0 16.15 0 14.7939V4.93128C0 3.57518 0.450417 2.41427 1.35125 1.44856C2.25208 0.482855 3.335 0 4.6 0H18.4C19.665 0 20.7479 0.482855 21.6488 1.44856C22.5496 2.41427 23 3.57518 23 4.93128V14.7939C23 16.15 22.5496 17.3109 21.6488 18.2766C20.7479 19.2423 19.665 19.7251 18.4 19.7251H4.6ZM4.6 4.93128H18.4C18.8217 4.93128 19.2242 4.98265 19.6075 5.08539C19.9908 5.18812 20.355 5.3525 20.7 5.57851V4.93128C20.7 4.25323 20.475 3.67298 20.0249 3.19054C19.5749 2.7081 19.0333 2.46646 18.4 2.46564H4.6C3.9675 2.46564 3.42623 2.70727 2.9762 3.19054C2.52617 3.67381 2.30077 4.25405 2.3 4.93128V5.57851C2.645 5.3525 3.00917 5.18812 3.3925 5.08539C3.77583 4.98265 4.17833 4.93128 4.6 4.93128ZM2.4725 8.93795L15.2662 12.2666C15.4387 12.3077 15.6113 12.3077 15.7838 12.2666C15.9563 12.2255 16.1192 12.1433 16.2725 12.02L20.2687 8.44482C20.0579 8.13662 19.7896 7.88512 19.4637 7.69034C19.1379 7.49555 18.7833 7.39775 18.4 7.39693H4.6C4.10167 7.39693 3.66582 7.53582 3.29245 7.81362C2.91908 8.09142 2.64577 8.46619 2.4725 8.93795Z"
+                fill="#006EFF"
+              />
+            </svg>
+            <span
+              style={{
+                width: '142px',
+                height: '24px',
+                fontFamily: 'Poppins, sans-serif',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                fontSize: '18px',
+                lineHeight: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#FFFFFF',
+              }}
+            >
+              Wallet
+            </span>
+            {selectedCrypto && (
+              <div
+                onClick={() => setSelectedCrypto(null)}
                 style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  fontSize: '18px',
-                  lineHeight: '24px',
-                  color: '#FFFFFF',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginLeft: '20px',
                 }}
               >
-                Back
-              </span>
-            </div>
-          )}
-        </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ transform: 'rotate(180deg)' }}
+                >
+                  <path
+                    d="M12 4V20M12 4L8 8M12 4L16 8"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    fontSize: '18px',
+                    lineHeight: '24px',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Back
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
-        
+
         <img
           src="/assets/svg/ui/x.svg"
           alt="Close"
@@ -189,6 +192,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
               setIsCardsMode(false);
             } else if (isMM2Mode) {
               setIsMM2Mode(false);
+            } else if (isMM2DepositMode) {
+              setIsMM2DepositMode(false);
             } else if (selectedCrypto) {
               setSelectedCrypto(null);
             } else if (isWithdrawMode) {
@@ -1613,6 +1618,177 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         )}
 
 
+        {isMM2DepositMode && (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                width: '240px',
+                height: '32px',
+                left: '27px',
+                top: '22px',
+                zIndex: 10,
+              }}
+            >
+              <img
+                src="/assets/svg/home/wallet.svg"
+                alt="Deposit"
+                style={{
+                  position: 'absolute',
+                  width: '30px',
+                  height: '30px',
+                  left: '0px',
+                  top: '0px',
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '123px',
+                  height: '33px',
+                  left: '47px',
+                  top: '0px',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  fontSize: '22px',
+                  lineHeight: '33px',
+                  color: '#FFFFFF',
+                }}
+              >
+                Deposit
+              </span>
+            </div>
+
+            <div
+              style={{
+                position: 'absolute',
+                width: '537px',
+                height: '140px',
+                left: '29px',
+                top: '75px',
+                background: '#1C212E',
+                borderRadius: '12px',
+                padding: '20px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '15px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    background: 'url(/assets/wallet/mm2.png)',
+                    backgroundSize: 'cover',
+                  }}
+                />
+                <div
+                  style={{
+                    flex: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: 'Poppins, sans-serif',
+                      fontStyle: 'normal',
+                      fontWeight: 600,
+                      fontSize: '16px',
+                      lineHeight: '24px',
+                      color: '#FFFFFF',
+                      marginBottom: '5px',
+                    }}
+                  >
+                    Bot: MM2_BUGGY
+                  </span>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: 'Poppins, sans-serif',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      fontSize: '13px',
+                      lineHeight: '20px',
+                      color: '#6B7289',
+                    }}
+                  >
+                    Trade this bot to deposit your MM2 items
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank')}
+                style={{
+                  width: '100%',
+                  marginTop: '20px',
+                  padding: '14px',
+                  background: '#0276FF',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: '#FFFFFF',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                Join Server & Trade Bot
+              </button>
+            </div>
+
+            <div
+              style={{
+                position: 'absolute',
+                width: '537px',
+                height: 'auto',
+                left: '29px',
+                top: '235px',
+              }}
+            >
+              <span
+                style={{
+                  display: 'block',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: '12px',
+                  lineHeight: '18px',
+                  color: '#6B7289',
+                  marginBottom: '10px',
+                }}
+              >
+                Instructions:
+              </span>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: '20px',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: '13px',
+                  lineHeight: '20px',
+                  color: '#9CA3AF',
+                }}
+              >
+                <li>Click "Join Server & Trade Bot" to join the VIP server</li>
+                <li>Find and trade the bot "MM2_BUGGY" in the game</li>
+                <li>Add your items to the trade and wait for the bot to accept</li>
+                <li>Your items will be automatically credited to your account</li>
+              </ul>
+            </div>
+          </>
+        )}
+
         {isMM2Mode && (
           <>
             <div
@@ -1894,7 +2070,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         
         {isCardsMode && <CardsDeposit onClose={() => setIsCardsMode(false)} />}
 
-        {!selectedCrypto && !isWithdrawMode && !isMM2Mode && !isCardsMode && (
+        {!selectedCrypto && !isWithdrawMode && !isMM2Mode && !isMM2DepositMode && !isCardsMode && (
           <>
             
         <div
@@ -2044,7 +2220,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
 
         <div
-          onClick={() => isWithdrawMode ? setIsMM2WithdrawOpen(true) : window.open('https://www.roblox.com/share?code=08e9a905497e2541bad83194f3fc0888&type=Server', '_blank')}
+          onClick={() => isWithdrawMode ? setIsMM2WithdrawOpen(true) : setIsMM2DepositMode(true)}
           style={{
             position: 'absolute',
             width: '537px',

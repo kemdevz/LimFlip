@@ -201,9 +201,11 @@ router.post('/withdraw/request', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const inventory = await Inventory.findOne({ userId: user._id });
+    let inventory = await Inventory.findOne({ userId: user._id });
     if (!inventory) {
-      return res.status(404).json({ error: 'Inventory not found' });
+      // Create inventory if it doesn't exist
+      inventory = new Inventory({ userId: user._id, items: [] });
+      await inventory.save();
     }
 
     // Verify user owns all items
@@ -213,6 +215,8 @@ router.post('/withdraw/request', async (req, res) => {
     if (missingItems.length > 0) {
       return res.status(400).json({ error: 'You do not own all the selected items' });
     }
+
+    // Allow withdrawing last item - no inventory length check needed
 
     // Get item details before removing
     const selectedItems = inventory.items.filter(item => itemIds.includes(item.uniqueId));

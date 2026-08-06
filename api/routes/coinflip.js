@@ -86,22 +86,20 @@ router.post('/create', async (req, res) => {
     }
     
     // Get user inventory
-    const inventory = await Inventory.findOne({ userId });
-    
+    let inventory = await Inventory.findOne({ userId });
+
     if (!inventory) {
-      return res.status(404).json({ error: 'Inventory not found' });
+      // Create inventory if it doesn't exist
+      inventory = new Inventory({ userId, items: [] });
+      await inventory.save();
     }
-    
+
     // Check if user owns all the items by uniqueId
     const inventoryUniqueIds = inventory.items.map(item => item.uniqueId);
     const missingItems = uniqueIds.filter(id => !inventoryUniqueIds.includes(id));
 
     if (missingItems.length > 0) {
       return res.status(400).json({ error: 'You do not own all the selected items' });
-    }
-
-    if (inventory.items.length === 0 || inventory.items.length < uniqueIds.length) {
-      return res.status(400).json({ error: 'Your inventory does not have enough items' });
     }
 
     // Get selected items with populated details BEFORE removing
@@ -177,10 +175,12 @@ router.post('/join/:gameId', async (req, res) => {
     }
 
     // Get user inventory first to validate items
-    const inventory = await Inventory.findOne({ userId });
+    let inventory = await Inventory.findOne({ userId });
 
     if (!inventory) {
-      return res.status(404).json({ error: 'Inventory not found' });
+      // Create inventory if it doesn't exist
+      inventory = new Inventory({ userId, items: [] });
+      await inventory.save();
     }
 
     // Check if user owns all the items by uniqueId
@@ -514,20 +514,28 @@ router.post('/cancel/:gameId', async (req, res) => {
         userId,
         items: []
       });
+      await inventory.save();
     }
 
     // Add items back to inventory with unique IDs
     const newItems = game.items.map(item => createInventoryItem(item.itemId));
 
-    // Atomically add items to inventory
+    // Atomically add items to inventory using $push with $each
     const updateResult = await Inventory.updateOne(
       { _id: inventory._id },
       { $push: { items: { $each: newItems } } }
     );
 
-    if (updateResult.modifiedCount === 0) {
-      console.log('Race condition detected: inventory update failed');
-      return res.status(500).json({ error: 'Failed to return items to inventory' });
+    if (updateResult.modifiedCount === 0 && !inventory._id) {
+      // If inventory was just created, try again with the new _id
+      const retryResult = await Inventory.updateOne(
+        { _id: inventory._id },
+        { $push: { items: { $each: newItems } } }
+      );
+      if (retryResult.modifiedCount === 0) {
+        console.log('Failed to add items to new inventory');
+        return res.status(500).json({ error: 'Failed to return items to inventory' });
+      }
     }
 
     // Refresh inventory after atomic update

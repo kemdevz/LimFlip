@@ -6,6 +6,7 @@ local Trade = game:GetService("ReplicatedStorage"):WaitForChild("Trade")
 local InventoryModule = require(game:GetService("ReplicatedStorage").Modules.InventoryModule)
 local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local AcceptRequestRe = Trade:WaitForChild("AcceptRequest")
 local AcceptTrade = Trade:WaitForChild("AcceptTrade")
@@ -657,6 +658,46 @@ acceptTradeRemote.OnClientEvent:Connect(function(complete, items_)
             resetState()
         end
     elseif Trading and currentTrader and currentTrader ~= "" then
+        -- Get the accept button from GUI
+        local acceptButton = game:GetService("Players").LocalPlayer.PlayerGui.TradeGUI.Container.Trade.Actions.Accept.Confirm.ActionButton
+        
+        if acceptButton then
+            -- Get EXACT button position
+            local buttonPos = acceptButton.AbsolutePosition
+            local buttonSize = acceptButton.AbsoluteSize
+
+            -- CLICK AT THE ABSOLUTE BOTTOM-MIDDLE + 10px lower
+            local clickX = math.floor(buttonPos.X + (buttonSize.X / 2))
+            local clickY = math.floor(buttonPos.Y + buttonSize.Y - 1 + 10)
+
+            print("=== CLICKING ACCEPT BUTTON ===")
+            print("Button Position:", buttonPos.X, buttonPos.Y)
+            print("Button Size:", buttonSize.X, buttonSize.Y)
+            print("Clicking at:", clickX, clickY)
+
+            -- CLICK 3 TIMES
+            for i = 1, 3 do
+                print("Click", i, "at:", clickX, clickY)
+                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+                wait(0.05)
+                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+                wait(0.3)
+            end
+
+            -- Fire button events as fallback
+            pcall(function()
+                acceptButton.MouseButton1Down:Fire()
+                wait(0.05)
+                acceptButton.MouseButton1Up:Fire()
+            end)
+            
+            pcall(function()
+                acceptButton.MouseButton1Click:Fire()
+            end)
+        else
+            print("Accept button not found, using fallback")
+        end
+
         AcceptTrade:FireServer(285646582)
 
         print("accepted trade as the second player.")

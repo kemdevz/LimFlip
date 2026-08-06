@@ -93,6 +93,21 @@ export default function MobileBottomNav() {
               transform: translateX(100%);
             }
           }
+          * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+          }
+          button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+          }
         `}
       </style>
       

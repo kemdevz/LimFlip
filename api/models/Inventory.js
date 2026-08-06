@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const inventoryItemSchema = new mongoose.Schema({
   uniqueId: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   itemId: {
     type: String,

@@ -247,21 +247,8 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Use cached avatar URL from MongoDB if available, otherwise fetch fresh
-    let avatarUrl = user.avatarUrl;
-    if (!avatarUrl || !avatarUrl.includes('tr.rbxcdn.com')) {
-      try {
-        const userThumbnail = await noblox.getPlayerThumbnail(user.robloxUserId, 420, 'png', false, 'Headshot');
-        avatarUrl = userThumbnail[0].imageUrl;
-        
-        // Update user with fresh avatar in MongoDB
-        user.avatarUrl = avatarUrl;
-        await user.save();
-      } catch (error) {
-        console.error('Error fetching avatar for /me with noblox:', error);
-        avatarUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
-      }
-    }
+    // Use cached avatar URL from MongoDB - no fresh fetch to avoid slow loading
+    const avatarUrl = user.avatarUrl || `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${user.robloxUserId}&size=420x420&format=Png&isCircular=false`;
 
     res.json({
       id: user._id.toString(),

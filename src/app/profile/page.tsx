@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/useAuth';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
 import ProfileModal from '@/components/chat/ProfileModal';
 import ProfileHeader from './components/ProfileHeader';
 import ProfileTabs from './components/ProfileTabs';
@@ -137,8 +136,6 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-
-        {isMobile && <Footer />}
       </div>
 
       <ProfileModal

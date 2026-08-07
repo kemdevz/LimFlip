@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
 import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
 import PrivacyModal from '@/components/privacy/PrivacyModal';
@@ -137,8 +136,6 @@ export default function TOSPage() {
         </div>
       </div>
 
-      <Footer />
-      
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}

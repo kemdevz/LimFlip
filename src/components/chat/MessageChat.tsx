@@ -9,6 +9,7 @@ interface MessageChatProps {
   avatarUrl?: string;
   isWhale?: boolean;
   onProfileClick?: () => void;
+  isNew?: boolean;
 }
 
 export default function MessageChat({
@@ -18,6 +19,7 @@ export default function MessageChat({
   avatarUrl,
   isWhale = true,
   onProfileClick,
+  isNew = false,
 }: MessageChatProps) {
   const styleRef = useRef<HTMLStyleElement>(null);
 
@@ -52,7 +54,7 @@ export default function MessageChat({
 
   return (
     <div
-      className="message-animate chat-message-bubble"
+      className={isNew ? 'message-animate chat-message-bubble' : 'chat-message-bubble'}
       style={{
         display: 'flex',
         flexDirection: 'column',

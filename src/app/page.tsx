@@ -409,8 +409,6 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
           isNew={newGameIds.has(game._id)}
         />
       ))}
-
-      <Footer />
       </div>
 
       <CoinflipViewModal

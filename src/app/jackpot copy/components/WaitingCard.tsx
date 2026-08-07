@@ -1,4 +1,4 @@
-export default function PlayerCard() {
+export default function WaitingCard() {
   return (
     <div
       style={{
@@ -19,7 +19,7 @@ export default function PlayerCard() {
           top: '0px',
           border: '3px solid transparent',
           borderRadius: '15px',
-          background: 'linear-gradient(to bottom, #0075FF 66%, #000000 100%) border-box',
+          background: 'linear-gradient(to bottom, #72788B 66%, #000000 100%) border-box',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -89,8 +89,8 @@ export default function PlayerCard() {
           }}
         />
         <img
-          src="/assets/images/coinflip/item_1side.png"
-          alt="Avatar"
+          src="/assets/jackpot/waiting.png"
+          alt="Waiting"
           style={{
             position: 'absolute',
             width: '84px',
@@ -118,7 +118,7 @@ export default function PlayerCard() {
           color: '#FFFFFF',
         }}
       >
-        jakep
+        Waiting...
       </span>
       
       <div
@@ -169,7 +169,7 @@ export default function PlayerCard() {
             color: '#FFFFFF',
           }}
         >
-          B$43.8k
+          B$0.00
         </span>
       </div>
       </div>

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
 import MarketplaceContent from '@/components/market/MarketplaceContent';
 import MyListingsModal from '@/components/market/MyListingsModal';
@@ -56,7 +55,6 @@ export default function MarketPage() {
 
       <MarketplaceContent onMyListingsClick={() => setIsMyListingsOpen(true)} />
 
-      <Footer />
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}

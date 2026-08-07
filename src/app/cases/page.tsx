@@ -1,26 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import JackpotStats from './components/JackpotStats';
-import JackpotContainer from './components/JackpotContainer';
-import JackpotWheel from './components/JackpotWheel';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
 import MyListingsModal from '@/components/market/MyListingsModal';
 import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
 import PrivacyModal from '@/components/privacy/PrivacyModal';
 import RulesModal from '@/components/rules/RulesModal';
 import FaqModal from '@/components/faq/FaqModal';
-import { User } from '@/types';
 
-export default function JackpotPage() {
+export default function CasesPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
@@ -28,21 +23,12 @@ export default function JackpotPage() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
   const handleProfileClick = (username: string, avatarUrl: string) => {
     console.log('Profile clicked:', username);
   };
 
-
   return (
     <div className="page-shell">
-      
       <div
         className="page-bg page-bg--main"
         style={{
@@ -50,7 +36,6 @@ export default function JackpotPage() {
         }}
       />
 
-      
       <div
         className="absolute inset-0"
         style={{
@@ -69,7 +54,7 @@ export default function JackpotPage() {
         onSignUpClick={() => {}}
         onLogInClick={() => {}}
         onCoinflipClick={() => router.push('/')}
-        onJackpotClick={() => {}}
+        onJackpotClick={() => router.push('/jackpot')}
         onSellItemsClick={() => setIsMyListingsOpen(true)}
       />
       <Sidebar onProfileClick={handleProfileClick} onGiftClick={() => setIsCreateGiveawayOpen(true)} onRulesClick={() => setIsRulesModalOpen(true)} />
@@ -86,54 +71,33 @@ export default function JackpotPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            position: 'relative',
           }}
         >
-          {/* Coming Soon Overlay */}
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-              backgroundColor: 'rgba(19, 22, 33, 0.9)',
+              textAlign: 'center',
+              color: '#FFFFFF',
             }}
           >
-            <div
+            <h1
               style={{
-                textAlign: 'center',
-                color: '#FFFFFF',
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: isMobile ? '32px' : '48px',
+                fontWeight: 700,
+                marginBottom: '16px',
               }}
             >
-              <h1
-                style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: isMobile ? '32px' : '48px',
-                  fontWeight: 700,
-                  marginBottom: '16px',
-                }}
-              >
-                Coming Soon
-              </h1>
-              <p
-                style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: isMobile ? '16px' : '20px',
-                  color: '#8B95A3',
-                }}
-              >
-                Jackpot is currently under development. Check back later!
-              </p>
-            </div>
-          </div>
-
-          {/* Original Components (hidden behind overlay) */}
-          <div style={{ visibility: 'hidden', pointerEvents: 'none' }}>
-            <JackpotStats />
-            <JackpotContainer />
-            <JackpotWheel />
+              Coming Soon
+            </h1>
+            <p
+              style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: isMobile ? '16px' : '20px',
+                color: '#8B95A3',
+              }}
+            >
+              Cases is currently under development. Check back later!
+            </p>
           </div>
         </div>
       </div>

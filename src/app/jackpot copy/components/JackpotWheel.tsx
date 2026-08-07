@@ -1,86 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import JoinJackpotModal from './JoinJackpotModal';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
-
-interface Player {
-  id: string;
-  username: string;
-  avatar: string;
-  items: string[];
-  totalValue: number;
-  percentage: number;
-}
-
-interface Card {
-  image: string;
-  playerId: string;
-}
 
 export default function JackpotWheel() {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [cards, setCards] = useState<Card[]>([]);
-  
-  // Default waiting cards
-  const waitingCards = [
-    '/assets/images/coinflip/candy.png',
-    '/assets/images/coinflip/chroma.png',
-    '/assets/images/coinflip/knife.png',
-    '/assets/images/coinflip/luger.png',
-    '/assets/jackpot/gingerscope.png',
-  ];
-
-  // Calculate card distribution based on player percentages
-  useEffect(() => {
-    if (players.length === 0) {
-      // Show waiting cards
-      setCards(waitingCards.map(img => ({ image: img, playerId: 'waiting' })));
-      return;
-    }
-
-    const totalCards = 36;
-    const newCards: Card[] = [];
-    let cardIndex = 0;
-
-    players.forEach(player => {
-      const playerCardCount = Math.round((player.percentage / 100) * totalCards);
-      for (let i = 0; i < playerCardCount; i++) {
-        if (cardIndex < totalCards) {
-          const itemIndex = cardIndex % player.items.length;
-          newCards.push({
-            image: player.items[itemIndex],
-            playerId: player.id,
-          });
-          cardIndex++;
-        }
-      }
-    });
-
-    // Fill remaining with waiting cards if needed
-    while (newCards.length < totalCards) {
-      newCards.push({
-        image: waitingCards[newCards.length % waitingCards.length],
-        playerId: 'waiting',
-      });
-    }
-
-    setCards(newCards);
-  }, [players]);
-
-  // Handle player join
-  const handlePlayerJoin = (newPlayer: Player) => {
-    setPlayers(prevPlayers => {
-      const totalValue = [...prevPlayers, newPlayer].reduce((sum, p) => sum + p.totalValue, 0);
-      
-      return [...prevPlayers, newPlayer].map(player => ({
-        ...player,
-        percentage: (player.totalValue / totalValue) * 100,
-      }));
-    });
-  };
 
   return (
     <div
@@ -379,69 +305,229 @@ export default function JackpotWheel() {
               top: '17px',
             }}
           >
-            {cards.slice(0, 5).map((card, index) => (
-              <div
-                key={`${card.playerId}-${index}`}
-                style={{
-                  width: '65px',
-                  height: '65px',
-                  borderRadius: '34.9074px',
-                  flex: 'none',
-                  order: index,
-                  flexGrow: 0,
-                  margin: '0px -12px',
-                  position: 'relative',
-                  background: '#11151D',
-                  border: '1.2037px solid #181E2E',
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  src={card.image}
-                  alt="Item blur"
-                  style={{
-                    position: 'absolute',
-                    width: '49.35px',
-                    height: '49.35px',
-                    left: '-3px',
-                    top: '-3px',
-                    filter: 'blur(7.88426px)',
-                    transform: 'rotate(44.66deg)',
-                  }}
-                />
-                <img
-                  src={card.image}
-                  alt="Item"
-                  style={{
-                    position: 'absolute',
-                    width: '49.35px',
-                    height: '49.35px',
-                    left: '7.22px',
-                    top: '7.22px',
-                  }}
-                />
-              </div>
-            ))}
             
-            {cards.length > 5 && (
-              <div
+            <div
+              style={{
+                width: '65px',
+                height: '65px',
+                borderRadius: '34.9074px',
+                flex: 'none',
+                order: 0,
+                flexGrow: 0,
+                margin: '0px -12px',
+                position: 'relative',
+                background: '#11151D',
+                border: '1.2037px solid #181E2E',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src="/assets/images/coinflip/candy.png"
+                alt="Item blur"
                 style={{
-                  width: '24.07px',
-                  height: '24.07px',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: '600',
-                  fontSize: '18.0556px',
-                  lineHeight: '27px',
-                  color: '#FFFFFF',
-                  flex: 'none',
-                  order: 5,
-                  flexGrow: 0,
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '-3px',
+                  top: '-3px',
+                  filter: 'blur(7.88426px)',
+                  transform: 'rotate(44.66deg)',
                 }}
-              >
-                +{cards.length - 5}
-              </div>
-            )}
+              />
+              <img
+                src="/assets/images/coinflip/candy.png"
+                alt="Item"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '7.22px',
+                  top: '7.22px',
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                width: '65px',
+                height: '65px',
+                borderRadius: '34.9074px',
+                flex: 'none',
+                order: 1,
+                flexGrow: 0,
+                margin: '0px -12px',
+                position: 'relative',
+                background: '#11151D',
+                border: '1.2037px solid #181E2E',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src="/assets/images/coinflip/chroma.png"
+                alt="Item blur"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '-3px',
+                  top: '-3px',
+                  filter: 'blur(7.88426px)',
+                  transform: 'rotate(44.66deg)',
+                }}
+              />
+              <img
+                src="/assets/images/coinflip/chroma.png"
+                alt="Item"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '7.22px',
+                  top: '7.22px',
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                width: '65px',
+                height: '65px',
+                borderRadius: '34.9074px',
+                flex: 'none',
+                order: 2,
+                flexGrow: 0,
+                margin: '0px -12px',
+                position: 'relative',
+                background: '#11151D',
+                border: '1.2037px solid #181E2E',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src="/assets/images/coinflip/knife.png"
+                alt="Item blur"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '-3px',
+                  top: '-3px',
+                  filter: 'blur(7.88426px)',
+                  transform: 'rotate(44.66deg)',
+                }}
+              />
+              <img
+                src="/assets/images/coinflip/knife.png"
+                alt="Item"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '7.22px',
+                  top: '7.22px',
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                width: '65px',
+                height: '65px',
+                borderRadius: '34.9074px',
+                flex: 'none',
+                order: 3,
+                flexGrow: 0,
+                margin: '0px -12px',
+                position: 'relative',
+                background: '#11151D',
+                border: '1.2037px solid #181E2E',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src="/assets/images/coinflip/luger.png"
+                alt="Item blur"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '-3px',
+                  top: '-3px',
+                  filter: 'blur(7.88426px)',
+                  transform: 'rotate(44.66deg)',
+                }}
+              />
+              <img
+                src="/assets/images/coinflip/luger.png"
+                alt="Item"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '7.22px',
+                  top: '7.22px',
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                width: '65px',
+                height: '65px',
+                borderRadius: '34.9074px',
+                flex: 'none',
+                order: 4,
+                flexGrow: 0,
+                margin: '0px -12px',
+                position: 'relative',
+                background: '#11151D',
+                border: '1.2037px solid #181E2E',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src="/assets/jackpot/gingerscope.png"
+                alt="Item blur"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '-3px',
+                  top: '-3px',
+                  filter: 'blur(7.88426px)',
+                  transform: 'rotate(44.66deg)',
+                }}
+              />
+              <img
+                src="/assets/jackpot/gingerscope.png"
+                alt="Item"
+                style={{
+                  position: 'absolute',
+                  width: '49.35px',
+                  height: '49.35px',
+                  left: '7.22px',
+                  top: '7.22px',
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                width: '24.07px',
+                height: '24.07px',
+                fontFamily: 'Poppins, sans-serif',
+                fontStyle: 'normal',
+                fontWeight: '600',
+                fontSize: '18.0556px',
+                lineHeight: '27px',
+                color: '#FFFFFF',
+                flex: 'none',
+                order: 5,
+                flexGrow: 0,
+              }}
+            >
+              +9
+            </div>
           </div>
 
           

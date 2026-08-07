@@ -51,6 +51,7 @@ export default function UpgraderPage() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [upgradeResult, setUpgradeResult] = useState<'won' | 'lost' | null>(null);
+  const [liveWins, setLiveWins] = useState<LiveWin[]>([]);
   const STOCK_USER_ID = '7848923878';
 
   // Fetch inventories on mount
@@ -211,98 +212,43 @@ export default function UpgraderPage() {
     }
   };
 
-  const [liveWins, setLiveWins] = useState<LiveWin[]>([
-    {
-      username: 'rockstarbandd',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-97E3EA23B1E47B79D17C79BBE87972BF-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-0f7ffd8e0c2de137e8a0d4dfd0cda775/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-dd607b48a625a65ed26acbe31753e3ec/420/420/Model/Png/noFilter'],
-      inputValue: 23,
-      outputValue: 28,
-      multiplier: 1.22,
-    },
-    {
-      username: 'Kittythecattya',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9F40BFB2CE92DD15491AE57566846A48-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-d8d50e69d4173ce46a487abccf1f91e4/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-ccf2e13dc265ba55d8a7e564bfa87f40/420/420/Image/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-10977d6653007360a6066b91c3dddab8/420/420/Model/Png/noFilter'],
-      inputValue: 8,
-      outputValue: 9,
-      multiplier: 1.13,
-    },
-    {
-      username: 'StompPls_o',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-8E03BF07FB56293284C5CB6D01EC77A3-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-3529b8649a2fc7d54d946bcb30afa53a/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter'],
-      inputValue: 5,
-      outputValue: 7,
-      multiplier: 1.40,
-    },
-    {
-      username: 'Vidllyk',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FD5751331047A431330430A8AD001984-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-1b77d78e716491269a94bf75402ffe74/420/420/Image/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-43c469bac8044e64467421b6231fd544/420/420/Model/Png/noFilter'],
-      inputValue: 40,
-      outputValue: 80,
-      multiplier: 2.00,
-    },
-    {
-      username: 'Kittythecattya',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9F40BFB2CE92DD15491AE57566846A48-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-05df408cbe6cf224545605fe7f0e82c5/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-ccf2e13dc265ba55d8a7e564bfa87f40/420/420/Image/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-10977d6653007360a6066b91c3dddab8/420/420/Model/Png/noFilter'],
-      inputValue: 7,
-      outputValue: 9,
-      multiplier: 1.29,
-    },
-    {
-      username: 'StompPls_o',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-8E03BF07FB56293284C5CB6D01EC77A3-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-10977d6653007360a6066b91c3dddab8/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-05df408cbe6cf224545605fe7f0e82c5/420/420/Model/Png/noFilter'],
-      inputValue: 4,
-      outputValue: 7,
-      multiplier: 1.75,
-    },
-    {
-      username: 'Vidllyk',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FD5751331047A431330430A8AD001984-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-0f7ffd8e0c2de137e8a0d4dfd0cda775/420/420/Model/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-1b77d78e716491269a94bf75402ffe74/420/420/Image/Png/noFilter'],
-      inputValue: 23,
-      outputValue: 40,
-      multiplier: 1.74,
-    },
-    {
-      username: 'Kittythecattya',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9F40BFB2CE92DD15491AE57566846A48-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-22c472682362c1fea620cd35a6528fa7/420/420/Image/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-ccf2e13dc265ba55d8a7e564bfa87f40/420/420/Image/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-ccf2e13dc265ba55d8a7e564bfa87f40/420/420/Image/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-10977d6653007360a6066b91c3dddab8/420/420/Model/Png/noFilter'],
-      inputValue: 7,
-      outputValue: 10,
-      multiplier: 1.43,
-    },
-    {
-      username: 'Vidllyk',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FD5751331047A431330430A8AD001984-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-e16ab3e92e0f683a3c30600433fefeda/420/420/Image/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-1b77d78e716491269a94bf75402ffe74/420/420/Image/Png/noFilter'],
-      inputValue: 22,
-      outputValue: 40,
-      multiplier: 1.82,
-    },
-    {
-      username: 'StompPls_o',
-      avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-8E03BF07FB56293284C5CB6D01EC77A3-Png/420/420/AvatarHeadshot/Png/noFilter',
-      inputItems: ['https://tr.rbxcdn.com/180DAY-ccf2e13dc265ba55d8a7e564bfa87f40/420/420/Image/Png/noFilter'],
-      outputItems: ['https://tr.rbxcdn.com/180DAY-5548c6ec3299fc5b4752e054723cb621/420/420/Image/Png/noFilter'],
-      inputValue: 5,
-      outputValue: 6,
-      multiplier: 1.20,
-    },
-  ]);
+  // Fetch upgrader history on mount
+  useEffect(() => {
+    const fetchUpgraderHistory = async () => {
+      try {
+        const response = await fetch('https://api-bash.onrender.com/upgrader/history?limit=10');
+        const history = await response.json();
+        
+        const formattedWins: LiveWin[] = history.map((entry: any) => ({
+          username: entry.username,
+          avatar: entry.avatar || '',
+          inputItems: entry.inputItems.map((item: any) => item.image),
+          outputItems: entry.outputItem ? [entry.outputItem.image] : [],
+          inputValue: entry.inputValue,
+          outputValue: entry.outputValue,
+          multiplier: entry.multiplier,
+        }));
+        
+        setLiveWins(formattedWins);
+      } catch (error) {
+        console.error('Error fetching upgrader history:', error);
+        // Set fallback data if fetch fails
+        setLiveWins([
+          {
+            username: 'rockstarbandd',
+            avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-97E3EA23B1E47B79D17C79BBE87972BF-Png/420/420/AvatarHeadshot/Png/noFilter',
+            inputItems: ['https://tr.rbxcdn.com/180DAY-0f7ffd8e0c2de137e8a0d4dfd0cda775/420/420/Model/Png/noFilter'],
+            outputItems: ['https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-ab2df954762bba83028c1903451bdaf9/420/420/Model/Png/noFilter', 'https://tr.rbxcdn.com/180DAY-dd607b48a625a65ed26acbe31753e3ec/420/420/Model/Png/noFilter'],
+            inputValue: 23,
+            outputValue: 28,
+            multiplier: 1.22,
+          },
+        ]);
+      }
+    };
+    
+    fetchUpgraderHistory();
+  }, []);
 
   const handleProfileClick = (username: string, avatarUrl: string) => {
     console.log('Profile clicked:', username);
@@ -402,7 +348,7 @@ export default function UpgraderPage() {
                     gap: '12px',
                     borderRadius: '12px',
                     border: '1px solid #2A3040',
-                    backgroundColor: '#1E222F',
+                    backgroundColor: '#191d29',
                     padding: '16px',
                     minWidth: '280px',
                   }}
@@ -588,7 +534,7 @@ export default function UpgraderPage() {
                   gap: '16px',
                   borderRadius: '12px',
                   border: '1px solid #2A3040',
-                  backgroundColor: '#1E222F',
+                  backgroundColor: '#191d29',
                   padding: '24px',
                   animation: 'fadeInUp 0.3s ease-out 0.1s both',
                   position: 'relative',
@@ -1066,7 +1012,7 @@ export default function UpgraderPage() {
                   gap: '16px',
                   borderRadius: '12px',
                   border: '1px solid #2A3040',
-                  backgroundColor: '#1E222F',
+                  backgroundColor: '#191d29',
                   padding: '16px',
                   animation: 'fadeInUp 0.3s ease-out 0.2s both',
                 }}
@@ -1388,7 +1334,7 @@ export default function UpgraderPage() {
                   style={{
                     borderRadius: '12px',
                     border: '1px solid #2A3040',
-                    backgroundColor: '#1E222F',
+                    backgroundColor: '#191d29',
                     padding: '16px',
                   }}
                 >

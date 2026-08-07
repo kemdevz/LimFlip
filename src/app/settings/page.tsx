@@ -5,7 +5,6 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
 import SignUpModal from '@/components/auth/SignUpModal';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
 import MyListingsModal from '@/components/market/MyListingsModal';
@@ -1402,8 +1401,6 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
-
-      <Footer />
 
       <SignUpModal
         isOpen={isSignUpModalOpen}

@@ -50,6 +50,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
   const [inputMessage, setInputMessage] = useState('');
   const [isMounted, setIsMounted] = useState(false);
   const [giveaway, setGiveaway] = useState<GiveawayData | undefined>();
+  const [newMessageIds, setNewMessageIds] = useState<Set<string>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -148,7 +149,18 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
     if (!isMounted || !socket) return;
 
     socket.on('chat-message', (data: Message) => {
+      const messageId = `${data.username}-${data.message}-${data.time}`;
+      setNewMessageIds(prev => new Set(prev).add(messageId));
       setMessages((prev) => [...prev, data]);
+      
+      // Remove from new messages after animation completes
+      setTimeout(() => {
+        setNewMessageIds(prev => {
+          const next = new Set(prev);
+          next.delete(messageId);
+          return next;
+        });
+      }, 500);
     });
 
     socket.on('giveaway-joined', (data: { giveawayId: string; participantCount: number }) => {
@@ -488,17 +500,22 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
         }}
       >
         <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '11px' }}>
-          {messages.map((msg, index) => (
-            <MessageChat
-              key={index}
-              username={msg.username}
-              message={msg.message}
-              time={msg.time}
-              avatarUrl={msg.avatarUrl}
-              isWhale={msg.isWhale}
-              onProfileClick={() => handleProfileClick(msg.username, msg.avatarUrl)}
-            />
-          ))}
+          {messages.map((msg, index) => {
+            const messageId = `${msg.username}-${msg.message}-${msg.time}`;
+            const isNew = newMessageIds.has(messageId);
+            return (
+              <MessageChat
+                key={messageId}
+                username={msg.username}
+                message={msg.message}
+                time={msg.time}
+                avatarUrl={msg.avatarUrl}
+                isWhale={msg.isWhale}
+                isNew={isNew}
+                onProfileClick={() => handleProfileClick(msg.username, msg.avatarUrl)}
+              />
+            );
+          })}
         </div>
       </div>
 

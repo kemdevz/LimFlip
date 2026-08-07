@@ -3,6 +3,7 @@ const router = express.Router();
 const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
 const User = require('../models/User');
+const UpgraderHistory = require('../models/UpgraderHistory');
 
 // Get io instance from server (will be set by server.js)
 let io;
@@ -200,6 +201,33 @@ router.post('/upgrade', async (req, res) => {
         }
       }
 
+      // Save to upgrader history
+      const historyEntry = new UpgraderHistory({
+        userId,
+        username: (await User.findById(userId)).username,
+        avatar: (await User.findById(userId)).avatar || '',
+        inputItems: inputItems.map(item => ({
+          uniqueId: item.uniqueId,
+          itemId: item.itemId,
+          name: inputItemDefs.find(def => def?.itemId === item.itemId)?.name || '',
+          image: inputItemDefs.find(def => def?.itemId === item.itemId)?.image || '',
+          value: inputItemDefs.find(def => def?.itemId === item.itemId)?.value || 0
+        })),
+        outputItem: {
+          uniqueId: newUniqueId,
+          itemId: desiredItem.itemId,
+          name: desiredItemDef?.name || '',
+          image: desiredItemDef?.image || '',
+          value: desiredItemDef?.value || 0
+        },
+        inputValue,
+        outputValue: desiredValue,
+        winChance,
+        won: true,
+        multiplier: desiredValue / inputValue
+      });
+      await historyEntry.save();
+
       // Emit socket events
       if (io) {
         const populatedUserInventory = await populateItemDetails(userInventory.items);
@@ -275,6 +303,27 @@ router.post('/upgrade', async (req, res) => {
         }
       }
 
+      // Save to upgrader history
+      const historyEntry = new UpgraderHistory({
+        userId,
+        username: (await User.findById(userId)).username,
+        avatar: (await User.findById(userId)).avatar || '',
+        inputItems: inputItems.map(item => ({
+          uniqueId: item.uniqueId,
+          itemId: item.itemId,
+          name: inputItemDefs.find(def => def?.itemId === item.itemId)?.name || '',
+          image: inputItemDefs.find(def => def?.itemId === item.itemId)?.image || '',
+          value: inputItemDefs.find(def => def?.itemId === item.itemId)?.value || 0
+        })),
+        outputItem: null,
+        inputValue,
+        outputValue: 0,
+        winChance,
+        won: false,
+        multiplier: 0
+      });
+      await historyEntry.save();
+
       // Emit socket events
       if (io) {
         const populatedUserInventory = await populateItemDetails(userInventory.items);
@@ -301,6 +350,21 @@ router.post('/upgrade', async (req, res) => {
     }
   } catch (error) {
     console.error('Error processing upgrade:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get upgrader history (past games)
+router.get('/history', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const history = await UpgraderHistory.find()
+      .sort({ createdAt: -1 })
+      .limit(limit);
+    
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching upgrader history:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

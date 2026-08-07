@@ -6,6 +6,7 @@ import { MobileLayoutProvider } from "@/context/MobileLayoutContext";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { ToastProvider } from "@/components/Toast";
 import ToastContainer from "@/components/ui/ToastContainer";
+import MobileClassHandler from "@/components/layout/MobileClassHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,14 +52,17 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SocketProvider>
-          <MobileLayoutProvider>
-            {children}
-            <MobileBottomNav />
-            <ToastProvider />
-            <ToastContainer />
-          </MobileLayoutProvider>
-        </SocketProvider>
+        <div id="desktop-scale-wrapper">
+          <SocketProvider>
+            <MobileLayoutProvider>
+              <MobileClassHandler />
+              {children}
+              <MobileBottomNav />
+              <ToastProvider />
+              <ToastContainer />
+            </MobileLayoutProvider>
+          </SocketProvider>
+        </div>
       </body>
     </html>
   );

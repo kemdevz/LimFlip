@@ -17,6 +17,8 @@ const { router: mm2Routes, setIo: setMm2Io } = require('./routes/mm2');
 const { router: depositRoutes, setIo: setDepositIo } = require('./routes/deposit');
 const { router: giveawayRoutes, setIo: setGiveawayIo } = require('./routes/giveaway');
 const messagesRoutes = require('./routes/messages');
+const cryptoRoutes = require('./routes/crypto');
+const { router: upgraderRoutes, setIo: setUpgraderIo } = require('./routes/upgrader');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
@@ -42,6 +44,7 @@ setMm2Io(io);
 setMarketplaceIo(io);
 setDepositIo(io);
 setGiveawayIo(io);
+setUpgraderIo(io);
 
 let onlineUsers = 9; // Start with 9 fake online users
 
@@ -140,6 +143,8 @@ app.use('/mm2', mm2Routes);
 app.use('/deposit', depositRoutes);
 app.use('/giveaway', giveawayRoutes);
 app.use('/messages', messagesRoutes);
+app.use('/crypto', cryptoRoutes);
+app.use('/upgrader', upgraderRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

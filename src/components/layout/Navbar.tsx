@@ -57,6 +57,14 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
       badge: 'B$3.2k',
     },
     {
+      id: 'upgrader',
+      label: 'Upgrader',
+      icon: '/assets/svg/navbar/upgrader.svg',
+      activeIcon: '/assets/svg/navbar/upgrader-active.svg',
+      active: pathname === '/upgrader',
+      onClick: () => router.push('/upgrader'),
+    },
+    {
       id: 'market',
       label: 'Market',
       icon: '/assets/svg/ui/market.svg',
@@ -121,7 +129,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                   key={item.id}
                   ref={(el) => { navRefs.current[index] = el; }}
                 >
-                  {index === 2 && (
+                  {index === 3 && (
                     <svg width="2" height="26" viewBox="0 0 2 26" fill="none" style={{ display: 'inline-block', marginRight: '26px', verticalAlign: 'middle' }}>
                       <rect width="2" height="26" rx="1" fill="#4C526B" />
                     </svg>

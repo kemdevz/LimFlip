@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CryptoTransactionHistory from './CryptoTransactionHistory';
 
 interface CryptoDepositModalProps {
   isOpen: boolean;
@@ -59,12 +60,6 @@ export default function CryptoDepositModal({ isOpen, onClose, cryptoType = 'BTC'
   };
 
   const config = cryptoConfig[cryptoType];
-
-  const transactions = [
-    { amount: '1,000', date: '10.7.24 9:26', currency: 'BTC', type: 'DEPOSIT', status: 'Pending' },
-    { amount: '500', date: '10.7.24 8:15', currency: 'BTC', type: 'DEPOSIT', status: 'Pending' },
-    { amount: '2,500', date: '10.6.24 14:30', currency: 'BTC', type: 'DEPOSIT', status: 'Pending' },
-  ];
 
   return (
     <div
@@ -534,154 +529,7 @@ export default function CryptoDepositModal({ isOpen, onClose, cryptoType = 'BTC'
             top: '273px',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              padding: '0px',
-              gap: '6px',
-              position: 'absolute',
-              width: '534px',
-              height: '136px',
-              left: '0px',
-              top: '7px',
-            }}
-          >
-            {transactions.map((tx, index) => (
-              <div
-                key={index}
-                style={{
-                  width: '534px',
-                  height: '43px',
-                  background: '#1C212E',
-                  borderRadius: '15px',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: '0px',
-                    gap: '8px',
-                    position: 'absolute',
-                    width: '64px',
-                    height: '21px',
-                    left: '14px',
-                    top: 'calc(50% - 21px/2 - 0.5px)',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '16px',
-                      background: '#0276FF',
-                    }}
-                  />
-                  <span
-                    style={{
-                      width: '36px',
-                      height: '21px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      lineHeight: '21px',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {tx.amount}
-                  </span>
-                </div>
-                <span
-                  style={{
-                    position: 'absolute',
-                    width: '79px',
-                    height: '21px',
-                    left: 'calc(50% - 79px/2 - 116.45px)',
-                    top: 'calc(50% - 21px/2)',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '21px',
-                    color: '#5E6475',
-                  }}
-                >
-                  {tx.date}
-                </span>
-                <span
-                  style={{
-                    position: 'absolute',
-                    width: '28px',
-                    height: '21px',
-                    left: 'calc(50% - 28px/2 - 34.91px)',
-                    top: 'calc(50% - 21px/2)',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '21px',
-                    color: '#5E6475',
-                  }}
-                >
-                  {tx.currency}
-                </span>
-                <span
-                  style={{
-                    position: 'absolute',
-                    width: '57px',
-                    height: '21px',
-                    left: 'calc(50% - 57px/2 + 35.64px)',
-                    top: 'calc(50% - 21px/2)',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '21px',
-                    color: '#5E6475',
-                  }}
-                >
-                  {tx.type}
-                </span>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    padding: '8px 14px',
-                    gap: '10px',
-                    position: 'absolute',
-                    width: '87px',
-                    height: '34px',
-                    right: '4px',
-                    top: '4px',
-                    background: '#0276FF',
-                    borderRadius: '15px',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '59px',
-                      height: '18px',
-                      fontFamily: 'Poppins, sans-serif',
-                      fontStyle: 'normal',
-                      fontWeight: 500,
-                      fontSize: '14px',
-                      lineHeight: '21px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {tx.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <CryptoTransactionHistory cryptoType={cryptoType} />
           <div
             style={{
               position: 'absolute',

@@ -36,6 +36,60 @@
     --content-top: 56px;
     --content-width: 100vw;
     --page-padding-x: 12px;
+    --mnav-h: 58px;
+  }
+}
+
+/* Tablet - use desktop layout at full size with horizontal scroll */
+@media (min-width: 769px) and (max-width: 1024px) {
+  body {
+    min-width: 1366px;
+    overflow-x: auto;
+  }
+  
+  #desktop-scale-wrapper {
+    width: 1366px;
+    min-width: 1366px;
+  }
+}
+
+html.mobile {
+  --mnav-h: 58px;
+}
+
+html.mobile, html.mobile body {
+  height: auto;
+  overflow: visible;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useAuth } from '@/hooks/useAuth';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -35,7 +36,7 @@ interface Item {
 export default function UpgraderPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
@@ -47,28 +48,42 @@ export default function UpgraderPage() {
   const [userInventory, setUserInventory] = useState<Item[]>([]);
   const [stockInventory, setStockInventory] = useState<Item[]>([]);
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [wheelRotation, setWheelRotation] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [upgradeResult, setUpgradeResult] = useState<'won' | 'lost' | null>(null);
   const STOCK_USER_ID = '7848923878';
 
   // Fetch inventories on mount
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        // Fetch user inventory (using a placeholder userId for now)
-        const userResponse = await fetch('https://api-bash.onrender.com/inventory/placeholder_user_id');
-        const userData = await userResponse.json();
-        if (userData.items) {
-          setUserInventory(userData.items.map((item: any) => ({
-            name: item.name,
-            price: item.value,
-            img: item.image,
-            uniqueId: item.uniqueId,
-            itemId: item.itemId
-          })));
+        console.log('User object:', user);
+        console.log('User id:', user?.id);
+
+        // Fetch user inventory using the actual user's id
+        if (user?.id) {
+          console.log('Fetching user inventory for:', user.id);
+          const userResponse = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`);
+          const userData = await userResponse.json();
+          console.log('User inventory response:', userData);
+          if (userData.items) {
+            setUserInventory(userData.items.map((item: any) => ({
+              name: item.name,
+              price: item.value,
+              img: item.image,
+              uniqueId: item.uniqueId,
+              itemId: item.itemId
+            })));
+          }
+        } else {
+          console.log('No user ID available, skipping user inventory fetch');
         }
 
         // Fetch stock inventory
+        console.log('Fetching stock inventory for:', STOCK_USER_ID);
         const stockResponse = await fetch(`https://api-bash.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
         const stockData = await stockResponse.json();
+        console.log('Stock inventory response:', stockData);
         if (stockData.items) {
           setStockInventory(stockData.items.map((item: any) => ({
             name: item.name,
@@ -84,14 +99,33 @@ export default function UpgraderPage() {
     };
 
     fetchInventories();
-  }, [STOCK_USER_ID]);
+  }, [user?.id, STOCK_USER_ID]);
 
   const handleUpgrade = async () => {
-    if (!selectedInputItems.length || !selectedDesiredItem || !user) {
+    if (!user) {
+      console.log('No user logged in');
+      return;
+    }
+
+    if (!selectedInputItems.length) {
+      console.log('No input items selected');
+      return;
+    }
+
+    if (!selectedDesiredItem) {
+      console.log('No desired item selected');
       return;
     }
 
     setIsUpgrading(true);
+    setIsSpinning(true);
+    setUpgradeResult(null);
+
+    // Calculate win percentage
+    const inputValue = selectedInputItems.reduce((sum, item) => sum + item.price, 0);
+    const desiredValue = selectedDesiredItem.price;
+    const winPercentage = (inputValue / desiredValue) * 100;
+
     try {
       const response = await fetch('https://api-bash.onrender.com/upgrader/upgrade', {
         method: 'POST',
@@ -99,7 +133,7 @@ export default function UpgraderPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.userId || 'placeholder_user_id',
+          userId: user.id,
           stockRobloxUserId: STOCK_USER_ID,
           inputItemIds: selectedInputItems.map(item => item.uniqueId),
           desiredItemId: selectedDesiredItem.uniqueId,
@@ -107,39 +141,71 @@ export default function UpgraderPage() {
       });
 
       const result = await response.json();
-      
+
+      console.log('Upgrade result:', result);
+
       if (result.success) {
-        // Refresh inventories after upgrade
-        const userResponse = await fetch('https://api-bash.onrender.com/inventory/placeholder_user_id');
-        const userData = await userResponse.json();
-        if (userData.items) {
-          setUserInventory(userData.items.map((item: any) => ({
-            name: item.name,
-            price: item.value,
-            img: item.image,
-            uniqueId: item.uniqueId,
-            itemId: item.itemId
-          })));
+        // Calculate win percentage for landing position
+        const inputValue = selectedInputItems.reduce((sum, item) => sum + item.price, 0);
+        const desiredValue = selectedDesiredItem.price;
+        const winPercentage = (inputValue / desiredValue) * 100;
+        const winDegrees = winPercentage * 3.6;
+
+        // Calculate landing position based on result
+        let targetDegrees;
+        if (result.won) {
+          // Land in the blue stroke area (0 to winDegrees)
+          targetDegrees = Math.random() * winDegrees;
+        } else {
+          // Land in the transparent area (winDegrees to 360)
+          targetDegrees = winDegrees + Math.random() * (360 - winDegrees);
         }
 
-        const stockResponse = await fetch(`https://api-bash.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
-        const stockData = await stockResponse.json();
-        if (stockData.items) {
-          setStockInventory(stockData.items.map((item: any) => ({
-            name: item.name,
-            price: item.value,
-            img: item.image,
-            uniqueId: item.uniqueId,
-            itemId: item.itemId
-          })));
-        }
+        // Spin the wheel to land on target
+        const spinDegrees = 360 * 5 + (360 - targetDegrees); // 5 full rotations + land on target
+        setWheelRotation(spinDegrees);
 
-        // Clear selections
-        setSelectedInputItems([]);
-        setSelectedDesiredItem(null);
+        // Wait for spin to complete
+        setTimeout(async () => {
+          setIsSpinning(false);
+          setUpgradeResult(result.won ? 'won' : 'lost');
+
+          // Refresh inventories after upgrade
+          if (user.id) {
+            const userResponse = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`);
+            const userData = await userResponse.json();
+            if (userData.items) {
+              setUserInventory(userData.items.map((item: any) => ({
+                name: item.name,
+                price: item.value,
+                img: item.image,
+                uniqueId: item.uniqueId,
+                itemId: item.itemId
+              })));
+            }
+          }
+
+          const stockResponse = await fetch(`https://api-bash.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
+          const stockData = await stockResponse.json();
+          if (stockData.items) {
+            setStockInventory(stockData.items.map((item: any) => ({
+              name: item.name,
+              price: item.value,
+              img: item.image,
+              uniqueId: item.uniqueId,
+              itemId: item.itemId
+            })));
+          }
+
+          // Clear selections
+          setSelectedInputItems([]);
+          setSelectedDesiredItem(null);
+          setWheelRotation(0);
+        }, 3000); // 3 seconds spin duration
       }
     } catch (error) {
       console.error('Error processing upgrade:', error);
+      setIsSpinning(false);
     } finally {
       setIsUpgrading(false);
     }
@@ -238,13 +304,6 @@ export default function UpgraderPage() {
     },
   ]);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
   const handleProfileClick = (username: string, avatarUrl: string) => {
     console.log('Profile clicked:', username);
   };
@@ -263,6 +322,7 @@ export default function UpgraderPage() {
         className="absolute inset-0"
         style={{
           background: 'rgba(19, 22, 33, 0.3)',
+          pointerEvents: 'none',
         }}
       />
 
@@ -282,7 +342,7 @@ export default function UpgraderPage() {
       />
       <Sidebar onProfileClick={handleProfileClick} onGiftClick={() => setIsCreateGiveawayOpen(true)} onRulesClick={() => setIsRulesModalOpen(true)} />
 
-      <div className="page-content-area" style={{ overflow: 'auto' }}>
+      <div className="page-content-area" style={{ overflow: 'auto', pointerEvents: 'auto' }}>
         <div
           style={{
             minHeight: '100vh',
@@ -516,6 +576,8 @@ export default function UpgraderPage() {
               display: 'flex',
               flexDirection: 'column',
               gap: '24px',
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             {!isMobile && (
@@ -529,10 +591,12 @@ export default function UpgraderPage() {
                   backgroundColor: '#1E222F',
                   padding: '24px',
                   animation: 'fadeInUp 0.3s ease-out 0.1s both',
+                  position: 'relative',
+                  pointerEvents: 'auto',
                 }}
               >
                 {/* Wheel Section */}
-                <div style={{ display: 'grid', placeItems: 'center', marginBottom: '0', position: 'relative', height: '400px' }}>
+                <div style={{ display: 'grid', placeItems: 'center', marginBottom: '0', position: 'relative', height: '400px', overflow: 'visible' }}>
                   <div
                     style={{
                       position: 'absolute',
@@ -700,36 +764,40 @@ export default function UpgraderPage() {
                       width: '24.75%',
                     }}
                   >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        zIndex: 10,
-                        aspectRatio: '1',
-                        width: '100%',
-                        borderRadius: '50%',
-                        background: 'conic-gradient(transparent 0deg 0.01deg, #0276FF 1deg 0deg, transparent 0deg 360deg)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        zIndex: 10,
-                        aspectRatio: '1',
-                        width: '100%',
-                        borderRadius: '50%',
-                        background: 'conic-gradient(transparent 0deg 0.01deg, #0276FF 1deg 0deg, transparent 0deg 360deg)',
-                        opacity: 0.2,
-                        filter: 'blur(32px)',
-                      }}
-                    />
+                    {/* Static stroke showing win percentage */}
+                    {selectedDesiredItem && selectedInputItems.length > 0 && (
+                      <svg
+                        style={{
+                          position: 'absolute',
+                          zIndex: 10,
+                          aspectRatio: '1',
+                          width: '100%',
+                          transform: `rotate(${wheelRotation}deg)`,
+                          transition: isSpinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
+                        }}
+                        viewBox="0 0 100 100"
+                      >
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="#0276FF"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 283} 283`}
+                          transform="rotate(-90 50 50)"
+                        />
+                      </svg>
+                    )}
                     <div
                       style={{
                         position: 'absolute',
                         zIndex: 20,
                         display: 'grid',
                         aspectRatio: '1',
-                        width: 'calc(100% - 10px)',
-                        transform: 'translateX(5px) translateY(5px)',
+                        width: 'calc(100% - 20px)',
+                        transform: 'translateX(10px) translateY(10px)',
                         placeItems: 'center',
                         borderRadius: '50%',
                         backgroundColor: '#131621',
@@ -783,7 +851,40 @@ export default function UpgraderPage() {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <div style={{ display: 'grid', width: '43%' }}></div>
+                    <div style={{ display: 'grid', width: '43%' }}>
+                      {selectedInputItems.length > 0 && (
+                        <>
+                          <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '3%' }}>
+                            <span style={{ display: 'block', fontSize: '20px', fontWeight: 600 }}>
+                              {selectedInputItems.length === 1 ? selectedInputItems[0].name : `${selectedInputItems.length} items`}
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
+                              <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
+                              <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                            </span>
+                          </div>
+                          <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {selectedInputItems.length === 1 ? (
+                              <img src={selectedInputItems[0].img} width={64} height={64} style={{ aspectRatio: '1', width: '20%' }} />
+                            ) : (
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                {selectedInputItems.slice(0, 3).map((item, index) => (
+                                  <img key={index} src={item.img} width={48} height={48} style={{ aspectRatio: '1', width: '15%' }} />
+                                ))}
+                                {selectedInputItems.length > 3 && (
+                                  <span style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600 }}>+{selectedInputItems.length - 3}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5, filter: 'blur(4px)' }}>
+                            {selectedInputItems.length === 1 && (
+                              <img src={selectedInputItems[0].img} width={80} height={80} style={{ aspectRatio: '1', width: '25%' }} />
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
                     <div style={{ display: 'grid', width: '43%' }}>
                       {selectedDesiredItem && (
                         <>
@@ -805,7 +906,7 @@ export default function UpgraderPage() {
                     </div>
                   </div>
 
-                  {/* Win Text Overlays */}
+                  {/* Win Text Overlay */}
                   <div
                     style={{
                       pointerEvents: 'none',
@@ -815,43 +916,18 @@ export default function UpgraderPage() {
                       display: 'flex',
                       height: '100%',
                       width: '100%',
-                      justifyContent: 'space-between',
-                      opacity: 0,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      opacity: upgradeResult === 'won' ? 1 : 0,
+                      transition: 'opacity 0.5s',
                     }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        aspectRatio: '1.7',
-                        height: '100%',
-                        width: '43%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        perspective: '800px',
-                      }}
-                    >
-                      <svg width="368" height="62" viewBox="0 0 220 37" fill="#0df896" xmlns="http://www.w3.org/2000/svg" style={{ height: '50%', width: '60%', transform: 'translateX(5%) rotate3d(0, 1, 0, 30deg)' }}>
-                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#0df896" fontSize="28" fontWeight="bold" fontFamily="Poppins">SUCCESS</text>
-                      </svg>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        aspectRatio: '1.7',
-                        height: '100%',
-                        width: '43%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        perspective: '800px',
-                      }}
-                    >
-                      <svg width="368" height="62" viewBox="0 0 220 37" fill="#0df896" xmlns="http://www.w3.org/2000/svg" style={{ height: '50%', width: '60%', transform: 'translateX(-5%) rotate3d(0, 1, 0, -30deg)' }}>
-                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#0df896" fontSize="28" fontWeight="bold" fontFamily="Poppins">SUCCESS</text>
-                      </svg>
-                    </div>
+                    <svg width="368" height="62" viewBox="0 0 220 37" fill="#0df896" xmlns="http://www.w3.org/2000/svg" style={{ height: '15%', width: '40%' }}>
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#0df896" fontSize="28" fontWeight="bold" fontFamily="Poppins">SUCCESS</text>
+                    </svg>
                   </div>
 
-                  {/* Fail Text Overlays */}
+                  {/* Fail Text Overlay */}
                   <div
                     style={{
                       pointerEvents: 'none',
@@ -861,45 +937,21 @@ export default function UpgraderPage() {
                       display: 'flex',
                       height: '100%',
                       width: '100%',
-                      justifyContent: 'space-between',
-                      opacity: 0,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      opacity: upgradeResult === 'lost' ? 1 : 0,
+                      transition: 'opacity 0.5s',
                     }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        aspectRatio: '1.7',
-                        height: '100%',
-                        width: '43%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        perspective: '800px',
-                      }}
-                    >
-                      <svg width="284" height="62" viewBox="0 0 284 62" fill="#ef4363" xmlns="http://www.w3.org/2000/svg" style={{ height: '50%', width: '60%', transform: 'translateX(5%) rotate3d(0, 1, 0, 30deg)' }}>
-                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#ef4363" fontSize="28" fontWeight="bold" fontFamily="Poppins">FAIL</text>
-                      </svg>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        aspectRatio: '1.7',
-                        height: '100%',
-                        width: '43%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        perspective: '800px',
-                      }}
-                    >
-                      <svg width="284" height="62" viewBox="0 0 284 62" fill="#ef4363" xmlns="http://www.w3.org/2000/svg" style={{ height: '50%', width: '60%', transform: 'translateX(-5%) rotate3d(0, 1, 0, -30deg)' }}>
-                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#ef4363" fontSize="28" fontWeight="bold" fontFamily="Poppins">FAIL</text>
-                      </svg>
-                    </div>
+                    <svg width="284" height="62" viewBox="0 0 284 62" fill="#ef4363" xmlns="http://www.w3.org/2000/svg" style={{ height: '15%', width: '40%' }}>
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#ef4363" fontSize="28" fontWeight="bold" fontFamily="Poppins">FAIL</text>
+                    </svg>
                   </div>
 
                   {/* Side Panel Backgrounds */}
                   <div
                     style={{
+                      pointerEvents: 'none',
                       gridColumn: '1 / -1',
                       gridRow: '1 / -1',
                       display: 'flex',
@@ -922,6 +974,7 @@ export default function UpgraderPage() {
                   {/* Side Panel Fills */}
                   <div
                     style={{
+                      pointerEvents: 'none',
                       zIndex: 10,
                       gridColumn: '1 / -1',
                       gridRow: '1 / -1',
@@ -953,8 +1006,8 @@ export default function UpgraderPage() {
                 </div>
 
                 {/* Bottom Controls */}
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1000, pointerEvents: 'auto' }}>
+                  <div style={{ pointerEvents: 'auto' }}>
                     <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>Selected Total</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
@@ -962,8 +1015,13 @@ export default function UpgraderPage() {
                     </span>
                   </div>
                   <button
-                    onClick={handleUpgrade}
-                    disabled={isUpgrading || !selectedInputItems.length || !selectedDesiredItem}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Button clicked!');
+                      handleUpgrade();
+                    }}
+                    disabled={isUpgrading}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -971,7 +1029,7 @@ export default function UpgraderPage() {
                       gap: '8px',
                       whiteSpace: 'nowrap',
                       borderRadius: '8px',
-                      backgroundColor: isUpgrading || !selectedInputItems.length || !selectedDesiredItem ? '#2A3040' : '#0276FF',
+                      backgroundColor: isUpgrading ? '#2A3040' : '#0276FF',
                       color: '#FFFFFF',
                       padding: '8px 16px',
                       height: 'unset',
@@ -979,14 +1037,17 @@ export default function UpgraderPage() {
                       fontSize: '18px',
                       fontWeight: 600,
                       border: 'none',
-                      cursor: isUpgrading || !selectedInputItems.length || !selectedDesiredItem ? 'not-allowed' : 'pointer',
+                      cursor: isUpgrading ? 'not-allowed' : 'pointer',
                       fontFamily: 'Poppins',
-                      opacity: isUpgrading || !selectedInputItems.length || !selectedDesiredItem ? 0.5 : 1,
+                      opacity: isUpgrading ? 0.5 : 1,
+                      position: 'relative',
+                      zIndex: 10000,
+                      pointerEvents: 'auto',
                     }}
                   >
                     {isUpgrading ? 'Upgrading...' : 'Upgrade'}
                   </button>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', pointerEvents: 'auto' }}>
                     <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>Desired Total</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
@@ -1110,7 +1171,10 @@ export default function UpgraderPage() {
                           style={{
                             cursor: 'pointer',
                             borderRadius: '8px',
-                            border: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderTop: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderBottom: '8px solid #2A3040',
                             backgroundColor: '#131621',
                             padding: '16px 8px 8px',
                             display: 'flex',
@@ -1120,7 +1184,6 @@ export default function UpgraderPage() {
                             transition: 'all 0.3s',
                             position: 'relative',
                             overflow: 'hidden',
-                            borderBottom: '8px solid #2A3040',
                           }}
                         >
                           <div style={{ position: 'relative', width: '100%', aspectRatio: '1', maxWidth: '128px', maxHeight: '128px' }}>
@@ -1257,7 +1320,10 @@ export default function UpgraderPage() {
                           style={{
                             cursor: 'pointer',
                             borderRadius: '8px',
-                            border: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderTop: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderBottom: '8px solid #2A3040',
                             backgroundColor: '#131621',
                             padding: '16px 8px 8px',
                             display: 'flex',
@@ -1267,7 +1333,6 @@ export default function UpgraderPage() {
                             transition: 'all 0.3s',
                             position: 'relative',
                             overflow: 'hidden',
-                            borderBottom: '8px solid #2A3040',
                           }}
                         >
                           <div style={{ position: 'relative', width: '100%', aspectRatio: '1', maxWidth: '128px', maxHeight: '128px' }}>

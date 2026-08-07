@@ -150,7 +150,7 @@ router.post('/upgrade', async (req, res) => {
       userInventory.items = userInventory.items.filter(
         item => !inputItemIds.includes(item.uniqueId)
       );
-      
+
       // Add desired item to user inventory
       const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       userInventory.items.push({
@@ -158,12 +158,47 @@ router.post('/upgrade', async (req, res) => {
         itemId: desiredItem.itemId,
         acquiredAt: new Date()
       });
-      
+
       // Remove desired item from stock inventory
       stockInventory.items.splice(desiredItemIndex, 1);
-      
-      await userInventory.save();
-      await stockInventory.save();
+
+      try {
+        await userInventory.save();
+      } catch (versionError) {
+        if (versionError.name === 'VersionError') {
+          // Re-fetch and retry
+          userInventory = await Inventory.findOne({ userId });
+          userInventory.items = userInventory.items.filter(
+            item => !inputItemIds.includes(item.uniqueId)
+          );
+          userInventory.items.push({
+            uniqueId: newUniqueId,
+            itemId: desiredItem.itemId,
+            acquiredAt: new Date()
+          });
+          await userInventory.save();
+        } else {
+          throw versionError;
+        }
+      }
+
+      try {
+        await stockInventory.save();
+      } catch (versionError) {
+        if (versionError.name === 'VersionError') {
+          // Re-fetch and retry
+          stockInventory = await Inventory.findOne({ userId: stockUser._id });
+          const desiredItemIndex = stockInventory.items.findIndex(
+            item => item.uniqueId === desiredItemId
+          );
+          if (desiredItemIndex !== -1) {
+            stockInventory.items.splice(desiredItemIndex, 1);
+          }
+          await stockInventory.save();
+        } else {
+          throw versionError;
+        }
+      }
 
       // Emit socket events
       if (io) {
@@ -194,7 +229,7 @@ router.post('/upgrade', async (req, res) => {
       userInventory.items = userInventory.items.filter(
         item => !inputItemIds.includes(item.uniqueId)
       );
-      
+
       // Add input items to stock inventory
       for (const inputItem of inputItems) {
         const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -204,9 +239,41 @@ router.post('/upgrade', async (req, res) => {
           acquiredAt: new Date()
         });
       }
-      
-      await userInventory.save();
-      await stockInventory.save();
+
+      try {
+        await userInventory.save();
+      } catch (versionError) {
+        if (versionError.name === 'VersionError') {
+          // Re-fetch and retry
+          userInventory = await Inventory.findOne({ userId });
+          userInventory.items = userInventory.items.filter(
+            item => !inputItemIds.includes(item.uniqueId)
+          );
+          await userInventory.save();
+        } else {
+          throw versionError;
+        }
+      }
+
+      try {
+        await stockInventory.save();
+      } catch (versionError) {
+        if (versionError.name === 'VersionError') {
+          // Re-fetch and retry
+          stockInventory = await Inventory.findOne({ userId: stockUser._id });
+          for (const inputItem of inputItems) {
+            const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            stockInventory.items.push({
+              uniqueId: newUniqueId,
+              itemId: inputItem.itemId,
+              acquiredAt: new Date()
+            });
+          }
+          await stockInventory.save();
+        } else {
+          throw versionError;
+        }
+      }
 
       // Emit socket events
       if (io) {

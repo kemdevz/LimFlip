@@ -115,6 +115,24 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       const data = await response.json();
       if (Array.isArray(data)) {
         setMessages(data);
+        // Add all loaded messages to new message IDs for animation
+        const newIds = new Set<string>();
+        data.forEach((msg: Message, index: number) => {
+          const messageId = `${msg.username}-${msg.message}-${msg.time}`;
+          setTimeout(() => {
+            newIds.add(messageId);
+            setNewMessageIds(prev => new Set(prev).add(messageId));
+          }, index * 50); // Stagger animations by 50ms
+          
+          // Remove from new messages after animation completes
+          setTimeout(() => {
+            setNewMessageIds(prev => {
+              const next = new Set(prev);
+              next.delete(messageId);
+              return next;
+            });
+          }, 500 + (index * 50));
+        });
       }
     } catch (error) {
       console.error('Error fetching messages:', error);

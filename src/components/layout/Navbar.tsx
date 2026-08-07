@@ -65,14 +65,6 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
       onClick: () => router.push('/upgrader'),
     },
     {
-      id: 'cases',
-      label: 'Cases',
-      icon: '/assets/svg/navbar/cases.svg',
-      activeIcon: '/assets/svg/navbar/cases-active.svg',
-      active: pathname === '/cases',
-      onClick: () => router.push('/cases'),
-    },
-    {
       id: 'market',
       label: '',
       icon: '/assets/svg/ui/market.svg',
@@ -146,7 +138,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                   ref={(el) => { navRefs.current[index] = el; }}
                   style={{ marginRight: (item.id === 'market' || item.id === 'affiliates') ? '-10px' : '0' }}
                 >
-                  {index === 4 && (
+                  {index === 3 && (
                     <svg width="2" height="26" viewBox="0 0 2 26" fill="none" style={{ display: 'inline-block', marginRight: '26px', verticalAlign: 'middle' }}>
                       <rect width="2" height="26" rx="1" fill="#4C526B" />
                     </svg>

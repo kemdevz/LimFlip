@@ -116,13 +116,9 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       if (Array.isArray(data)) {
         setMessages(data);
         // Add all loaded messages to new message IDs for animation
-        const newIds = new Set<string>();
         data.forEach((msg: Message, index: number) => {
           const messageId = `${msg.username}-${msg.message}-${msg.time}`;
-          setTimeout(() => {
-            newIds.add(messageId);
-            setNewMessageIds(prev => new Set(prev).add(messageId));
-          }, index * 50); // Stagger animations by 50ms
+          setNewMessageIds(prev => new Set(prev).add(messageId));
           
           // Remove from new messages after animation completes
           setTimeout(() => {
@@ -131,7 +127,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
               next.delete(messageId);
               return next;
             });
-          }, 500 + (index * 50));
+          }, 400 + (index * 50));
         });
       }
     } catch (error) {

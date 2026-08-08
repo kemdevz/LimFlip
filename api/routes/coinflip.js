@@ -50,6 +50,103 @@ const formatAmount = (amount) => {
   }
 };
 
+// Get leaderboard data
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { type = 'profit' } = req.query;
+
+    // Get all completed coinflip games
+    const completedGames = await Coinflip.find({ status: 'completed' })
+      .populate('creator', 'username avatarUrl')
+      .populate('joiner', 'username avatarUrl')
+      .populate('winner', 'username avatarUrl');
+
+    // Calculate wager and profit data per user
+    const userStats = {};
+
+    completedGames.forEach(game => {
+      const creatorId = game.creator._id.toString();
+      const joinerId = game.joiner?._id.toString();
+      const winnerId = game.winner?._id.toString();
+
+      // Get wager amounts (use betAmount for balance-based, totalValue for item-based)
+      const creatorWager = game.isBalanceBased ? game.creatorBetAmount : game.totalValue;
+      const joinerWager = game.isBalanceBased ? game.joinerBetAmount : game.totalValue;
+
+      // Initialize user stats if not exists
+      if (!userStats[creatorId]) {
+        userStats[creatorId] = {
+          userId: creatorId,
+          username: game.creator.username,
+          avatarUrl: game.creator.avatarUrl,
+          totalWager: 0,
+          totalProfit: 0,
+          gamesPlayed: 0
+        };
+      }
+
+      if (joinerId && !userStats[joinerId]) {
+        userStats[joinerId] = {
+          userId: joinerId,
+          username: game.joiner.username,
+          avatarUrl: game.joiner.avatarUrl,
+          totalWager: 0,
+          totalProfit: 0,
+          gamesPlayed: 0
+        };
+      }
+
+      // Update wager stats
+      userStats[creatorId].totalWager += creatorWager;
+      userStats[creatorId].gamesPlayed += 1;
+
+      if (joinerId) {
+        userStats[joinerId].totalWager += joinerWager;
+        userStats[joinerId].gamesPlayed += 1;
+      }
+
+      // Calculate profit
+      if (winnerId) {
+        if (winnerId === creatorId) {
+          userStats[creatorId].totalProfit += joinerWager;
+          if (joinerId) {
+            userStats[joinerId].totalProfit -= creatorWager;
+          }
+        } else if (winnerId === joinerId) {
+          userStats[joinerId].totalProfit += creatorWager;
+          userStats[creatorId].totalProfit -= joinerWager;
+        }
+      }
+    });
+
+    // Convert to array and sort based on type
+    let sortedUsers = Object.values(userStats);
+
+    if (type === 'profit') {
+      sortedUsers.sort((a, b) => b.totalProfit - a.totalProfit);
+    } else if (type === 'wager') {
+      sortedUsers.sort((a, b) => b.totalWager - a.totalWager);
+    } else if (type === 'least') {
+      sortedUsers.sort((a, b) => a.totalProfit - b.totalProfit);
+    }
+
+    // Take top 10 and add rank
+    const leaderboard = sortedUsers.slice(0, 10).map((user, index) => ({
+      rank: index + 1,
+      username: user.username,
+      avatar: user.avatarUrl,
+      profit: user.totalProfit,
+      wager: user.totalWager,
+      gamesPlayed: user.gamesPlayed
+    }));
+
+    res.json({ leaderboard });
+  } catch (error) {
+    console.error('Error fetching leaderboard data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Helper function to emit inventory update
 const emitInventoryUpdate = (userId, inventory) => {
   if (io) {

@@ -79,7 +79,7 @@ export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
   const username = giveaway?.creator?.username || 'jakep123';
   const entries = giveaway ? `${giveaway.participantCount} entries` : '43 entries';
   const itemName = giveaway?.items?.[0]?.name || 'Luger';
-  const itemValue = giveaway?.totalValue ? `B$${(giveaway.totalValue / 1000).toFixed(0)}K` : 'B$1K';
+  const itemValue = giveaway?.totalValue ? `B$${giveaway.totalValue.toLocaleString()}` : 'B$1,000';
   const itemImage = giveaway?.items?.[0]?.image || '/assets/wallet/mm2.png';
 
   return (

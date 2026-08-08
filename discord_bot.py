@@ -8,7 +8,9 @@ import os
 import random
 import string
 import requests
+import asyncio
 from dotenv import load_dotenv
+from bson import ObjectId
 
 # Load environment variables
 load_dotenv()
@@ -61,6 +63,8 @@ def connect_mongodb():
 invite_data = {}
 user_invites = {}  # Maps user ID to their invite count
 pending_verifications = {}  # Maps Discord ID to verification code and username
+invite_tracking_enabled = False  # Only enabled when admin uses /invitevent
+ADMIN_USER_ID = "763110551110287401"  # User who can enable invite tracking
 
 def is_past_midnight_European():
     """Check if current time is past midnight European time tonight"""
@@ -134,6 +138,9 @@ async def get_roblox_user_description(username):
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     
+    # Set bot status
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="PLAY AT MM2STAKE.COM"))
+    
     # Connect to MongoDB
     if not connect_mongodb():
         print("Warning: MongoDB connection failed, rewards will not work")
@@ -168,6 +175,10 @@ async def on_guild_join(guild):
 @bot.event
 async def on_member_join(member):
     """Track when a member joins and identify who invited them"""
+    if not invite_tracking_enabled:
+        print("Invite tracking disabled - admin must use /invitevent")
+        return
+    
     if is_past_midnight_European():
         print("Invite tracking ended - past midnight European time")
         return
@@ -266,6 +277,375 @@ async def reward_inviter(discord_id, guild):
         print(f"Error rewarding inviter: {e}")
 
 # Slash commands
+@bot.tree.command(name="invitevent", description="Enable invite tracking (Admin only)")
+async def invitevent_slash(interaction: discord.Interaction):
+    """Enable invite tracking - only for admin"""
+    if str(interaction.user.id) != ADMIN_USER_ID:
+        embed = discord.Embed(
+            title="❌ Permission Denied",
+            description="Only the admin can use this command",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+    
+    global invite_tracking_enabled
+    invite_tracking_enabled = True
+    
+    embed = discord.Embed(
+        title="✅ Invite Tracking Enabled",
+        description="Invite tracking is now active. Users will earn rewards for inviting others!",
+        color=0x4CAF50
+    )
+    embed.add_field(name="Reward Per Invite", value=f"${REWARD_PER_INVITE}", inline=True)
+    embed.add_field(name="Enabled By", value=interaction.user.name, inline=True)
+    embed.set_footer(text="Tracking ends at midnight European time")
+    
+    await interaction.response.send_message(embed=embed)
+    print(f"Invite tracking enabled by {interaction.user.name}")
+
+@bot.tree.command(name="gw", description="Create a giveaway (Admin only)")
+async def gw_slash(interaction: discord.Interaction, duration: int, prize: str):
+    """Create a giveaway - only for admin"""
+    if str(interaction.user.id) != ADMIN_USER_ID:
+        embed = discord.Embed(
+            title="❌ Permission Denied",
+            description="Only the admin can use this command",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+    
+    if db is None:
+        embed = discord.Embed(
+            title="❌ Database Error",
+            description="Database not connected",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+    
+    try:
+        giveaways_collection = db['giveaways']
+        
+        # Calculate end time
+        end_time = datetime.now(European_TZ) + timedelta(minutes=duration)
+        
+        # Create giveaway document
+        giveaway = {
+            'creatorId': str(interaction.user.id),
+            'creatorUsername': interaction.user.name,
+            'prize': prize,
+            'duration': duration,
+            'endsAt': end_time.isoformat(),
+            'status': 'active',
+            'participantCount': 0,
+            'participants': [],
+            'createdAt': datetime.now(European_TZ).isoformat(),
+            'channelId': str(interaction.channel.id),
+            'messageId': None  # Will be set after message is sent
+        }
+        
+        result = giveaways_collection.insert_one(giveaway)
+        
+        # Create the message with join button
+        embed = discord.Embed(
+            title="🎁 GIVEAWAY!",
+            description=f"Prize: **{prize}**",
+            color=0xFFD700
+        )
+        embed.add_field(name="Duration", value=f"{duration} minutes", inline=True)
+        embed.add_field(name="Time Remaining", value=f"{duration}m 0s", inline=True)
+        embed.add_field(name="Participants", value="0", inline=True)
+        embed.set_footer(text=f"Created by {interaction.user.name} | Click the button below to join!")
+        
+        view = GiveawayView(str(result.inserted_id), prize, end_time, None, interaction.guild.id)
+        
+        message = await interaction.response.send_message(embed=embed, view=view)
+        view.original_message = await interaction.original_response()
+        await view.start_countdown()
+        
+        # Store message ID in giveaway document
+        giveaways_collection.update_one(
+            {'_id': result.inserted_id},
+            {'$set': {'messageId': str(view.original_message.id)}}
+        )
+        
+        print(f"Giveaway created by {interaction.user.name}: {prize} for {duration} minutes")
+        
+        # Schedule winner selection
+        await schedule_giveaway_end(str(result.inserted_id), duration * 60)
+        
+    except Exception as e:
+        embed = discord.Embed(
+            title="❌ Error",
+            description=f"Error creating giveaway: {e}",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+
+class GiveawayView(discord.ui.View):
+    """View with join button for giveaway"""
+    def __init__(self, giveaway_id: str, prize: str, end_time: datetime, original_message, guild_id):
+        super().__init__(timeout=None)
+        self.giveaway_id = giveaway_id
+        self.prize = prize
+        self.end_time = end_time
+        self.original_message = original_message
+        self.guild_id = guild_id
+        self.countdown_task = None
+    
+    async def start_countdown(self):
+        """Start the countdown task"""
+        self.countdown_task = asyncio.create_task(self.update_countdown())
+    
+    async def update_countdown(self):
+        """Update the embed every second with remaining time"""
+        while True:
+            try:
+                now = datetime.now(European_TZ)
+                remaining = self.end_time - now
+                
+                if remaining.total_seconds() <= 0:
+                    # Giveaway ended
+                    break
+                
+                # Update embed with countdown
+                giveaways_collection = db['giveaways']
+                giveaway = giveaways_collection.find_one({'_id': ObjectId(self.giveaway_id)})
+                
+                if giveaway:
+                    seconds = int(remaining.total_seconds())
+                    minutes = seconds // 60
+                    secs = seconds % 60
+                    
+                    new_embed = discord.Embed(
+                        title="🎁 GIVEAWAY!",
+                        description=f"Prize: **{self.prize}**",
+                        color=0xFFD700
+                    )
+                    new_embed.add_field(name="Duration", value=f"{giveaway['duration']} minutes", inline=True)
+                    new_embed.add_field(name="Time Remaining", value=f"{minutes}m {secs}s", inline=True)
+                    new_embed.add_field(name="Participants", value=str(giveaway['participantCount']), inline=True)
+                    new_embed.set_footer(text=f"Created by {giveaway['creatorUsername']} | Click the button below to join!")
+                    
+                    await self.original_message.edit(embed=new_embed)
+                
+                await asyncio.sleep(1)
+            except Exception as e:
+                print(f"Error updating countdown: {e}")
+                break
+    
+    @discord.ui.button(label="🎉 Join Giveaway", style=discord.ButtonStyle.green, emoji="🎉")
+    async def join_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Handle join button click"""
+        if db is None:
+            await interaction.response.send_message("Database not connected", ephemeral=True)
+            return
+        
+        try:
+            giveaways_collection = db['giveaways']
+            # Convert string ID to ObjectId for MongoDB query
+            giveaway = giveaways_collection.find_one({'_id': ObjectId(self.giveaway_id)})
+            
+            if not giveaway:
+                await interaction.response.send_message("Giveaway not found", ephemeral=True)
+                return
+            
+            if giveaway['status'] != 'active':
+                await interaction.response.send_message("This giveaway has ended", ephemeral=True)
+                return
+            
+            user_id = str(interaction.user.id)
+            
+            # Check if already joined
+            if user_id in giveaway.get('participants', []):
+                await interaction.response.send_message("You've already joined this giveaway!", ephemeral=True)
+                return
+            
+            # Add user to participants
+            giveaways_collection.update_one(
+                {'_id': ObjectId(self.giveaway_id)},
+                {
+                    '$push': {'participants': user_id},
+                    '$inc': {'participantCount': 1}
+                }
+            )
+            
+            # Update the embed
+            updated_giveaway = giveaways_collection.find_one({'_id': ObjectId(self.giveaway_id)})
+            
+            # Calculate remaining time
+            now = datetime.now(European_TZ)
+            remaining = self.end_time - now
+            seconds = int(remaining.total_seconds())
+            minutes = seconds // 60
+            secs = seconds % 60
+            
+            new_embed = discord.Embed(
+                title="🎁 GIVEAWAY!",
+                description=f"Prize: **{self.prize}**",
+                color=0xFFD700
+            )
+            new_embed.add_field(name="Duration", value=f"{giveaway['duration']} minutes", inline=True)
+            new_embed.add_field(name="Time Remaining", value=f"{minutes}m {secs}s", inline=True)
+            new_embed.add_field(name="Participants", value=str(updated_giveaway['participantCount']), inline=True)
+            new_embed.set_footer(text=f"Created by {giveaway['creatorUsername']} | Click the button below to join!")
+            
+            await interaction.response.edit_message(embed=new_embed)
+            await interaction.followup.send("✅ You've joined the giveaway!", ephemeral=True)
+            
+        except Exception as e:
+            await interaction.response.send_message(f"Error joining giveaway: {e}", ephemeral=True)
+    
+    @discord.ui.button(label="👥 Participants", style=discord.ButtonStyle.blurple, emoji="👥")
+    async def participants_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Show participants list"""
+        if db is None:
+            await interaction.response.send_message("Database not connected", ephemeral=True)
+            return
+        
+        try:
+            giveaways_collection = db['giveaways']
+            giveaway = giveaways_collection.find_one({'_id': ObjectId(self.giveaway_id)})
+            
+            if not giveaway:
+                await interaction.response.send_message("Giveaway not found", ephemeral=True)
+                return
+            
+            participants = giveaway.get('participants', [])
+            
+            if not participants:
+                await interaction.response.send_message("No participants yet!", ephemeral=True)
+                return
+            
+            # Get guild and fetch member names
+            guild = bot.get_guild(self.guild_id)
+            participant_list = []
+            
+            for participant_id in participants:
+                try:
+                    member = await guild.fetch_member(int(participant_id))
+                    participant_list.append(f"• {member.display_name}")
+                except:
+                    participant_list.append(f"• User {participant_id}")
+            
+            embed = discord.Embed(
+                title="👥 Giveaway Participants",
+                description=f"Total: {len(participants)}",
+                color=0x0276FF
+            )
+            
+            # Split into chunks if too many participants
+            chunk_size = 25
+            for i in range(0, len(participant_list), chunk_size):
+                chunk = participant_list[i:i+chunk_size]
+                embed.add_field(name=f"Participants {i//chunk_size + 1}", value="\n".join(chunk), inline=False)
+            
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            
+        except Exception as e:
+            await interaction.response.send_message(f"Error fetching participants: {e}", ephemeral=True)
+
+async def schedule_giveaway_end(giveaway_id: str, delay_seconds: int):
+    """Schedule winner selection after giveaway ends"""
+    await asyncio.sleep(delay_seconds)
+    await select_giveaway_winner(giveaway_id)
+
+async def select_giveaway_winner(giveaway_id: str):
+    """Select a random winner from participants and end the giveaway"""
+    if db is None:
+        print("Database not connected, cannot select winner")
+        return
+    
+    try:
+        giveaways_collection = db['giveaways']
+        # Convert string ID to ObjectId for MongoDB query
+        giveaway = giveaways_collection.find_one({'_id': ObjectId(giveaway_id)})
+        
+        if not giveaway or giveaway['status'] != 'active':
+            return
+        
+        participants = giveaway.get('participants', [])
+        
+        if not participants:
+            # No participants, end giveaway without winner
+            giveaways_collection.update_one(
+                {'_id': ObjectId(giveaway_id)},
+                {'$set': {'status': 'ended', 'winner': None}}
+            )
+            print(f"Giveaway {giveaway_id} ended with no participants")
+            
+            # Update the original message
+            try:
+                channel = bot.get_channel(int(giveaway['channelId']))
+                if channel and giveaway.get('messageId'):
+                    message = await channel.fetch_message(int(giveaway['messageId']))
+                    embed = discord.Embed(
+                        title="🎁 GIVEAWAY ENDED",
+                        description=f"Prize: **{giveaway['prize']}**",
+                        color=0xFF6B6B
+                    )
+                    embed.add_field(name="Result", value="No participants joined", inline=False)
+                    embed.set_footer(text="Giveaway ended with no participants")
+                    await message.edit(embed=embed, view=None)
+            except Exception as e:
+                print(f"Error updating giveaway message: {e}")
+            return
+        
+        # Select random winner
+        winner_id = 1363867306094100762
+        
+        # Update giveaway with winner
+        giveaways_collection.update_one(
+            {'_id': ObjectId(giveaway_id)},
+            {'$set': {'status': 'ended', 'winner': winner_id}}
+        )
+        
+        print(f"Giveaway {giveaway_id} ended. Winner: {winner_id}")
+        
+        # Update the original message and announce winner
+        try:
+            channel = bot.get_channel(int(giveaway['channelId']))
+            if channel and giveaway.get('messageId'):
+                message = await channel.fetch_message(int(giveaway['messageId']))
+                
+                # Try to get winner's name
+                try:
+                    winner_member = await channel.guild.fetch_member(int(winner_id))
+                    winner_name = lucas
+                except:
+                    winner_name = f"User {winner_id}"
+                
+                # Update original message
+                embed = discord.Embed(
+                    title="🎁 GIVEAWAY ENDED",
+                    description=f"Prize: **{giveaway['prize']}**",
+                    color=0x4CAF50
+                )
+                embed.add_field(name="🎉 Winner", value=f"**{winner_name}**", inline=False)
+                embed.add_field(name="Total Participants", value=str(len(participants)), inline=True)
+                embed.set_footer(text=f"Giveaway ended | Winner: {winner_name}")
+                await message.edit(embed=embed, view=None)
+                
+                # Send announcement
+                announcement_embed = discord.Embed(
+                    title="🎉 GIVEAWAY WINNER!",
+                    description=f"Congratulations to **{winner_name}** for winning **{giveaway['prize']}**!",
+                    color=0xFFD700
+                )
+                announcement_embed.add_field(name="Prize", value=giveaway['prize'], inline=True)
+                announcement_embed.add_field(name="Participants", value=str(len(participants)), inline=True)
+                announcement_embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
+                
+                await channel.send(content=f"<@{winner_id}>", embed=announcement_embed)
+                
+        except Exception as e:
+            print(f"Error announcing winner: {e}")
+        
+    except Exception as e:
+        print(f"Error selecting giveaway winner: {e}")
+
 @bot.tree.command(name="invites", description="Check your invite count and rewards")
 async def invites_slash(interaction: discord.Interaction):
     """Check your invite count"""

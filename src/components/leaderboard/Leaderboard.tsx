@@ -7,6 +7,8 @@ interface LeaderboardItem {
   username: string;
   avatar?: string;
   profit: number;
+  wager: number;
+  gamesPlayed: number;
 }
 
 interface LeaderboardProps {
@@ -14,12 +16,34 @@ interface LeaderboardProps {
   onClose?: () => void;
 }
 
-export default function Leaderboard({ items = mockItems, onClose }: LeaderboardProps) {
+export default function Leaderboard({ items, onClose }: LeaderboardProps) {
   const [activeTab, setActiveTab] = useState<'profit' | 'wager' | 'least'>('profit');
   const [shouldRender, setShouldRender] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardItem[]>([]);
+  const [loading, setLoading] = useState(false);
   const styleRef = useRef<HTMLStyleElement>(null);
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`https://api-bash.onrender.com/coinflip/leaderboard?type=${activeTab}`);
+        const data = await response.json();
+        setLeaderboardData(data.leaderboard || []);
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+        // Fallback to mock data if API fails
+        setLeaderboardData(mockItems);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, [activeTab]);
 
   useEffect(() => {
     // Trigger the open animation after component mounts
@@ -365,23 +389,28 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
               top: '39px',
             }}
           >
-            {items.map((item) => (
-              <div
-                key={item.rank}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  width: '539px',
-                  height: '61px',
-                  background: getRowBackground(item.rank),
-                  borderRadius: getBorderRadius(item.rank),
-                  flex: 'none',
-                  order: item.rank - 1,
-                  flexGrow: 0,
-                }}
-              >
+            {loading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#8890A2' }}>
+                Loading...
+              </div>
+            ) : (
+              leaderboardData.map((item) => (
+                <div
+                  key={item.rank}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    width: '539px',
+                    height: '61px',
+                    background: getRowBackground(item.rank),
+                    borderRadius: getBorderRadius(item.rank),
+                    flex: 'none',
+                    order: item.rank - 1,
+                    flexGrow: 0,
+                  }}
+                >
                 
                 <span
                   style={{
@@ -491,7 +520,8 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
                   </span>
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -502,12 +532,12 @@ export default function Leaderboard({ items = mockItems, onClose }: LeaderboardP
 
 // Mock data for demonstration
 const mockItems: LeaderboardItem[] = [
-  { rank: 1, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 2, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 3, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 4, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 5, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 6, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 7, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
-  { rank: 8, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451 },
+  { rank: 1, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 2, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 3, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 4, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 5, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 6, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 7, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
+  { rank: 8, username: 'Jake', avatar: '/assets/images/coinflip/item_1side.png', profit: 273451, wager: 500000, gamesPlayed: 50 },
 ];

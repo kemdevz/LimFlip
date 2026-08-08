@@ -15,8 +15,6 @@ const setIo = (socketIo) => {
   io = socketIo;
 };
 
-module.exports = { router, setIo };
-
 // Function to check and complete ended giveaways
 const checkAndCompleteGiveaways = async () => {
   try {
@@ -95,7 +93,7 @@ const startGiveawayChecker = () => {
   console.log('Giveaway checker started');
 };
 
-module.exports.startGiveawayChecker = startGiveawayChecker;
+module.exports = { router, setIo, startGiveawayChecker };
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -352,5 +350,3 @@ router.get('/:giveawayId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-module.exports = { router, setIo };

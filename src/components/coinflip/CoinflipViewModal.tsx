@@ -658,6 +658,69 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                 }}
               >
                 
+                {game?.creatorItems?.slice(0, 2).map((item: any) => (
+                  <div
+                    key={`creator-${item.itemId || item.name}`}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                      <span
+                        style={{
+                          fontFamily: 'Proxima Nova, Poppins, sans-serif',
+                          fontStyle: 'normal',
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          lineHeight: '13px',
+                          color: '#F3F3F3',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {item.name}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'Proxima Nova, Poppins, sans-serif',
+                          fontStyle: 'normal',
+                          fontWeight: 600,
+                          fontSize: '13px',
+                          lineHeight: '13px',
+                          color: '#006EFF',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {formatAmount(item.value)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  width: '100%',
+                  paddingLeft: '12px',
+                  paddingRight: '12px',
+                }}
+              >
+                
                 {game?.joinerItems?.slice(0, 2).map((item: any) => (
                   <div
                     key={`joiner-${item.itemId || item.name}`}

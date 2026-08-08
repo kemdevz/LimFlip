@@ -526,6 +526,7 @@ export default function UpgraderPage() {
               zIndex: 1,
             }}
           >
+            {/* Wheel Section - Desktop */}
             {!isMobile && (
               <div
                 style={{
@@ -1004,7 +1005,375 @@ export default function UpgraderPage() {
               </div>
             )}
 
-            {/* Inventory Selection Panels */}
+            {/* Wheel Section - Mobile */}
+            {isMobile && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid #2A3040',
+                  backgroundColor: '#191d29',
+                  padding: '16px',
+                  animation: 'fadeInUp 0.3s ease-out 0.1s both',
+                  position: 'relative',
+                  pointerEvents: 'auto',
+                }}
+              >
+                {/* Mobile Wheel */}
+                <div style={{ display: 'grid', placeItems: 'center', marginBottom: '0', position: 'relative', height: '300px', overflow: 'visible' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      aspectRatio: '1',
+                      width: '200px',
+                      transition: 'opacity 0.3s',
+                      opacity: 0,
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    {/* Success State */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        zIndex: 10,
+                        display: 'grid',
+                        aspectRatio: '1',
+                        width: 'calc(100% - 10px)',
+                        transform: 'translateX(5px) translateY(5px)',
+                        placeItems: 'center',
+                        overflow: 'hidden',
+                        borderRadius: '50%',
+                        backgroundColor: '#131621',
+                      }}
+                    >
+                      <div
+                        style={{
+                          pointerEvents: 'none',
+                          gridColumn: '1 / -1',
+                          gridRow: '1 / -1',
+                          padding: '10%',
+                          opacity: 0.5,
+                          aspectRatio: '1',
+                          width: '65%',
+                        }}
+                      >
+                        <svg width="54" height="43" viewBox="0 0 54 43" fill="#0df896" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+                          <path d="M7.83907 17.638L2.00475 23.4723L13.3502 34.8178L19.1839 40.6528H19.1852L25.0196 34.8185L51.6666 8.1701L45.8322 2.33578L19.1845 28.9835L7.83907 17.638ZM45.8322 0.921565L53.0808 8.1701L26.4331 34.8178L19.1852 42.067H19.1839L11.9353 34.8185L0.590534 23.4723L7.83907 16.2238L19.1845 27.5693L45.8322 0.921565Z"></path>
+                        </svg>
+                      </div>
+                      <div
+                        style={{
+                          zIndex: 50,
+                          display: 'flex',
+                          width: '100%',
+                          minWidth: 0,
+                          maxWidth: '100%',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gridArea: '1 / 1 / -1 / -1',
+                        }}
+                      >
+                        <div style={{ position: 'relative', width: '80%' }}>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', marginLeft: '-16px' }}></div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '14px', fontWeight: 600, color: '#0276FF' }}>
+                          <span style={{ marginRight: '4px' }}>+</span>
+                          <img src="/assets/svg/home/wallet.svg" width={14} height={12} />
+                          <span>0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        zIndex: 0,
+                        height: '100%',
+                        width: '100%',
+                        borderRadius: '50%',
+                        backgroundColor: '#0276FF',
+                        filter: 'blur(16px)',
+                        gridArea: '1 / 1 / -1 / -1',
+                      }}
+                    />
+                  </div>
+
+                  {/* Fail State */}
+                  <div
+                    style={{
+                      position: 'relative',
+                      aspectRatio: '1',
+                      width: '200px',
+                      transition: 'opacity 0.3s',
+                      opacity: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        zIndex: 40,
+                        display: 'grid',
+                        aspectRatio: '1',
+                        width: 'calc(100% - 10px)',
+                        transform: 'translateX(5px) translateY(5px)',
+                        placeItems: 'center',
+                        borderRadius: '50%',
+                        backgroundColor: '#131621',
+                      }}
+                    >
+                      <div
+                        style={{
+                          zIndex: 50,
+                          gridColumn: '1 / -1',
+                          gridRow: '1 / -1',
+                          display: 'flex',
+                          width: '100%',
+                          minWidth: 0,
+                          maxWidth: '100%',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <div style={{ position: 'relative', width: '80%' }}>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', marginLeft: '-16px' }}></div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '14px', fontWeight: 600, color: '#ef4363' }}>
+                          <span style={{ marginRight: '4px' }}>-</span>
+                          <img src="/assets/svg/home/wallet.svg" width={14} height={12} style={{ filter: 'brightness(0) saturate(100%) invert(38%) sepia(37%) saturate(4348%) hue-rotate(326deg) brightness(98%) contrast(91%)' }} />
+                          <span>0</span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          pointerEvents: 'none',
+                          gridColumn: '1 / -1',
+                          gridRow: '1 / -1',
+                          padding: '10%',
+                          opacity: 0.5,
+                          aspectRatio: '1',
+                          width: '65%',
+                        }}
+                      >
+                        <svg width="45" height="45" viewBox="0 0 45 45" fill="#ef4363" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+                          <path d="M44.1221 9.57727L30.877 22.8214L44.1221 36.0665L35.4482 44.7404L22.2031 31.4952L8.95898 44.7404L0.285156 36.0665L13.5293 22.8214L0.285156 9.57727L8.95898 0.903442L22.2031 14.1476L35.4473 0.903442L44.1221 9.57727ZM22.2031 15.5616L8.95898 2.3175L1.69922 9.57727L14.9434 22.8214L1.69824 36.0656L8.95801 43.3253L22.2031 30.0812L35.4482 43.3263L42.708 36.0665L29.4629 22.8214L42.707 9.57727L35.4473 2.31653L22.2031 15.5616Z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        zIndex: 0,
+                        gridColumn: '1 / -1',
+                        gridRow: '1 / -1',
+                        height: '100%',
+                        width: '100%',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(239, 67, 99, 0.5)',
+                        filter: 'blur(16px)',
+                      }}
+                    />
+                  </div>
+
+                  {/* Main Wheel */}
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 20,
+                      gridColumn: '1 / -1',
+                      gridRow: '1 / -1',
+                      aspectRatio: '1',
+                      width: '200px',
+                    }}
+                  >
+                    {/* Static stroke showing win percentage */}
+                    {selectedDesiredItem && selectedInputItems.length > 0 && (
+                      <svg
+                        style={{
+                          position: 'absolute',
+                          zIndex: 10,
+                          aspectRatio: '1',
+                          width: '100%',
+                          transform: `rotate(${wheelRotation}deg)`,
+                          transition: isSpinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
+                        }}
+                        viewBox="0 0 100 100"
+                      >
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="#0276FF"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 283} 283`}
+                          transform="rotate(-90 50 50)"
+                        />
+                      </svg>
+                    )}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        zIndex: 20,
+                        display: 'grid',
+                        aspectRatio: '1',
+                        width: 'calc(100% - 20px)',
+                        transform: 'translateX(10px) translateY(10px)',
+                        placeItems: 'center',
+                        borderRadius: '50%',
+                        backgroundColor: '#131621',
+                      }}
+                    >
+                      <div
+                        style={{
+                          pointerEvents: 'none',
+                          zIndex: 50,
+                          gridColumn: '1 / -1',
+                          gridRow: '1 / -1',
+                          display: 'flex',
+                          height: '100%',
+                          width: '100%',
+                          justifyContent: 'center',
+                          transform: 'rotate(0deg) scale(1.1)',
+                        }}
+                      >
+                        <span style={{ height: 'fit-content', borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '16px solid #0276FF' }}></span>
+                      </div>
+                      <div
+                        style={{
+                          height: '100%',
+                          width: '100%',
+                          padding: '20%',
+                          gridArea: '1 / 1 / -1 / -1',
+                        }}
+                      >
+                        <img src="/assets/svg/ui/logo.svg" alt="" style={{ aspectRatio: '1', width: '100%', opacity: 0.05 }} />
+                      </div>
+                      <div style={{ textAlign: 'center', gridArea: '1 / 1 / -1 / -1' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 500 }}></span>
+                        <span style={{ display: 'block', fontSize: '32px', fontWeight: 600, color: '#FFFFFF' }}>
+                          {selectedDesiredItem && selectedInputItems.length > 0
+                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 100).toFixed(2) + '%'
+                            : '0.00%'}
+                        </span>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' }}>Chance</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Win Text Overlay */}
+                  <div
+                    style={{
+                      pointerEvents: 'none',
+                      zIndex: 30,
+                      gridColumn: '1 / -1',
+                      gridRow: '1 / -1',
+                      display: 'flex',
+                      height: '100%',
+                      width: '100%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      opacity: upgradeResult === 'won' ? 1 : 0,
+                      transition: 'opacity 0.5s',
+                    }}
+                  >
+                    <svg width="200" height="40" viewBox="0 0 220 37" fill="#0df896" xmlns="http://www.w3.org/2000/svg" style={{ height: '15%', width: '60%' }}>
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#0df896" fontSize="24" fontWeight="bold" fontFamily="Poppins">SUCCESS</text>
+                    </svg>
+                  </div>
+
+                  {/* Fail Text Overlay */}
+                  <div
+                    style={{
+                      pointerEvents: 'none',
+                      zIndex: 30,
+                      gridColumn: '1 / -1',
+                      gridRow: '1 / -1',
+                      display: 'flex',
+                      height: '100%',
+                      width: '100%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      opacity: upgradeResult === 'lost' ? 1 : 0,
+                      transition: 'opacity 0.5s',
+                    }}
+                  >
+                    <svg width="180" height="40" viewBox="0 0 284 62" fill="#ef4363" xmlns="http://www.w3.org/2000/svg" style={{ height: '15%', width: '60%' }}>
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#ef4363" fontSize="24" fontWeight="bold" fontFamily="Poppins">FAIL</text>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Mobile Multiplier Display */}
+                <div style={{ textAlign: 'center', marginBottom: '0', marginTop: '10px' }}>
+                  <span style={{ fontSize: '14px' }}>Multiplier: </span>
+                  <span style={{ fontWeight: 600, color: '#0276FF', fontSize: '16px' }}>
+                    {selectedDesiredItem && selectedInputItems.length > 0
+                      ? (selectedDesiredItem.price / selectedInputItems.reduce((sum, item) => sum + item.price, 0)).toFixed(2)
+                      : '0.00'}
+                  </span>
+                  <span style={{ fontSize: '14px' }}>x</span>
+                </div>
+
+                {/* Mobile Bottom Controls */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1000, pointerEvents: 'auto', gap: '12px' }}>
+                  <div style={{ pointerEvents: 'auto', flex: 1 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>Selected</div>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
+                      <img src="/assets/svg/home/wallet.svg" width={14} height={12} />
+                      <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Button clicked!');
+                      handleUpgrade();
+                    }}
+                    disabled={isUpgrading}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      whiteSpace: 'nowrap',
+                      borderRadius: '8px',
+                      backgroundColor: isUpgrading ? '#2A3040' : '#0276FF',
+                      color: '#FFFFFF',
+                      padding: '10px 20px',
+                      height: 'unset',
+                      flex: 1,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: isUpgrading ? 'not-allowed' : 'pointer',
+                      fontFamily: 'Poppins',
+                      opacity: isUpgrading ? 0.5 : 1,
+                      position: 'relative',
+                      zIndex: 10000,
+                      pointerEvents: 'auto',
+                    }}
+                  >
+                    {isUpgrading ? 'Upgrading...' : 'Upgrade'}
+                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', pointerEvents: 'auto', flex: 1 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>Desired</div>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
+                      <img src="/assets/svg/home/wallet.svg" width={14} height={12} />
+                      <span style={{ fontWeight: 600 }}>{selectedDesiredItem ? selectedDesiredItem.price : 0}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Inventory Selection Panels - Desktop */}
             {!isMobile && (
               <div
                 style={{
@@ -1321,7 +1690,7 @@ export default function UpgraderPage() {
               </div>
             )}
 
-            {/* Mobile View */}
+            {/* Mobile Inventory Selection */}
             {isMobile && (
               <div
                 style={{
@@ -1330,6 +1699,7 @@ export default function UpgraderPage() {
                   gap: '16px',
                 }}
               >
+                {/* Input Items Selection */}
                 <div
                   style={{
                     borderRadius: '12px',
@@ -1340,7 +1710,7 @@ export default function UpgraderPage() {
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                      Select Item
+                      Select Input Items
                     </label>
                     <input
                       type="text"
@@ -1358,10 +1728,104 @@ export default function UpgraderPage() {
                       }}
                     />
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                    <button
+                  <div
+                    style={{
+                      marginTop: '16px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <div
                       style={{
-                        flex: 1,
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '12px',
+                      }}
+                    >
+                      {userInventory.map((item, i) => (
+                        <button
+                          key={item.uniqueId || i}
+                          onClick={() => {
+                            const isSelected = selectedInputItems.some(selected => selected.uniqueId === item.uniqueId);
+                            if (isSelected) {
+                              setSelectedInputItems(selectedInputItems.filter(selected => selected.uniqueId !== item.uniqueId));
+                            } else {
+                              setSelectedInputItems([...selectedInputItems, item]);
+                            }
+                          }}
+                          style={{
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            borderTop: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderBottom: '8px solid #2A3040',
+                            backgroundColor: '#131621',
+                            padding: '12px 8px 8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s',
+                            position: 'relative',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div style={{ position: 'relative', width: '100%', aspectRatio: '1', maxWidth: '80px', maxHeight: '80px' }}>
+                            <img
+                              src={item.img}
+                              alt=""
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                filter: 'blur(4px)',
+                              }}
+                            />
+                            <img
+                              src={item.img}
+                              alt=""
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                              }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#FFFFFF', maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {item.name}
+                            </span>
+                            <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#0276FF' }}>
+                              R${item.price}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desired Item Selection */}
+                <div
+                  style={{
+                    borderRadius: '12px',
+                    border: '1px solid #2A3040',
+                    backgroundColor: '#191d29',
+                    padding: '16px',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
+                      Select Desired Item
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Search for an item.."
+                      style={{
                         height: '48px',
                         padding: '0 12px',
                         borderRadius: '8px',
@@ -1371,62 +1835,80 @@ export default function UpgraderPage() {
                         fontWeight: 600,
                         fontSize: '14px',
                         color: 'rgba(255, 255, 255, 0.5)',
-                        cursor: 'pointer',
                       }}
-                    >
-                      High - Low
-                    </button>
-                    <button
-                      style={{
-                        flex: 1,
-                        height: '48px',
-                        padding: '0 12px',
-                        borderRadius: '8px',
-                        border: '2px solid rgba(255, 255, 255, 0.25)',
-                        backgroundColor: 'transparent',
-                        fontFamily: 'Poppins',
-                        fontWeight: 600,
-                        fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Murder Mystery 2
-                    </button>
+                    />
                   </div>
                   <div
                     style={{
                       marginTop: '16px',
-                      height: '300px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '16px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
                     }}
                   >
-                    <span style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '24px', color: '#FFFFFF' }}>
-                      No Items!
-                    </span>
-                    <p style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                      Your inventory seems to be empty...
-                    </p>
-                    <button
+                    <div
                       style={{
-                        height: '44px',
-                        padding: '0 32px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        backgroundColor: '#0276FF',
-                        fontFamily: 'Poppins',
-                        fontWeight: 600,
-                        fontSize: '14px',
-                        color: '#FFFFFF',
-                        cursor: 'pointer',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '12px',
                       }}
                     >
-                      Deposit Items
-                    </button>
+                      {stockInventory.map((item, i) => (
+                        <button
+                          key={item.uniqueId || i}
+                          onClick={() => setSelectedDesiredItem(item)}
+                          style={{
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            borderTop: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderBottom: '8px solid #2A3040',
+                            backgroundColor: '#131621',
+                            padding: '12px 8px 8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s',
+                            position: 'relative',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div style={{ position: 'relative', width: '100%', aspectRatio: '1', maxWidth: '80px', maxHeight: '80px' }}>
+                            <img
+                              src={item.img}
+                              alt=""
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                filter: 'blur(4px)',
+                              }}
+                            />
+                            <img
+                              src={item.img}
+                              alt=""
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                              }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#FFFFFF', maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {item.name}
+                            </span>
+                            <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#0276FF' }}>
+                              R${item.price}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

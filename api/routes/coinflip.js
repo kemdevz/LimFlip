@@ -88,18 +88,25 @@ router.post('/create', async (req, res) => {
     // Handle balance-based coinflip
     if (isBalanceBased) {
       if (!betAmount || betAmount <= 0) {
+        console.log('Invalid bet amount:', betAmount);
         return res.status(400).json({ error: 'Invalid bet amount' });
       }
 
       // Get user and check balance
       const user = await User.findById(userId);
       if (!user) {
+        console.log('User not found:', userId);
         return res.status(404).json({ error: 'User not found' });
       }
 
+      console.log('User balance:', user.balance, 'Bet amount:', betAmount);
+
       if (user.balance < betAmount) {
+        console.log('Insufficient balance:', { userBalance: user.balance, betAmount });
         return res.status(400).json({ error: 'Insufficient balance' });
       }
+
+      console.log('Creating balance-based coinflip:', { userId, betAmount, selectedCoin });
 
       // Deduct balance from user
       user.balance -= betAmount;

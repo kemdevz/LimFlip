@@ -525,6 +525,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
                 time={msg.time}
                 avatarUrl={msg.avatarUrl}
                 isWhale={msg.isWhale}
+                role={msg.role}
                 isNew={isNew}
                 onProfileClick={() => handleProfileClick(msg.username, msg.avatarUrl)}
               />

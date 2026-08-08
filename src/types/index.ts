@@ -33,6 +33,7 @@ export interface Message {
   time: string;
   avatarUrl: string;
   isWhale?: boolean;
+  role?: 'User' | 'Moderator' | 'Owner';
 }
 
 export interface NavItem {

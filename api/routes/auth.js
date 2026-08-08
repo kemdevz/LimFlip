@@ -255,7 +255,8 @@ router.get('/me', async (req, res) => {
       username: user.username,
       robloxUserId: user.robloxUserId,
       avatarUrl: avatarUrl,
-      balance: user.balance || 0
+      balance: user.balance || 0,
+      role: user.role || 'User'
     });
   } catch (error) {
     console.error('Get me error:', error);
@@ -325,6 +326,51 @@ router.post('/link-discord', async (req, res) => {
   } catch (error) {
     console.error('Link Discord error:', error);
     res.status(500).json({ error: 'Failed to link Discord account' });
+  }
+});
+
+// Change user role (admin only)
+router.post('/change-role', async (req, res) => {
+  try {
+    const { targetUserId, newRole, adminUserId } = req.body;
+
+    if (!targetUserId || !newRole || !adminUserId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Validate role
+    const validRoles = ['User', 'Moderator', 'Owner'];
+    if (!validRoles.includes(newRole)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    // Check if admin user is Owner
+    const adminUser = await User.findById(adminUserId);
+    if (!adminUser || adminUser.role !== 'Owner') {
+      return res.status(403).json({ error: 'Only Owner can change roles' });
+    }
+
+    // Find target user
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Target user not found' });
+    }
+
+    // Update user role
+    targetUser.role = newRole;
+    await targetUser.save();
+
+    console.log(`Changed role of user ${targetUser.username} to ${newRole} by ${adminUser.username}`);
+
+    res.json({
+      success: true,
+      message: `User role changed to ${newRole}`,
+      username: targetUser.username,
+      newRole: targetUser.role
+    });
+  } catch (error) {
+    console.error('Change role error:', error);
+    res.status(500).json({ error: 'Failed to change user role' });
   }
 });
 

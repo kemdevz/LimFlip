@@ -8,6 +8,7 @@ interface MessageChatProps {
   time?: string;
   avatarUrl?: string;
   isWhale?: boolean;
+  role?: 'User' | 'Moderator' | 'Owner';
   onProfileClick?: () => void;
   isNew?: boolean;
 }
@@ -18,6 +19,7 @@ export default function MessageChat({
   time = '15:24',
   avatarUrl,
   isWhale = true,
+  role = 'User',
   onProfileClick,
   isNew = false,
 }: MessageChatProps) {
@@ -170,7 +172,7 @@ export default function MessageChat({
                   fontWeight: 600,
                   fontSize: '16px',
                   lineHeight: '24px',
-                  color: isWhale ? '#006EFF' : '#FFFFFF',
+                  color: role === 'Owner' ? '#FFD700' : role === 'Moderator' ? '#FF4444' : isWhale ? '#006EFF' : '#FFFFFF',
                   flex: 'none',
                   order: 0,
                   flexGrow: 0,

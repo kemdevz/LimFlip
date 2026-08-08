@@ -131,7 +131,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           right: 0,
           bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
+          zIndex: 2000,
           animation: isAnimatingOut ? 'fadeOut 0.2s ease-out' : 'fadeIn 0.2s ease-out',
         }}
         onClick={onClose}
@@ -141,9 +141,9 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
           style={{
             position: 'relative',
             width: isMobile ? '100%' : '1134px',
-            height: isMobile ? '100%' : '721px',
+            height: isMobile ? 'calc(100% - 59px)' : '721px',
             maxWidth: isMobile ? '100%' : '1134px',
-            maxHeight: isMobile ? '100%' : '721px',
+            maxHeight: isMobile ? 'calc(100% - 59px)' : '721px',
             filter: 'drop-shadow(0px 4px 20.4px rgba(0, 0, 0, 0.25))',
             animation: isAnimatingOut ? 'scaleOut 0.2s ease-out' : 'scaleIn 0.2s ease-out',
           }}
@@ -204,6 +204,50 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
               }}
             />
           </>
+        )}
+
+        {isMobile && (
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              right: '16px',
+              top: 'calc(100% - 60px)',
+            }}
+          >
+            <div
+              onClick={() => setSelectedSide('tails')}
+              style={{
+                width: '42px',
+                height: '42px',
+                background: 'url(/assets/images/coinflip/tails.png)',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                filter: selectedSide === 'tails' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+                opacity: selectedSide === 'tails' ? 1 : 0.5,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            />
+            <div
+              onClick={() => setSelectedSide('heads')}
+              style={{
+                width: '42px',
+                height: '42px',
+                background: 'url(/assets/images/coinflip/heads.png)',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                filter: selectedSide === 'heads' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+                opacity: selectedSide === 'heads' ? 1 : 0.5,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            />
+          </div>
         )}
 
         

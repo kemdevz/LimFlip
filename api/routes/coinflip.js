@@ -79,9 +79,62 @@ const createInventoryItem = (itemId) => {
 // Create a new coinflip game
 router.post('/create', async (req, res) => {
   try {
-    const { userId, uniqueIds, betAmount, selectedCoin } = req.body;
+    const { userId, uniqueIds, betAmount, selectedCoin, isBalanceBased } = req.body;
     
-    if (!userId || !uniqueIds || uniqueIds.length === 0) {
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+
+    // Handle balance-based coinflip
+    if (isBalanceBased) {
+      if (!betAmount || betAmount <= 0) {
+        return res.status(400).json({ error: 'Invalid bet amount' });
+      }
+
+      // Get user and check balance
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      if (user.balance < betAmount) {
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+
+      // Deduct balance from user
+      user.balance -= betAmount;
+      await user.save();
+
+      // Create balance-based game
+      const game = new Coinflip({
+        creator: userId,
+        creatorItems: [],
+        items: [],
+        totalValue: betAmount,
+        status: 'waiting',
+        selectedCoin: selectedCoin || 'heads',
+        isBalanceBased: true,
+        creatorBetAmount: betAmount,
+        joinerBetAmount: 0
+      });
+
+      await game.save();
+
+      // Populate creator data before emitting
+      const populatedGame = await Coinflip.findById(game._id)
+        .populate('creator', 'username avatarUrl')
+        .populate('joiner', 'username avatarUrl');
+
+      // Emit socket event for new game
+      if (io) {
+        io.emit('coinflip-created', { game: populatedGame });
+      }
+
+      return res.json({ message: 'Balance-based coinflip game created', game: populatedGame });
+    }
+
+    // Handle item-based coinflip (existing logic)
+    if (!uniqueIds || uniqueIds.length === 0) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
@@ -127,6 +180,9 @@ router.post('/create', async (req, res) => {
       totalValue,
       status: 'waiting',
       selectedCoin: selectedCoin || 'heads',
+      isBalanceBased: false,
+      creatorBetAmount: 0,
+      joinerBetAmount: 0
     });
 
     await game.save();
@@ -168,33 +224,11 @@ router.post('/create', async (req, res) => {
 router.post('/join/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { userId, uniqueIds, betAmount } = req.body;
+    const { userId, uniqueIds, betAmount, isBalanceBased } = req.body;
 
-    if (!userId || !uniqueIds || uniqueIds.length === 0) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
     }
-
-    // Get user inventory first to validate items
-    let inventory = await Inventory.findOne({ userId });
-
-    if (!inventory) {
-      // Create inventory if it doesn't exist
-      inventory = new Inventory({ userId, items: [] });
-      await inventory.save();
-    }
-
-    // Check if user owns all the items by uniqueId
-    const inventoryUniqueIds = inventory.items.map(item => item.uniqueId);
-    const missingItems = uniqueIds.filter(id => !inventoryUniqueIds.includes(id));
-
-    if (missingItems.length > 0) {
-      return res.status(400).json({ error: 'You do not own all the selected items' });
-    }
-
-    // Get selected items with populated details
-    const selectedItems = inventory.items.filter(item => uniqueIds.includes(item.uniqueId));
-    const populatedItems = await populateItemDetails(selectedItems);
-    const totalValue = populatedItems.reduce((sum, item) => sum + item.value, 0);
 
     // Atomically find and update game to prevent race condition
     const game = await Coinflip.findOneAndUpdate(
@@ -214,6 +248,134 @@ router.post('/join/:gameId', async (req, res) => {
       await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
       return res.status(400).json({ error: 'You cannot join your own game' });
     }
+
+    // Handle balance-based joining
+    if (game.isBalanceBased || isBalanceBased) {
+      if (!betAmount || betAmount <= 0) {
+        await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+        return res.status(400).json({ error: 'Invalid bet amount' });
+      }
+
+      // Check if bet is within 10% of game value
+      const gameValue = game.totalValue;
+      const minValue = gameValue * 0.9;
+      const maxValue = gameValue * 1.1;
+
+      if (betAmount < minValue || betAmount > maxValue) {
+        await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+        return res.status(400).json({
+          error: `Bet amount must be between ${formatAmount(minValue)} and ${formatAmount(maxValue)}`
+        });
+      }
+
+      // Get user and check balance
+      const user = await User.findById(userId);
+      if (!user) {
+        await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      if (user.balance < betAmount) {
+        await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+        return res.status(400).json({ error: 'Insufficient balance' });
+      }
+
+      // Deduct balance from joiner
+      user.balance -= betAmount;
+      await user.save();
+
+      // Update game with joiner
+      game.joiner = userId;
+      game.joinerItems = [];
+      game.items = [];
+      game.totalValue += betAmount;
+      game.status = 'active';
+      game.joinerBetAmount = betAmount;
+      game.isBalanceBased = true;
+
+      await game.save();
+
+      // Populate game data before emitting
+      const populatedGame = await Coinflip.findById(game._id)
+        .populate('creator', 'username avatarUrl')
+        .populate('joiner', 'username avatarUrl');
+
+      // Emit socket event for game joined
+      if (io) {
+        io.emit('coinflip-joined', { game: populatedGame });
+      }
+
+      // Schedule game completion after countdown (5 seconds)
+      setTimeout(async () => {
+        try {
+          // Determine winner by random coin flip
+          const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
+          const winnerId = coinFlip === game.selectedCoin ? creatorId : userId;
+          
+          game.winner = winnerId;
+          game.result = coinFlip;
+          game.status = 'completed';
+          game.completedAt = new Date();
+          
+          await game.save();
+          
+          console.log('Balance-based game completed:', { gameId: game._id, winner: winnerId, result: coinFlip });
+
+          // Populate game data before emitting
+          const completedGame = await Coinflip.findById(game._id)
+            .populate('creator', 'username avatarUrl')
+            .populate('joiner', 'username avatarUrl');
+
+          // Calculate total pot (no tax for balance-based games)
+          const totalPot = game.creatorBetAmount + game.joinerBetAmount;
+
+          // Give total pot to winner
+          const winner = await User.findById(winnerId);
+          if (winner) {
+            winner.balance += totalPot;
+            await winner.save();
+          }
+
+          // Emit socket event for game completion
+          if (io) {
+            io.emit('coinflip-completed', { game: completedGame });
+          }
+        } catch (error) {
+          console.error('Error completing balance-based game:', error);
+        }
+      }, 5000); // 5 second countdown
+      
+      return res.json({ message: 'Joined balance-based coinflip game', game: populatedGame });
+    }
+
+    // Handle item-based joining (existing logic)
+    if (!uniqueIds || uniqueIds.length === 0) {
+      await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Get user inventory first to validate items
+    let inventory = await Inventory.findOne({ userId });
+
+    if (!inventory) {
+      // Create inventory if it doesn't exist
+      inventory = new Inventory({ userId, items: [] });
+      await inventory.save();
+    }
+
+    // Check if user owns all the items by uniqueId
+    const inventoryUniqueIds = inventory.items.map(item => item.uniqueId);
+    const missingItems = uniqueIds.filter(id => !inventoryUniqueIds.includes(id));
+
+    if (missingItems.length > 0) {
+      await Coinflip.findByIdAndUpdate(gameId, { $set: { status: 'waiting' } });
+      return res.status(400).json({ error: 'You do not own all the selected items' });
+    }
+
+    // Get selected items with populated details
+    const selectedItems = inventory.items.filter(item => uniqueIds.includes(item.uniqueId));
+    const populatedItems = await populateItemDetails(selectedItems);
+    const totalValue = populatedItems.reduce((sum, item) => sum + item.value, 0);
 
     // Check if bet is within 10% of game value
     const gameValue = game.totalValue;
@@ -505,6 +667,22 @@ router.post('/cancel/:gameId', async (req, res) => {
       return res.status(403).json({ error: 'Only the creator can cancel the game' });
     }
 
+    // Handle balance-based cancellation
+    if (game.isBalanceBased) {
+      // Return balance to creator
+      const user = await User.findById(userId);
+      if (user) {
+        user.balance += game.creatorBetAmount;
+        await user.save();
+      }
+
+      // Delete the game
+      await Coinflip.findByIdAndDelete(gameId);
+
+      return res.json({ message: 'Balance-based game cancelled successfully, balance returned' });
+    }
+
+    // Handle item-based cancellation (existing logic)
     // Return items to user's inventory atomically
     const Inventory = require('../models/Inventory');
     let inventory = await Inventory.findOne({ userId });

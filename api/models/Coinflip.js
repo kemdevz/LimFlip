@@ -39,6 +39,18 @@ const coinflipSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  isBalanceBased: {
+    type: Boolean,
+    default: false
+  },
+  creatorBetAmount: {
+    type: Number,
+    default: 0
+  },
+  joinerBetAmount: {
+    type: Number,
+    default: 0
+  },
   status: {
     type: String,
     enum: ['waiting', 'active', 'completed', 'cancelled'],

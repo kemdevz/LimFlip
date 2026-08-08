@@ -15,7 +15,7 @@ const userStatsRoutes = require('./routes/userStats');
 const { router: marketplaceRoutes, setIo: setMarketplaceIo } = require('./routes/marketplace');
 const { router: mm2Routes, setIo: setMm2Io } = require('./routes/mm2');
 const { router: depositRoutes, setIo: setDepositIo } = require('./routes/deposit');
-const { router: giveawayRoutes, setIo: setGiveawayIo } = require('./routes/giveaway');
+const { router: giveawayRoutes, setIo: setGiveawayIo, startGiveawayChecker } = require('./routes/giveaway');
 const messagesRoutes = require('./routes/messages');
 const cryptoRoutes = require('./routes/crypto');
 const { router: upgraderRoutes, setIo: setUpgraderIo } = require('./routes/upgrader');
@@ -45,6 +45,9 @@ setMarketplaceIo(io);
 setDepositIo(io);
 setGiveawayIo(io);
 setUpgraderIo(io);
+
+// Start giveaway checker
+startGiveawayChecker();
 
 let onlineUsers = 9; // Start with 9 fake online users
 

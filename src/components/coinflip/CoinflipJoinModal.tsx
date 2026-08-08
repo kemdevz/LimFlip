@@ -20,11 +20,15 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
   const [isVisible, setIsVisible] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [animatedAmount, setAnimatedAmount] = useState(0);
+  const [balanceAmount, setBalanceAmount] = useState('');
   const isMobile = useIsMobile();
   
   // Get user from useAuth hook
   const { user } = useAuth();
   const { inventory, loading, error } = useInventory(user?.id || null);
+
+  // Check if game is balance-based
+  const isBalanceBasedGame = game?.isBalanceBased || false;
 
   const toggleItemSelection = (uniqueId: string) => {
     setSelectedItems((prev) => {
@@ -44,11 +48,14 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
     return sum + (item?.value || ITEM_VALUE);
   }, 0);
   
+  // Use balance amount if balance-based game, otherwise use selected items value
+  const currentAmount = isBalanceBasedGame ? (parseFloat(balanceAmount) || 0) : totalSelectedAmount;
+  
   // Animate amount changes
   useEffect(() => {
     const duration = 300;
     const start = animatedAmount;
-    const end = totalSelectedAmount;
+    const end = currentAmount;
     const startTime = performance.now();
     
     const animate = (currentTime: number) => {
@@ -63,7 +70,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
     };
     
     requestAnimationFrame(animate);
-  }, [totalSelectedAmount]);
+  }, [currentAmount]);
   
   // Calculate 10% less and 10% more of selected value
   const minSelectedValue = animatedAmount * 0.9;
@@ -137,7 +144,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
           right: 0,
           bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
+          zIndex: 2000,
           animation: isAnimatingOut ? 'fadeOut 0.2s ease-out' : 'fadeIn 0.2s ease-out',
         }}
         onClick={onClose}
@@ -147,9 +154,9 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
           style={{
             position: 'relative',
             width: isMobile ? '100%' : '1134px',
-            height: isMobile ? '100%' : '721px',
+            height: isMobile ? 'calc(100% - 59px)' : '721px',
             maxWidth: isMobile ? '100%' : '1134px',
-            maxHeight: isMobile ? '100%' : '721px',
+            maxHeight: isMobile ? 'calc(100% - 59px)' : '721px',
             filter: 'drop-shadow(0px 4px 20.4px rgba(0, 0, 0, 0.25))',
             animation: isAnimatingOut ? 'scaleOut 0.2s ease-out' : 'scaleIn 0.2s ease-out',
           }}
@@ -466,19 +473,30 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
         
         <div
           onClick={async () => {
-            if (selectedItems.size > 0 && user?.id && !isJoining && isValidBet) {
+            const canJoin = isBalanceBasedGame
+              ? (parseFloat(balanceAmount) > 0 && user?.id && !isJoining && isValidBet)
+              : (selectedItems.size > 0 && user?.id && !isJoining && isValidBet);
+
+            if (canJoin && user?.id) {
               setIsJoining(true);
               try {
+                const body: any = {
+                  userId: user.id,
+                  betAmount: isBalanceBasedGame ? parseFloat(balanceAmount) : totalSelectedAmount,
+                };
+
+                if (isBalanceBasedGame) {
+                  body.isBalanceBased = true;
+                } else {
+                  body.uniqueIds = Array.from(selectedItems);
+                }
+
                 const response = await fetch(`https://api-bash.onrender.com/coinflip/join/${game._id}`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({
-                    userId: user.id,
-                    uniqueIds: Array.from(selectedItems),
-                    betAmount: totalSelectedAmount,
-                  }),
+                  body: JSON.stringify(body),
                 });
 
                 const data = await response.json();
@@ -514,8 +532,8 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: selectedItems.size > 0 && !isJoining && isValidBet ? 'pointer' : 'not-allowed',
-            opacity: selectedItems.size > 0 && !isJoining && isValidBet ? 1 : 0.5,
+            cursor: ((isBalanceBasedGame && parseFloat(balanceAmount) > 0) || (!isBalanceBasedGame && selectedItems.size > 0)) && !isJoining && isValidBet ? 'pointer' : 'not-allowed',
+            opacity: ((isBalanceBasedGame && parseFloat(balanceAmount) > 0) || (!isBalanceBasedGame && selectedItems.size > 0)) && !isJoining && isValidBet ? 1 : 0.5,
             zIndex: 50,
           }}
         >
@@ -639,6 +657,68 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
+        {/* Balance input field for balance-based games */}
+        {isBalanceBasedGame && (
+          <div
+            style={{
+              position: 'absolute',
+              width: isMobile ? 'calc(100% - 32px)' : '722px',
+              height: '48px',
+              left: isMobile ? '16px' : '56px',
+              top: isMobile ? '60px' : '86px',
+            }}
+          >
+            <div
+              style={{
+                boxSizing: 'border-box',
+                position: 'absolute',
+                width: '100%',
+                height: '48px',
+                left: '0px',
+                top: '0px',
+                border: '1.5px solid #495060',
+                borderRadius: '15px',
+                background: '#1E222F',
+              }}
+            />
+            <input
+              type="number"
+              value={balanceAmount}
+              onChange={(e) => setBalanceAmount(e.target.value)}
+              placeholder="Enter bet amount..."
+              style={{
+                position: 'absolute',
+                width: 'calc(100% - 60px)',
+                height: '23px',
+                left: '30px',
+                top: '12px',
+                fontFamily: 'Poppins, sans-serif',
+                fontStyle: 'normal',
+                fontWeight: 700,
+                fontSize: '15px',
+                lineHeight: '22px',
+                color: '#FFFFFF',
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                right: '20px',
+                top: '12px',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 600,
+                fontSize: '15px',
+                color: '#006EFF',
+              }}
+            >
+              Balance: {formatAmount(user?.balance || 0)}
+            </span>
+          </div>
+        )}
+
         
         <div
           style={{
@@ -653,51 +733,58 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
             width: isMobile ? 'calc(100% - 32px)' : '960px',
             height: isMobile ? 'auto' : '440px',
             left: isMobile ? '16px' : '80px',
-            top: isMobile ? '210px' : '200px',
+            top: isMobile ? isBalanceBasedGame ? '130px' : '210px' : '200px',
             overflowY: 'auto',
           }}
           className="hide-scrollbar"
         >
-          {loading ? (
-            <span style={{ color: '#6B7289' }}>Loading inventory...</span>
-          ) : error ? (
-            <span style={{ color: '#EF4444' }}>Error loading inventory</span>
-          ) : sortedItems && sortedItems.length > 0 ? (
-            sortedItems.map((item, index) => (
-              <div
-                key={`${item.uniqueId}_${index}`}
-                onClick={() => toggleItemSelection(item.uniqueId)}
-                style={{
-                  position: 'relative',
-                  width: isMobile ? 'calc(50% - 4px)' : '145px',
-                  height: isMobile ? 'auto' : '185px',
-                  cursor: 'pointer',
-                  flex: 'none',
-                  flexGrow: 0,
-                  transition: 'transform 0.2s ease, opacity 0.2s ease',
-                }}
-              >
-                {selectedItems.has(item.uniqueId) && (
+          {!isBalanceBasedGame && (
+            <>
+              {loading ? (
+                <span style={{ color: '#6B7289' }}>Loading inventory...</span>
+              ) : error ? (
+                <span style={{ color: '#EF4444' }}>Error loading inventory</span>
+              ) : sortedItems && sortedItems.length > 0 ? (
+                sortedItems.map((item, index) => (
                   <div
+                    key={`${item.uniqueId}_${index}`}
+                    onClick={() => toggleItemSelection(item.uniqueId)}
                     style={{
-                      position: 'absolute',
+                      position: 'relative',
                       width: isMobile ? 'calc(50% - 4px)' : '145px',
                       height: isMobile ? 'auto' : '185px',
-                      left: '0px',
-                      top: '0px',
-                      border: '1px solid #006EFF',
-                      borderRadius: '7.91501px',
-                      zIndex: 10,
-                      transition: 'opacity 0.2s ease',
-                      animation: 'pulse 0.3s ease-out',
+                      cursor: 'pointer',
+                      flex: 'none',
+                      flexGrow: 0,
+                      transition: 'transform 0.2s ease, opacity 0.2s ease',
                     }}
-                  />
-                )}
-                <CoinflipItemCard imageSrc={item.image} itemName={item.name} itemValue={item.value} />
-              </div>
-            ))
-          ) : (
-            <span style={{ color: '#6B7289' }}>No items in inventory</span>
+                  >
+                    {selectedItems.has(item.uniqueId) && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          width: isMobile ? 'calc(50% - 4px)' : '145px',
+                          height: isMobile ? 'auto' : '185px',
+                          left: '0px',
+                          top: '0px',
+                          border: '1px solid #006EFF',
+                          borderRadius: '7.91501px',
+                          zIndex: 10,
+                          transition: 'opacity 0.2s ease',
+                          animation: 'pulse 0.3s ease-out',
+                        }}
+                      />
+                    )}
+                    <CoinflipItemCard imageSrc={item.image} itemName={item.name} itemValue={item.value} />
+                  </div>
+                ))
+              ) : (
+                <span style={{ color: '#6B7289' }}>No items in inventory</span>
+              )}
+            </>
+          )}
+          {isBalanceBasedGame && (
+            <span style={{ color: '#6B7289' }}>Balance-based coinflip - no items needed</span>
           )}
         </div>
 

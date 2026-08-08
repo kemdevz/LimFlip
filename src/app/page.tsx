@@ -359,6 +359,37 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
     }
   };
 
+  const handlePlaceBet = async (amount: number, selectedCoin: 'heads' | 'tails') => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch('https://api-bash.onrender.com/coinflip/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          betAmount: amount,
+          selectedCoin,
+          isBalanceBased: true,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create game');
+      }
+
+      console.log('Balance-based game created:', data.game);
+      // The socket listener will handle adding the game and opening the modal
+    } catch (error) {
+      console.error('Error placing bet:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="page-shell page-shell--fixed">
       
@@ -392,7 +423,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
       <Sidebar onProfileClick={onProfileClick} onGiftClick={() => setIsCreateGiveawayOpen(true)} onRulesClick={() => setIsRulesModalOpen(true)} />
 
       <div className="page-content-area">
-      <CoinflipToolbar onBetItemsClick={() => setIsCoinflipCreateModalOpen(true)} />
+      <CoinflipToolbar onBetItemsClick={() => setIsCoinflipCreateModalOpen(true)} onPlaceBetClick={handlePlaceBet} />
 
       
       {games.map((game, index) => (

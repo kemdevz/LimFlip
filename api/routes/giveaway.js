@@ -17,6 +17,86 @@ const setIo = (socketIo) => {
 
 module.exports = { router, setIo };
 
+// Function to check and complete ended giveaways
+const checkAndCompleteGiveaways = async () => {
+  try {
+    const now = new Date();
+    
+    // Find all active giveaways that have ended
+    const endedGiveaways = await Giveaway.find({
+      status: 'active',
+      endsAt: { $lte: now }
+    });
+
+    for (const giveaway of endedGiveaways) {
+      console.log(`Completing giveaway ${giveaway._id} with ${giveaway.participants.length} participants`);
+      
+      // Select random winner from participants
+      if (giveaway.participants.length > 0) {
+        const randomIndex = Math.floor(Math.random() * giveaway.participants.length);
+        const winnerId = giveaway.participants[randomIndex];
+        
+        // Get winner user
+        const winner = await User.findById(winnerId);
+        
+        if (winner) {
+          // Add items to winner's inventory
+          const winnerInventory = await Inventory.findOne({ userId: winnerId });
+          if (winnerInventory) {
+            winnerInventory.items.push(...giveaway.items);
+            await winnerInventory.save();
+            
+            console.log(`Added ${giveaway.items.length} items to winner ${winner.username}'s inventory`);
+          }
+          
+          // Update giveaway with winner
+          giveaway.winner = winnerId;
+          giveaway.status = 'completed';
+          giveaway.completedAt = now;
+          await giveaway.save();
+          
+          // Emit socket event for giveaway completed
+          if (io) {
+            io.emit('giveaway-completed', {
+              giveawayId: giveaway._id,
+              winner: {
+                id: winner._id,
+                username: winner.username,
+                avatarUrl: winner.avatarUrl
+              },
+              items: giveaway.items,
+              totalValue: giveaway.totalValue
+            });
+          }
+          
+          console.log(`Giveaway ${giveaway._id} completed. Winner: ${winner.username}`);
+        }
+      } else {
+        // No participants, mark as completed without winner
+        giveaway.status = 'completed';
+        giveaway.completedAt = now;
+        await giveaway.save();
+        
+        console.log(`Giveaway ${giveaway._id} completed with no participants`);
+      }
+    }
+  } catch (error) {
+    console.error('Error checking giveaways:', error);
+  }
+};
+
+// Start the giveaway checker interval (run every 10 seconds)
+let giveawayCheckerInterval;
+const startGiveawayChecker = () => {
+  if (giveawayCheckerInterval) {
+    clearInterval(giveawayCheckerInterval);
+  }
+  giveawayCheckerInterval = setInterval(checkAndCompleteGiveaways, 10000);
+  console.log('Giveaway checker started');
+};
+
+module.exports.startGiveawayChecker = startGiveawayChecker;
+
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
   const token = req.headers.authorization?.replace('Bearer ', '');

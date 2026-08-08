@@ -111,7 +111,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
       className="responsive-modal-overlay"
       style={{
         background: 'rgba(0, 0, 0, 0.7)',
-        zIndex: 1000,
+        zIndex: 2000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.2s ease-out',
         pointerEvents: isVisible ? 'auto' : 'none',
@@ -125,7 +125,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
         style={{
           position: isMobile ? 'relative' : 'absolute',
           width: isMobile ? '100%' : '900px',
-          height: isMobile ? '100vh' : '650px',
+          height: isMobile ? 'calc(100vh - 59px)' : '650px',
           left: isMobile ? '0' : '50%',
           top: isMobile ? '0' : '50%',
           transform: isMobile ? 'none' : `translate(-50%, -50%) scale(${isVisible ? 1 : 0.9})`,

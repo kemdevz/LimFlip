@@ -75,6 +75,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
       className="responsive-modal-overlay"
       style={{
         background: 'rgba(0, 0, 0, 0.7)',
+        zIndex: 2000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.2s ease-out',
         pointerEvents: isVisible ? 'auto' : 'none',

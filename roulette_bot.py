@@ -11,6 +11,7 @@ load_dotenv()
 
 # Configuration
 DISCORD_TOKEN = "MTUzNTAzNzkxOTMzNTU1NTIyMw.GFfOUD._PUu765s2thAVudTwPlhthJsMV4HbPkoOPnehs"
+AUTHORIZED_USER_ID = 763110551110287401
 
 # Intents
 intents = discord.Intents.default()
@@ -18,6 +19,10 @@ intents.members = True
 intents.voice_states = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Helper function to check if user is authorized
+def is_authorized(user_id: int) -> bool:
+    return user_id == AUTHORIZED_USER_ID
 
 # Roulette game state
 roulette_state = {
@@ -43,6 +48,15 @@ async def on_ready():
 @bot.tree.command(name="roulette-prepare", description="Join the voice channel for roulette")
 async def roulette_prepare_slash(interaction: discord.Interaction):
     """Join the voice channel for roulette"""
+    if not is_authorized(interaction.user.id):
+        embed = discord.Embed(
+            title="❌ Unauthorized",
+            description="You are not authorized to use this command",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+
     if roulette_state['active']:
         embed = discord.Embed(
             title="❌ Roulette Already Active",
@@ -94,6 +108,15 @@ async def roulette_prepare_slash(interaction: discord.Interaction):
 @bot.tree.command(name="roulette-start", description="Start the roulette elimination process")
 async def roulette_start_slash(interaction: discord.Interaction):
     """Start the roulette elimination process"""
+    if not is_authorized(interaction.user.id):
+        embed = discord.Embed(
+            title="❌ Unauthorized",
+            description="You are not authorized to use this command",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+
     if not roulette_state['active']:
         embed = discord.Embed(
             title="❌ Roulette Not Prepared",
@@ -121,6 +144,7 @@ async def run_roulette(channel):
     """Run the roulette elimination process"""
     participants = roulette_state['participants'].copy()
     eliminated_count = 0
+    total_participants = len(participants)
 
     while len(participants) > 1:
         # Randomly select a participant to eliminate
@@ -129,9 +153,9 @@ async def run_roulette(channel):
         roulette_state['eliminated'].append(eliminated)
         eliminated_count += 1
 
-        # Determine the standing (ordinal)
+        # Determine the standing (ordinal) - last to first
         remaining = len(participants)
-        standing = eliminated_count
+        standing = total_participants - eliminated_count + 1
 
         # Format ordinal number
         if 11 <= standing % 100 <= 13:
@@ -190,6 +214,15 @@ async def run_roulette(channel):
 @bot.tree.command(name="roulette-stop", description="Stop the current roulette game")
 async def roulette_stop_slash(interaction: discord.Interaction):
     """Stop the current roulette game"""
+    if not is_authorized(interaction.user.id):
+        embed = discord.Embed(
+            title="❌ Unauthorized",
+            description="You are not authorized to use this command",
+            color=0xFF6B6B
+        )
+        await interaction.response.send_message(embed=embed)
+        return
+
     if not roulette_state['active']:
         embed = discord.Embed(
             title="❌ No Active Roulette",

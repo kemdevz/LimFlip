@@ -29,7 +29,8 @@ export default function MobileBottomNav() {
     }, 300);
   };
 
-  const toggleMenu = () => {
+  const toggleMenu = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (menuOpen) {
       closeMenu();
     } else {
@@ -179,7 +180,7 @@ export default function MobileBottomNav() {
                 textAlign: 'left',
               }}
             >
-              Home
+              Coinflip
             </button>
 
             
@@ -188,6 +189,7 @@ export default function MobileBottomNav() {
               onClick={() => {
                 setActiveMenuItem(1);
                 closeMenu();
+                window.location.href = '/jackpot';
               }}
               style={{
                 background: 'none',
@@ -204,7 +206,7 @@ export default function MobileBottomNav() {
                 textAlign: 'left',
               }}
             >
-              Terms of Service
+              Jackpot
             </button>
 
             
@@ -213,6 +215,7 @@ export default function MobileBottomNav() {
               onClick={() => {
                 setActiveMenuItem(2);
                 closeMenu();
+                window.location.href = '/upgrader';
               }}
               style={{
                 background: 'none',
@@ -229,7 +232,7 @@ export default function MobileBottomNav() {
                 textAlign: 'left',
               }}
             >
-              Support
+              Upgrader
             </button>
 
             
@@ -238,6 +241,7 @@ export default function MobileBottomNav() {
               onClick={() => {
                 setActiveMenuItem(3);
                 closeMenu();
+                window.location.href = '/market';
               }}
               style={{
                 background: 'none',
@@ -254,7 +258,7 @@ export default function MobileBottomNav() {
                 textAlign: 'left',
               }}
             >
-              Provably Fair
+              Market
             </button>
           </div>
 
@@ -483,7 +487,11 @@ export default function MobileBottomNav() {
           
           <button
             ref={(el) => { buttonRefs.current[2] = el; }}
-            onClick={() => handleButtonClick(2, () => setMenuOpen(!menuOpen))}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleMenu();
+            }}
             style={{
               background: 'none',
               border: 'none',
@@ -501,7 +509,7 @@ export default function MobileBottomNav() {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M1 7.5H18M1 1H18M1 14H18" stroke={activeIndex === 2 ? '#0276FF' : 'white'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 7.5H18M1 1H18M1 14H18" stroke={menuOpen ? '#0276FF' : 'white'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>

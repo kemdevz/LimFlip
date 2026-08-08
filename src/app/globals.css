@@ -153,12 +153,12 @@ body {
     left: 0;
     top: 0;
     width: 100%;
-    min-height: calc(100dvh - var(--navbar-height));
-    max-height: calc(100dvh - var(--navbar-height));
+    min-height: calc(100dvh - var(--navbar-height) - var(--mnav-h));
+    max-height: calc(100dvh - var(--navbar-height) - var(--mnav-h));
     overflow-y: auto;
     overflow-x: hidden;
     padding-top: var(--navbar-height);
-    padding-bottom: 24px;
+    padding-bottom: calc(24px + var(--mnav-h));
   }
 }
 

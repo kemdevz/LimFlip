@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface CoinflipToolbarProps {
   onBetItemsClick?: () => void;
+  onPlaceBetClick?: (amount: number, selectedCoin: 'heads' | 'tails') => void;
 }
 
 const formatAmount = (amount: number) => {
@@ -19,10 +20,13 @@ const formatAmount = (amount: number) => {
   }
 };
 
-export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProps) {
+export default function CoinflipToolbar({ onBetItemsClick, onPlaceBetClick }: CoinflipToolbarProps) {
   const [playerCount, setPlayerCount] = useState(0);
   const [totalBets, setTotalBets] = useState(0);
   const [yourBets, setYourBets] = useState(0);
+  const [balanceAmount, setBalanceAmount] = useState('');
+  const [selectedCoin, setSelectedCoin] = useState<'heads' | 'tails'>('heads');
+  const [isPlacingBet, setIsPlacingBet] = useState(false);
   const { user } = useAuth();
   const { onlineCount } = useSocket();
   const isMobile = useIsMobile();
@@ -157,7 +161,9 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
           >
             <span style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '18px', color: '#006EFF', marginRight: '10px' }}>$</span>
             <input
-              type="text"
+              type="number"
+              value={balanceAmount}
+              onChange={(e) => setBalanceAmount(e.target.value)}
               placeholder="Enter bet amount ..."
               style={{
                 flex: 1,
@@ -165,7 +171,7 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
                 fontFamily: 'Poppins',
                 fontWeight: 500,
                 fontSize: '16px',
-                color: '#525D7D',
+                color: '#FFFFFF',
                 background: 'transparent',
                 border: 'none',
                 outline: 'none',
@@ -175,26 +181,64 @@ export default function CoinflipToolbar({ onBetItemsClick }: CoinflipToolbarProp
 
           <button
             type="button"
+            onClick={async () => {
+              const amount = parseFloat(balanceAmount);
+              if (amount > 0 && user?.id && onPlaceBetClick && !isPlacingBet) {
+                setIsPlacingBet(true);
+                try {
+                  await onPlaceBetClick(amount, selectedCoin);
+                  setBalanceAmount('');
+                } catch (error) {
+                  console.error('Error placing bet:', error);
+                } finally {
+                  setIsPlacingBet(false);
+                }
+              }
+            }}
+            disabled={isPlacingBet || !balanceAmount || parseFloat(balanceAmount) <= 0}
             style={{
               minWidth: '121px',
               height: '42px',
-              background: '#0276FF',
+              background: isPlacingBet || !balanceAmount || parseFloat(balanceAmount) <= 0 ? '#1C212E' : '#0276FF',
               borderRadius: '15px',
               border: 'none',
-              cursor: 'pointer',
+              cursor: isPlacingBet || !balanceAmount || parseFloat(balanceAmount) <= 0 ? 'not-allowed' : 'pointer',
               fontFamily: 'Proxima Nova, sans-serif',
               fontWeight: 700,
               fontSize: '17px',
               color: '#FFFFFF',
               padding: '0 16px',
+              opacity: isPlacingBet || !balanceAmount || parseFloat(balanceAmount) <= 0 ? 0.5 : 1,
             }}
           >
-            PLACE BET
+            {isPlacingBet ? 'PLACING...' : 'PLACE BET'}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <img src="/assets/images/coinflip/heads.png" alt="Heads" style={{ width: '42px', height: '42px', cursor: 'pointer' }} />
-            <img src="/assets/images/coinflip/tails.png" alt="Tails" style={{ width: '42px', height: '42px', cursor: 'pointer' }} />
+            <img 
+              src="/assets/images/coinflip/heads.png" 
+              alt="Heads" 
+              style={{ 
+                width: '42px', 
+                height: '42px', 
+                cursor: 'pointer',
+                opacity: selectedCoin === 'heads' ? 1 : 0.5,
+                filter: selectedCoin === 'heads' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+              }}
+              onClick={() => setSelectedCoin('heads')}
+            />
+            <img 
+              src="/assets/images/coinflip/tails.png" 
+              alt="Tails" 
+              style={{ 
+                width: '42px', 
+                height: '42px', 
+                cursor: 'pointer',
+                opacity: selectedCoin === 'tails' ? 1 : 0.5,
+                filter: selectedCoin === 'tails' ? 'drop-shadow(0px 0px 8.3px #666666)' : 'none',
+              }}
+              onClick={() => setSelectedCoin('tails')}
+            />
           </div>
 
           

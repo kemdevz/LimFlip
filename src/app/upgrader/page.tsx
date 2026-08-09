@@ -1872,9 +1872,29 @@ export default function UpgraderPage() {
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                      Select Desired Item
-                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
+                        Select Desired Item
+                      </label>
+                      <select
+                        value={stockSource}
+                        onChange={(e) => setStockSource(e.target.value as 'site' | 'third-party')}
+                        style={{
+                          height: '48px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          border: '2px solid rgba(255, 255, 255, 0.25)',
+                          backgroundColor: 'transparent',
+                          fontFamily: 'Poppins',
+                          fontWeight: 600,
+                          fontSize: '14px',
+                          color: 'rgba(255, 255, 255, 0.8)',
+                        }}
+                      >
+                        <option value="site">Site Stock</option>
+                        <option value="third-party">Third-Party Stock</option>
+                      </select>
+                    </div>
                     <input
                       type="text"
                       placeholder="Search for an item.."

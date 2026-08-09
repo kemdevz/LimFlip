@@ -10,6 +10,7 @@ interface InventoryItem {
   value: number;
   category: string;
   acquiredAt?: string;
+  listedInMarketplace?: boolean;
 }
 
 interface Inventory {

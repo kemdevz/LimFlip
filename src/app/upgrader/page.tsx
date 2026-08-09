@@ -56,6 +56,7 @@ export default function UpgraderPage() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [upgradeResult, setUpgradeResult] = useState<'won' | 'lost' | null>(null);
   const [liveWins, setLiveWins] = useState<LiveWin[]>([]);
+  const [provablyFairData, setProvablyFairData] = useState<any>(null);
   const STOCK_USER_ID = '7848923878';
 
   // Listen for third party stock updates via socket
@@ -201,19 +202,20 @@ export default function UpgraderPage() {
         const winPercentage = (inputValue / desiredValue) * 100;
         const winDegrees = winPercentage * 3.6;
 
-        // Calculate landing position based on result
-        let targetDegrees;
-        if (result.won) {
-          // Land in the blue stroke area (0 to winDegrees)
-          targetDegrees = Math.random() * winDegrees;
-        } else {
-          // Land in the transparent area (winDegrees to 360)
-          targetDegrees = winDegrees + Math.random() * (360 - winDegrees);
-        }
+        // Use provably fair roll from backend if available
+        const provablyFairRoll = result.provablyFair?.roll || Math.random() * 100;
+        
+        // Calculate landing position based on provably fair roll
+        const targetDegrees = (provablyFairRoll / 100) * 360;
 
         // Spin the wheel to land on target
         const spinDegrees = 360 * 5 + (360 - targetDegrees); // 5 full rotations + land on target
         setWheelRotation(spinDegrees);
+
+        // Store provably fair data for display
+        if (result.provablyFair) {
+          setProvablyFairData(result.provablyFair);
+        }
 
         // Wait for spin to complete
         setTimeout(async () => {
@@ -950,6 +952,55 @@ export default function UpgraderPage() {
                       <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill="#ef4363" fontSize="28" fontWeight="bold" fontFamily="Poppins">FAIL</text>
                     </svg>
                   </div>
+
+                  {/* Provably Fair Info */}
+                  {provablyFairData && upgradeResult && (
+                    <div
+                      style={{
+                        pointerEvents: 'none',
+                        zIndex: 35,
+                        gridColumn: '1 / -1',
+                        gridRow: '1 / -1',
+                        display: 'flex',
+                        height: '100%',
+                        width: '100%',
+                        justifyContent: 'flex-end',
+                        alignItems: 'flex-start',
+                        padding: '20px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.8)',
+                          borderRadius: '8px',
+                          padding: '12px',
+                          maxWidth: '250px',
+                          fontSize: '12px',
+                          color: '#fff',
+                          border: '1px solid #333',
+                        }}
+                      >
+                        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#0276FF' }}>
+                          🎲 Provably Fair
+                        </div>
+                        <div style={{ marginBottom: '4px' }}>
+                          <span style={{ color: '#888' }}>Roll:</span> {parseFloat(provablyFairData.roll).toFixed(2)}%
+                        </div>
+                        <div style={{ marginBottom: '4px', wordBreak: 'break-all' }}>
+                          <span style={{ color: '#888' }}>Seed Hash:</span> {provablyFairData.serverSeedHash?.slice(0, 20)}...
+                        </div>
+                        <div style={{ marginBottom: '4px', wordBreak: 'break-all' }}>
+                          <span style={{ color: '#888' }}>Client Seed:</span> {provablyFairData.clientSeed?.slice(0, 20)}...
+                        </div>
+                        <div style={{ marginBottom: '4px' }}>
+                          <span style={{ color: '#888' }}>Nonce:</span> {provablyFairData.nonce}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#666', marginTop: '8px' }}>
+                          Game ID: {provablyFairData.gameId || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Side Panel Backgrounds */}
                   <div

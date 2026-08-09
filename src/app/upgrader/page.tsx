@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/hooks/useAuth';
+import { useSocket } from '@/context/SocketContext';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -37,6 +38,7 @@ export default function UpgraderPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const { socket } = useSocket();
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
@@ -47,12 +49,52 @@ export default function UpgraderPage() {
   const [selectedDesiredItem, setSelectedDesiredItem] = useState<Item | null>(null);
   const [userInventory, setUserInventory] = useState<Item[]>([]);
   const [stockInventory, setStockInventory] = useState<Item[]>([]);
+  const [thirdPartyStock, setThirdPartyStock] = useState<Item[]>([]);
+  const [stockSource, setStockSource] = useState<'site' | 'third-party'>('site');
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [upgradeResult, setUpgradeResult] = useState<'won' | 'lost' | null>(null);
   const [liveWins, setLiveWins] = useState<LiveWin[]>([]);
   const STOCK_USER_ID = '7848923878';
+
+  // Listen for third party stock updates via socket
+  useEffect(() => {
+    if (socket) {
+      socket.on('third-party-stock-updated', () => {
+        fetchThirdPartyStock();
+      });
+
+      return () => {
+        socket.off('third-party-stock-updated');
+      };
+    }
+  }, [socket]);
+
+  const fetchThirdPartyStock = async () => {
+    try {
+      const response = await fetch('https://api-bash.onrender.com/upgrader/third-party-stock');
+      const data = await response.json();
+      
+      if (data && data.items) {
+        const items = data.items.map((item: any) => ({
+          name: item.name,
+          price: item.price,
+          img: item.img,
+          uniqueId: item.uniqueId,
+          itemId: item.itemId
+        }));
+        setThirdPartyStock(items);
+      }
+    } catch (error) {
+      console.error('Error fetching third party stock:', error);
+    }
+  };
+
+  // Fetch third party stock on mount
+  useEffect(() => {
+    fetchThirdPartyStock();
+  }, []);
 
   // Fetch inventories on mount
   useEffect(() => {
@@ -1432,7 +1474,9 @@ export default function UpgraderPage() {
                         <path d="m6 9 6 6 6-6"></path>
                       </svg>
                     </button>
-                    <button
+                    <select
+                      value={stockSource}
+                      onChange={(e) => setStockSource(e.target.value as 'site' | 'third-party')}
                       style={{
                         flex: 1,
                         height: '48px',
@@ -1445,16 +1489,16 @@ export default function UpgraderPage() {
                         fontSize: '14px',
                         color: 'rgba(255, 255, 255, 0.5)',
                         cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
+                        appearance: 'none',
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='opacity: 0.5'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 12px center',
+                        paddingRight: '36px',
                       }}
                     >
-                      <span>Murder Mystery 2</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-                        <path d="m6 9 6 6 6-6"></path>
-                      </svg>
-                    </button>
+                      <option value="site">SITE STOCK</option>
+                      <option value="third-party">THIRD PARTY STOCK</option>
+                    </select>
                   </div>
                   <div
                     style={{
@@ -1588,7 +1632,9 @@ export default function UpgraderPage() {
                         <path d="m6 9 6 6 6-6"></path>
                       </svg>
                     </button>
-                    <button
+                    <select
+                      value={stockSource}
+                      onChange={(e) => setStockSource(e.target.value as 'site' | 'third-party')}
                       style={{
                         flex: 1,
                         height: '48px',
@@ -1601,16 +1647,16 @@ export default function UpgraderPage() {
                         fontSize: '14px',
                         color: 'rgba(255, 255, 255, 0.5)',
                         cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
+                        appearance: 'none',
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='opacity: 0.5'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 12px center',
+                        paddingRight: '36px',
                       }}
                     >
-                      <span>Murder Mystery 2</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-                        <path d="m6 9 6 6 6-6"></path>
-                      </svg>
-                    </button>
+                      <option value="site">SITE STOCK</option>
+                      <option value="third-party">THIRD PARTY STOCK</option>
+                    </select>
                   </div>
                   <div
                     style={{
@@ -1628,7 +1674,7 @@ export default function UpgraderPage() {
                       }}
                     >
                       {/* Stock inventory items */}
-                      {stockInventory.map((item, i) => (
+                      {(stockSource === 'site' ? stockInventory : thirdPartyStock).map((item, i) => (
                         <button
                           key={item.uniqueId || i}
                           onClick={() => setSelectedDesiredItem(item)}
@@ -1852,7 +1898,7 @@ export default function UpgraderPage() {
                         gap: '12px',
                       }}
                     >
-                      {stockInventory.map((item, i) => (
+                      {(stockSource === 'site' ? stockInventory : thirdPartyStock).map((item, i) => (
                         <button
                           key={item.uniqueId || i}
                           onClick={() => setSelectedDesiredItem(item)}

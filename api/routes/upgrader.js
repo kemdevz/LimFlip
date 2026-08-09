@@ -5,6 +5,9 @@ const Item = require('../models/Item');
 const User = require('../models/User');
 const UpgraderHistory = require('../models/UpgraderHistory');
 
+// MM2 Empire API token
+const MM2_EMPIRE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTc4MzZmOWU3ZTc1MTFiOWUzNGZjODYiLCJ0eXBlIjoiYWNjZXNzIiwianRpIjoiemNsWEFQbE55RjVQTWVRQSIsImlhdCI6MTc4NjI3NDc1OCwiZXhwIjoxNzg2Mjc1NjU4LCJhdXRoX3RpbWUiOjE3ODYyNjMyODksImFtciI6WyJyb2Jsb3giXX0.cLZOdLq0Zf4WaJo7ELQ-ZHRSzimCr28KTNM6qU--R5o';
+
 // Get io instance from server (will be set by server.js)
 let io;
 
@@ -33,6 +36,54 @@ const populateItemDetails = async (inventoryItems) => {
     })
   );
 };
+
+// Get third party stock from MM2 Empire
+router.get('/third-party-stock', async (req, res) => {
+  try {
+    // Fetch wallet balance first
+    const walletResponse = await fetch('https://api.mm2empire.com/wallet', {
+      headers: {
+        'authorization': `Bearer ${MM2_EMPIRE_TOKEN}`,
+        'Referer': 'https://mm2empire.com/'
+      }
+    });
+    const walletData = await walletResponse.json();
+    const walletBalance = walletData?.balance || 0;
+
+    // Fetch marketplace items
+    const response = await fetch('https://api.mm2empire.com/marketplace?group_by_item=true&limit=48&offset=0&sort=price_desc&v=200');
+    const data = await response.json();
+    
+    if (data && data.items) {
+      const items = [];
+      data.items.forEach((item) => {
+        const availableCount = item.availableCount || 1;
+        const price = item.priceCoins || item.itemDetails?.itemValue || 0;
+        
+        // Only include items we can afford
+        if (price <= walletBalance) {
+          for (let i = 0; i < availableCount; i++) {
+            items.push({
+              name: item.itemDetails?.itemName || item.itemDetails?.name || 'Unknown',
+              price: price,
+              img: item.itemDetails?.itemImage || item.itemDetails?.image || '/assets/wallet/mm2.png',
+              uniqueId: `${item.id || item.itemDetails?.id}_${i}`,
+              itemId: item.itemDetails?.id || item.id,
+              isThirdParty: true
+            });
+          }
+        }
+      });
+      
+      res.json({ items, walletBalance });
+    } else {
+      res.json({ items: [], walletBalance });
+    }
+  } catch (error) {
+    console.error('Error fetching third party stock:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Get stock account inventory
 router.get('/stock/:robloxUserId', async (req, res) => {
@@ -118,14 +169,46 @@ router.post('/upgrade', async (req, res) => {
       inputItems.push(userInventory.items[itemIndex]);
     }
     
-    // Verify desired item exists in stock inventory
+    let desiredItem, desiredValue, desiredItemDef, isThirdParty = false;
+
+    // Check if desired item exists in site stock inventory
     const desiredItemIndex = stockInventory.items.findIndex(item => item.uniqueId === desiredItemId);
-    if (desiredItemIndex === -1) {
-      return res.status(400).json({ error: 'Desired item not found in stock inventory' });
+    if (desiredItemIndex !== -1) {
+      // Site stock item
+      desiredItem = stockInventory.items[desiredItemIndex];
+      desiredItemDef = await Item.findOne({ itemId: desiredItem.itemId });
+      desiredValue = desiredItemDef?.value || 0;
+    } else {
+      // Third party item - fetch from MM2 Empire API
+      isThirdParty = true;
+      const response = await fetch('https://api.mm2empire.com/marketplace?group_by_item=true&limit=48&offset=0&sort=price_desc&v=200');
+      const data = await response.json();
+      
+      if (data && data.items) {
+        const thirdPartyItem = data.items.find(item => item.id === desiredItemId);
+        if (thirdPartyItem) {
+          desiredItem = {
+            itemId: thirdPartyItem.id,
+            name: thirdPartyItem.itemDetails?.itemName || thirdPartyItem.itemDetails?.name || 'Unknown',
+            price: thirdPartyItem.priceCoins || thirdPartyItem.itemDetails?.itemValue || 0,
+            img: thirdPartyItem.itemDetails?.itemImage || thirdPartyItem.itemDetails?.image || '/assets/wallet/mm2.png'
+          };
+          desiredValue = desiredItem.price;
+          desiredItemDef = {
+            name: desiredItem.name,
+            image: desiredItem.img,
+            value: desiredValue,
+            itemId: desiredItem.itemId
+          };
+        } else {
+          return res.status(404).json({ error: 'Third party item not found' });
+        }
+      } else {
+        return res.status(500).json({ error: 'Failed to fetch third party stock' });
+      }
     }
-    const desiredItem = stockInventory.items[desiredItemIndex];
     
-    // Get item values
+    // Get item values for input items
     const inputItemDefs = await Promise.all(
       inputItems.map(async (invItem) => {
         const itemDef = await Item.findOne({ itemId: invItem.itemId });
@@ -133,10 +216,7 @@ router.post('/upgrade', async (req, res) => {
       })
     );
     
-    const desiredItemDef = await Item.findOne({ itemId: desiredItem.itemId });
-    
     const inputValue = inputItemDefs.reduce((sum, item) => sum + (item?.value || 0), 0);
-    const desiredValue = desiredItemDef?.value || 0;
     
     // Calculate win chance (input value / desired value * 100)
     const winChance = (inputValue / desiredValue) * 100;
@@ -152,22 +232,68 @@ router.post('/upgrade', async (req, res) => {
         item => !inputItemIds.includes(item.uniqueId)
       );
 
-      // Add desired item to user inventory
-      const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      userInventory.items.push({
-        uniqueId: newUniqueId,
-        itemId: desiredItem.itemId,
-        acquiredAt: new Date()
-      });
+      if (isThirdParty) {
+        // For third party items, we need to purchase from MM2 Empire
+        // First, create the item in our database if it doesn't exist
+        let itemDef = await Item.findOne({ itemId: desiredItem.itemId });
+        if (!itemDef) {
+          itemDef = new Item({
+            itemId: desiredItem.itemId,
+            name: desiredItem.name,
+            image: desiredItem.img,
+            value: desiredValue,
+            rarity: 'godly',
+            category: 'gun'
+          });
+          await itemDef.save();
+        }
 
-      // Remove desired item from stock inventory
-      stockInventory.items.splice(desiredItemIndex, 1);
+        // Add purchased item to user inventory
+        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        userInventory.items.push({
+          uniqueId: newUniqueId,
+          itemId: desiredItem.itemId,
+          acquiredAt: new Date()
+        });
+
+        // Purchase from MM2 Empire (simplified - in production you'd handle the actual purchase)
+        try {
+          await fetch('https://api.mm2empire.com/marketplace/purchase', {
+            method: 'POST',
+            headers: {
+              'authorization': `Bearer ${MM2_EMPIRE_TOKEN}`,
+              'Content-Type': 'application/json',
+              'Referer': 'https://mm2empire.com/'
+            },
+            body: JSON.stringify({
+              listingId: desiredItem.itemId,
+              quantity: 1
+            })
+          });
+        } catch (purchaseError) {
+          console.error('Error purchasing from MM2 Empire:', purchaseError);
+          // Continue anyway - item is already added to user inventory
+        }
+      } else {
+        // Site stock item
+        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        userInventory.items.push({
+          uniqueId: newUniqueId,
+          itemId: desiredItem.itemId,
+          acquiredAt: new Date()
+        });
+
+        // Remove desired item from stock inventory
+        const desiredItemIndex = stockInventory.items.findIndex(item => item.uniqueId === desiredItemId);
+        if (desiredItemIndex !== -1) {
+          stockInventory.items.splice(desiredItemIndex, 1);
+        }
+      }
 
       try {
         await userInventory.save();
       } catch (versionError) {
         if (versionError.name === 'VersionError') {
-          // Re-fetch and retry
           userInventory = await Inventory.findOne({ userId });
           userInventory.items = userInventory.items.filter(
             item => !inputItemIds.includes(item.uniqueId)
@@ -183,21 +309,22 @@ router.post('/upgrade', async (req, res) => {
         }
       }
 
-      try {
-        await stockInventory.save();
-      } catch (versionError) {
-        if (versionError.name === 'VersionError') {
-          // Re-fetch and retry
-          stockInventory = await Inventory.findOne({ userId: stockUser._id });
-          const desiredItemIndex = stockInventory.items.findIndex(
-            item => item.uniqueId === desiredItemId
-          );
-          if (desiredItemIndex !== -1) {
-            stockInventory.items.splice(desiredItemIndex, 1);
-          }
+      if (!isThirdParty) {
+        try {
           await stockInventory.save();
-        } else {
-          throw versionError;
+        } catch (versionError) {
+          if (versionError.name === 'VersionError') {
+            stockInventory = await Inventory.findOne({ userId: stockUser._id });
+            const desiredItemIndex = stockInventory.items.findIndex(
+              item => item.uniqueId === desiredItemId
+            );
+            if (desiredItemIndex !== -1) {
+              stockInventory.items.splice(desiredItemIndex, 1);
+            }
+            await stockInventory.save();
+          } else {
+            throw versionError;
+          }
         }
       }
 
@@ -218,13 +345,14 @@ router.post('/upgrade', async (req, res) => {
           itemId: desiredItem.itemId,
           name: desiredItemDef?.name || '',
           image: desiredItemDef?.image || '',
-          value: desiredItemDef?.value || 0
+          value: desiredValue
         },
         inputValue,
         outputValue: desiredValue,
         winChance,
         won: true,
-        multiplier: desiredValue / inputValue
+        multiplier: desiredValue / inputValue,
+        isThirdParty
       });
       await historyEntry.save();
 
@@ -236,11 +364,16 @@ router.post('/upgrade', async (req, res) => {
           inventory: { ...userInventory.toObject(), items: populatedUserInventory }
         });
 
-        const populatedStockInventory = await populateItemDetails(stockInventory.items);
-        io.emit('inventory-updated', {
-          userId: stockUser._id,
-          inventory: { ...stockInventory.toObject(), items: populatedStockInventory }
-        });
+        if (!isThirdParty) {
+          const populatedStockInventory = await populateItemDetails(stockInventory.items);
+          io.emit('inventory-updated', {
+            userId: stockUser._id,
+            inventory: { ...stockInventory.toObject(), items: populatedStockInventory }
+          });
+        }
+
+        // Emit third party stock update
+        io.emit('third-party-stock-updated');
       }
 
       res.json({
@@ -268,11 +401,33 @@ router.post('/upgrade', async (req, res) => {
         });
       }
 
+      // If third party item was desired, add it to site stock
+      if (isThirdParty && desiredItem) {
+        let itemDef = await Item.findOne({ itemId: desiredItem.itemId });
+        if (!itemDef) {
+          itemDef = new Item({
+            itemId: desiredItem.itemId,
+            name: desiredItem.name,
+            image: desiredItem.img,
+            value: desiredValue,
+            rarity: 'godly',
+            category: 'gun'
+          });
+          await itemDef.save();
+        }
+
+        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        stockInventory.items.push({
+          uniqueId: newUniqueId,
+          itemId: desiredItem.itemId,
+          acquiredAt: new Date()
+        });
+      }
+
       try {
         await userInventory.save();
       } catch (versionError) {
         if (versionError.name === 'VersionError') {
-          // Re-fetch and retry
           userInventory = await Inventory.findOne({ userId });
           userInventory.items = userInventory.items.filter(
             item => !inputItemIds.includes(item.uniqueId)
@@ -287,13 +442,20 @@ router.post('/upgrade', async (req, res) => {
         await stockInventory.save();
       } catch (versionError) {
         if (versionError.name === 'VersionError') {
-          // Re-fetch and retry
           stockInventory = await Inventory.findOne({ userId: stockUser._id });
           for (const inputItem of inputItems) {
             const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             stockInventory.items.push({
               uniqueId: newUniqueId,
               itemId: inputItem.itemId,
+              acquiredAt: new Date()
+            });
+          }
+          if (isThirdParty && desiredItem) {
+            const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            stockInventory.items.push({
+              uniqueId: newUniqueId,
+              itemId: desiredItem.itemId,
               acquiredAt: new Date()
             });
           }
@@ -320,7 +482,8 @@ router.post('/upgrade', async (req, res) => {
         outputValue: 0,
         winChance,
         won: false,
-        multiplier: 0
+        multiplier: 0,
+        isThirdParty
       });
       await historyEntry.save();
 
@@ -337,6 +500,9 @@ router.post('/upgrade', async (req, res) => {
           userId: stockUser._id,
           inventory: { ...stockInventory.toObject(), items: populatedStockInventory }
         });
+
+        // Emit third party stock update
+        io.emit('third-party-stock-updated');
       }
 
       res.json({

@@ -172,7 +172,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
           right: 0,
           bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
+          zIndex: 9999,
           animation: isAnimatingOut ? 'fadeOut 0.2s ease-out' : 'fadeIn 0.2s ease-out',
         }}
         onClick={onClose}
@@ -187,6 +187,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
             maxHeight: isMobile ? '100%' : '721px',
             filter: 'drop-shadow(0px 4px 20.4px rgba(0, 0, 0, 0.25))',
             animation: isAnimatingOut ? 'scaleOut 0.2s ease-out' : 'scaleIn 0.2s ease-out',
+            zIndex: 10000,
           }}
           onClick={(e) => e.stopPropagation()}
         >

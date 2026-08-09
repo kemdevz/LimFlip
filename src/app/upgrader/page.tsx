@@ -96,6 +96,13 @@ export default function UpgraderPage() {
     fetchThirdPartyStock();
   }, []);
 
+  // Reset upgrade result on mount to prevent auto-win on refresh
+  useEffect(() => {
+    setUpgradeResult(null);
+    setIsSpinning(false);
+    setWheelRotation(0);
+  }, []);
+
   // Fetch inventories on mount
   useEffect(() => {
     const fetchInventories = async () => {

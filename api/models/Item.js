@@ -27,6 +27,10 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  mm2Value: {
+    type: Number,
+    default: null
+  },
   category: {
     type: String,
     default: 'weapon'

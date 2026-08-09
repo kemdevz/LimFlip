@@ -10,7 +10,7 @@ const robloxRoutes = require('./routes/roblox');
 const { router: inventoryRoutes, setIo: setInventoryIo } = require('./routes/inventory');
 const { router: coinflipRoutes, setIo: setCoinflipIo } = require('./routes/coinflip');
 const { router: jackpotRoutes, setIo: setJackpotIo } = require('./routes/jackpot');
-const { router: trackTimerRoutes, setIo } = require('./routes/trackTimer');
+const { router: trackTimerRoutes, setIo: setTrackTimerIo } = require('./routes/trackTimer');
 const userStatsRoutes = require('./routes/userStats');
 const { router: marketplaceRoutes, setIo: setMarketplaceIo } = require('./routes/marketplace');
 const { router: mm2Routes, setIo: setMm2Io } = require('./routes/mm2');
@@ -39,7 +39,7 @@ const io = new Server(server, {
 setInventoryIo(io);
 setCoinflipIo(io);
 setJackpotIo(io);
-setIo(io);
+setTrackTimerIo(io);
 setMm2Io(io);
 setMarketplaceIo(io);
 setDepositIo(io);

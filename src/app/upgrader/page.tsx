@@ -32,6 +32,7 @@ interface Item {
   img: string;
   uniqueId?: string;
   itemId?: string;
+  mm2Value?: number;
 }
 
 export default function UpgraderPage() {
@@ -46,11 +47,14 @@ export default function UpgraderPage() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [selectedInputItems, setSelectedInputItems] = useState<Item[]>([]);
-  const [selectedDesiredItem, setSelectedDesiredItem] = useState<Item | null>(null);
+  const [selectedDesiredItems, setSelectedDesiredItems] = useState<Item[]>([]);
   const [userInventory, setUserInventory] = useState<Item[]>([]);
   const [stockInventory, setStockInventory] = useState<Item[]>([]);
   const [thirdPartyStock, setThirdPartyStock] = useState<Item[]>([]);
   const [stockSource, setStockSource] = useState<'site' | 'third-party'>('site');
+  const [userBalance, setUserBalance] = useState(0);
+  const [balanceAmount, setBalanceAmount] = useState('');
+  const [useMM2Values, setUseMM2Values] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -126,6 +130,13 @@ export default function UpgraderPage() {
               itemId: item.itemId
             })));
           }
+          
+          // Fetch user balance
+          const userBalanceResponse = await fetch(`https://api-bash.onrender.com/user/${user.id}`);
+          const userBalanceData = await userBalanceResponse.json();
+          if (userBalanceData.balance !== undefined) {
+            setUserBalance(userBalanceData.balance);
+          }
         } else {
           console.log('No user ID available, skipping user inventory fetch');
         }
@@ -153,19 +164,28 @@ export default function UpgraderPage() {
   }, [user?.id, STOCK_USER_ID]);
 
   const handleUpgrade = async () => {
-    if (!user) {
-      console.log('No user logged in');
+    const usingBalance = balanceAmount.trim() !== '';
+    
+    if (!usingBalance && selectedInputItems.length === 0) {
+      alert('Please select items from your inventory or enter a balance amount');
       return;
     }
-
-    if (!selectedInputItems.length) {
-      console.log('No input items selected');
+    
+    if (selectedDesiredItems.length === 0) {
+      alert('Please select desired items');
       return;
     }
-
-    if (!selectedDesiredItem) {
-      console.log('No desired item selected');
-      return;
+    
+    if (usingBalance) {
+      const amount = parseFloat(balanceAmount);
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid balance amount');
+        return;
+      }
+      if (amount > userBalance) {
+        alert('Insufficient balance');
+        return;
+      }
     }
 
     setIsUpgrading(true);
@@ -173,8 +193,8 @@ export default function UpgraderPage() {
     setUpgradeResult(null);
 
     // Calculate win percentage
-    const inputValue = selectedInputItems.reduce((sum, item) => sum + item.price, 0);
-    const desiredValue = selectedDesiredItem.price;
+    const inputValue = usingBalance ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+    const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
     const winPercentage = (inputValue / desiredValue) * 100;
 
     try {
@@ -184,10 +204,13 @@ export default function UpgraderPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.id,
+          userId: user?.id,
           stockRobloxUserId: STOCK_USER_ID,
-          inputItemIds: selectedInputItems.map(item => item.uniqueId),
-          desiredItemId: selectedDesiredItem.uniqueId,
+          inputItemIds: usingBalance ? [] : selectedInputItems.map(item => item.uniqueId),
+          desiredItemIds: selectedDesiredItems.map(item => item.uniqueId),
+          useBalance: usingBalance,
+          balanceAmount: usingBalance ? parseFloat(balanceAmount) : undefined,
+          useMM2Values: useMM2Values,
         }),
       });
 
@@ -197,8 +220,8 @@ export default function UpgraderPage() {
 
       if (result.success) {
         // Calculate win percentage for landing position
-        const inputValue = selectedInputItems.reduce((sum, item) => sum + item.price, 0);
-        const desiredValue = selectedDesiredItem.price;
+        const inputValue = usingBalance ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + item.price, 0);
+        const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + item.price, 0);
         const winPercentage = (inputValue / desiredValue) * 100;
         const winDegrees = winPercentage * 3.6;
 
@@ -223,7 +246,7 @@ export default function UpgraderPage() {
           setUpgradeResult(result.won ? 'won' : 'lost');
 
           // Refresh inventories after upgrade
-          if (user.id) {
+          if (user?.id) {
             const userResponse = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`);
             const userData = await userResponse.json();
             if (userData.items) {
@@ -234,6 +257,13 @@ export default function UpgraderPage() {
                 uniqueId: item.uniqueId,
                 itemId: item.itemId
               })));
+            }
+            
+            // Refresh user balance
+            const userBalanceResponse = await fetch(`https://api-bash.onrender.com/user/${user.id}`);
+            const userBalanceData = await userBalanceResponse.json();
+            if (userBalanceData.balance !== undefined) {
+              setUserBalance(userBalanceData.balance);
             }
           }
 
@@ -251,7 +281,7 @@ export default function UpgraderPage() {
 
           // Clear selections
           setSelectedInputItems([]);
-          setSelectedDesiredItem(null);
+          setSelectedDesiredItems([]);
           setWheelRotation(0);
         }, 3000); // 3 seconds spin duration
       }
@@ -770,7 +800,7 @@ export default function UpgraderPage() {
                     }}
                   >
                     {/* Static stroke showing win percentage */}
-                    {selectedDesiredItem && selectedInputItems.length > 0 && (
+                    {selectedDesiredItems && selectedInputItems.length > 0 && (
                       <svg
                         style={{
                           position: 'absolute',
@@ -790,7 +820,7 @@ export default function UpgraderPage() {
                           stroke="#0276FF"
                           strokeWidth="8"
                           strokeLinecap="round"
-                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 283} 283`}
+                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 283} 283`}
                           transform="rotate(-90 50 50)"
                         />
                       </svg>
@@ -836,8 +866,8 @@ export default function UpgraderPage() {
                       <div style={{ textAlign: 'center', gridArea: '1 / 1 / -1 / -1' }}>
                         <span style={{ fontSize: '24px', fontWeight: 500 }}></span>
                         <span style={{ display: 'block', fontSize: '48px', fontWeight: 600, color: '#FFFFFF' }}>
-                          {selectedDesiredItem && selectedInputItems.length > 0
-                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 100).toFixed(2) + '%'
+                          {selectedDesiredItems.length > 0 && selectedInputItems.length > 0
+                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 100).toFixed(2) + '%'
                             : '0.00%'}
                         </span>
                         <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' }}>Chance of receiving selected items</span>
@@ -891,20 +921,20 @@ export default function UpgraderPage() {
                       )}
                     </div>
                     <div style={{ display: 'grid', width: '43%' }}>
-                      {selectedDesiredItem && (
+                      {selectedDesiredItems.length > 0 && (
                         <>
                           <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '3%' }}>
-                            <span style={{ display: 'block', fontSize: '20px', fontWeight: 600 }}>{selectedDesiredItem.name}</span>
+                            <span style={{ display: 'block', fontSize: '20px', fontWeight: 600 }}>{selectedDesiredItems.length} item{selectedDesiredItems.length > 1 ? 's' : ''}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                               <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                              <span style={{ fontWeight: 600 }}>{selectedDesiredItem.price}</span>
+                              <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)}</span>
                             </span>
                           </div>
                           <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src={selectedDesiredItem.img} width={64} height={64} style={{ aspectRatio: '1', width: '20%' }} />
+                            <img src={selectedDesiredItems[0].img} width={64} height={64} style={{ aspectRatio: '1', width: '20%' }} />
                           </div>
                           <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5, filter: 'blur(4px)' }}>
-                            <img src={selectedDesiredItem.img} width={80} height={80} style={{ aspectRatio: '1', width: '25%' }} />
+                            <img src={selectedDesiredItems[0].img} width={80} height={80} style={{ aspectRatio: '1', width: '25%' }} />
                           </div>
                         </>
                       )}
@@ -1052,20 +1082,61 @@ export default function UpgraderPage() {
                 <div style={{ textAlign: 'center', marginBottom: '0', marginTop: '20px' }}>
                   <span>Multiplier: </span>
                   <span style={{ fontWeight: 600, color: '#0276FF' }}>
-                    {selectedDesiredItem && selectedInputItems.length > 0
-                      ? (selectedDesiredItem.price / selectedInputItems.reduce((sum, item) => sum + item.price, 0)).toFixed(2)
+                    {selectedDesiredItems.length > 0 && (balanceAmount.trim() !== '' ? parseFloat(balanceAmount) > 0 : selectedInputItems.length > 0)
+                      ? (selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0) / (balanceAmount.trim() !== '' ? parseFloat(balanceAmount) || 1 : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0))).toFixed(2)
                       : '0.00'}
                   </span>
                   <span>x</span>
                 </div>
 
+                {/* Balance Input - Only for third-party stock */}
+                {stockSource === 'third-party' && (
+                  <div style={{ textAlign: 'center', marginBottom: '15px', pointerEvents: 'auto', zIndex: 1000, position: 'relative' }}>
+                    <div style={{ marginBottom: '8px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={useMM2Values}
+                          onChange={(e) => setUseMM2Values(e.target.checked)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>USE BALANCE</span>
+                      </label>
+                    </div>
+                    <input
+                      type="number"
+                      value={balanceAmount}
+                      onChange={(e) => {
+                        setBalanceAmount(e.target.value);
+                        if (e.target.value.trim() !== '') {
+                          setSelectedInputItems([]);
+                        }
+                      }}
+                      placeholder={`Enter balance amount (Max: ${userBalance.toFixed(2)})`}
+                      max={userBalance}
+                      min="0"
+                      step="0.01"
+                      style={{
+                        width: '200px',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #2A3040',
+                        backgroundColor: '#131621',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        textAlign: 'center'
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Bottom Controls */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1000, pointerEvents: 'auto' }}>
                   <div style={{ pointerEvents: 'auto' }}>
-                    <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>Selected Total</div>
+                    <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>{balanceAmount.trim() !== '' ? 'Balance' : 'Selected Total'}</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                      <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                      <span style={{ fontWeight: 600 }}>{balanceAmount.trim() !== '' ? (parseFloat(balanceAmount) || 0).toFixed(2) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0).toFixed(2)}</span>
                     </span>
                   </div>
                   <button
@@ -1105,7 +1176,7 @@ export default function UpgraderPage() {
                     <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>Desired Total</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                      <span style={{ fontWeight: 600 }}>{selectedDesiredItem ? selectedDesiredItem.price : 0}</span>
+                      <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)}</span>
                     </span>
                   </div>
                 </div>
@@ -1298,7 +1369,7 @@ export default function UpgraderPage() {
                     }}
                   >
                     {/* Static stroke showing win percentage */}
-                    {selectedDesiredItem && selectedInputItems.length > 0 && (
+                    {selectedDesiredItems && selectedInputItems.length > 0 && (
                       <svg
                         style={{
                           position: 'absolute',
@@ -1318,7 +1389,7 @@ export default function UpgraderPage() {
                           stroke="#0276FF"
                           strokeWidth="8"
                           strokeLinecap="round"
-                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 283} 283`}
+                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 283} 283`}
                           transform="rotate(-90 50 50)"
                         />
                       </svg>
@@ -1364,8 +1435,8 @@ export default function UpgraderPage() {
                       <div style={{ textAlign: 'center', gridArea: '1 / 1 / -1 / -1' }}>
                         <span style={{ fontSize: '16px', fontWeight: 500 }}></span>
                         <span style={{ display: 'block', fontSize: '32px', fontWeight: 600, color: '#FFFFFF' }}>
-                          {selectedDesiredItem && selectedInputItems.length > 0
-                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItem.price) * 100).toFixed(2) + '%'
+                          {selectedDesiredItems.length > 0 && selectedInputItems.length > 0
+                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 100).toFixed(2) + '%'
                             : '0.00%'}
                         </span>
                         <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' }}>Chance</span>
@@ -1420,20 +1491,61 @@ export default function UpgraderPage() {
                 <div style={{ textAlign: 'center', marginBottom: '0', marginTop: '10px' }}>
                   <span style={{ fontSize: '14px' }}>Multiplier: </span>
                   <span style={{ fontWeight: 600, color: '#0276FF', fontSize: '16px' }}>
-                    {selectedDesiredItem && selectedInputItems.length > 0
-                      ? (selectedDesiredItem.price / selectedInputItems.reduce((sum, item) => sum + item.price, 0)).toFixed(2)
+                    {selectedDesiredItems.length > 0 && (balanceAmount.trim() !== '' ? parseFloat(balanceAmount) > 0 : selectedInputItems.length > 0)
+                      ? (selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0) / (balanceAmount.trim() !== '' ? parseFloat(balanceAmount) || 1 : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0))).toFixed(2)
                       : '0.00'}
                   </span>
                   <span style={{ fontSize: '14px' }}>x</span>
                 </div>
 
+                {/* Mobile Balance Input - Only for third-party stock */}
+                {stockSource === 'third-party' && (
+                  <div style={{ textAlign: 'center', marginBottom: '10px', pointerEvents: 'auto', zIndex: 1000, position: 'relative' }}>
+                    <div style={{ marginBottom: '8px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={useMM2Values}
+                          onChange={(e) => setUseMM2Values(e.target.checked)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '12px', color: '#FFFFFF' }}>USE BALANCE</span>
+                      </label>
+                    </div>
+                    <input
+                      type="number"
+                      value={balanceAmount}
+                      onChange={(e) => {
+                        setBalanceAmount(e.target.value);
+                        if (e.target.value.trim() !== '') {
+                          setSelectedInputItems([]);
+                        }
+                      }}
+                      placeholder={`Enter balance (Max: ${userBalance.toFixed(2)})`}
+                      max={userBalance}
+                      min="0"
+                      step="0.01"
+                      style={{
+                        width: '150px',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #2A3040',
+                        backgroundColor: '#131621',
+                        color: '#FFFFFF',
+                        fontSize: '12px',
+                        textAlign: 'center'
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Mobile Bottom Controls */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1000, pointerEvents: 'auto', gap: '12px' }}>
                   <div style={{ pointerEvents: 'auto', flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>Selected</div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>{balanceAmount.trim() !== '' ? 'Balance' : 'Selected'}</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={14} height={12} />
-                      <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                      <span style={{ fontWeight: 600 }}>{balanceAmount.trim() !== '' ? (parseFloat(balanceAmount) || 0).toFixed(2) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0).toFixed(2)}</span>
                     </span>
                   </div>
                   <button
@@ -1473,7 +1585,7 @@ export default function UpgraderPage() {
                     <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>Desired</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={14} height={12} />
-                      <span style={{ fontWeight: 600 }}>{selectedDesiredItem ? selectedDesiredItem.price : 0}</span>
+                      <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)}</span>
                     </span>
                   </div>
                 </div>
@@ -1742,13 +1854,20 @@ export default function UpgraderPage() {
                       {(stockSource === 'site' ? stockInventory : thirdPartyStock).map((item, i) => (
                         <button
                           key={item.uniqueId || i}
-                          onClick={() => setSelectedDesiredItem(item)}
+                          onClick={() => {
+                            const isSelected = selectedDesiredItems.some(i => i.uniqueId === item.uniqueId);
+                            if (isSelected) {
+                              setSelectedDesiredItems(selectedDesiredItems.filter(i => i.uniqueId !== item.uniqueId));
+                            } else {
+                              setSelectedDesiredItems([...selectedDesiredItems, item]);
+                            }
+                          }}
                           style={{
                             cursor: 'pointer',
                             borderRadius: '8px',
-                            borderTop: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
-                            borderRight: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
-                            borderLeft: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderTop: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderBottom: '8px solid #2A3040',
                             backgroundColor: '#131621',
                             padding: '16px 8px 8px',
@@ -1986,13 +2105,20 @@ export default function UpgraderPage() {
                       {(stockSource === 'site' ? stockInventory : thirdPartyStock).map((item, i) => (
                         <button
                           key={item.uniqueId || i}
-                          onClick={() => setSelectedDesiredItem(item)}
+                          onClick={() => {
+                            const isSelected = selectedDesiredItems.some(i => i.uniqueId === item.uniqueId);
+                            if (isSelected) {
+                              setSelectedDesiredItems(selectedDesiredItems.filter(i => i.uniqueId !== item.uniqueId));
+                            } else {
+                              setSelectedDesiredItems([...selectedDesiredItems, item]);
+                            }
+                          }}
                           style={{
                             cursor: 'pointer',
                             borderRadius: '8px',
-                            borderTop: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
-                            borderRight: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
-                            borderLeft: selectedDesiredItem?.uniqueId === item.uniqueId ? '2px solid #0276FF' : '2px solid transparent',
+                            borderTop: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderRight: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
+                            borderLeft: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderBottom: '8px solid #2A3040',
                             backgroundColor: '#131621',
                             padding: '12px 8px 8px',

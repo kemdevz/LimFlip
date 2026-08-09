@@ -20,7 +20,7 @@ const itemSchema = new mongoose.Schema({
   },
   rarity: {
     type: String,
-    enum: ['common', 'uncommon', 'rare', 'legendary', 'mythic'],
+    enum: ['common', 'uncommon', 'rare', 'legendary', 'mythic', 'godly', 'ancient', 'unique', 'vintage'],
     required: true
   },
   value: {

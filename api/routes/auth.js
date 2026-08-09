@@ -374,4 +374,36 @@ router.post('/change-role', async (req, res) => {
   }
 });
 
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Use cached avatar URL from MongoDB
+    const avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        username: user.username,
+        robloxUserId: user.robloxUserId,
+        avatarUrl: avatarUrl,
+        balance: user.balance || 0,
+        role: user.role || 'User',
+        verifiedAt: user.verifiedAt,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

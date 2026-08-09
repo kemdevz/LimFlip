@@ -1,12 +1,78 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
 const User = require('../models/User');
 const UpgraderHistory = require('../models/UpgraderHistory');
 
-// MM2 Empire API token
-const MM2_EMPIRE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTc4MzZmOWU3ZTc1MTFiOWUzNGZjODYiLCJ0eXBlIjoiYWNjZXNzIiwianRpIjoiemNsWEFQbE55RjVQTWVRQSIsImlhdCI6MTc4NjI3NDc1OCwiZXhwIjoxNzg2Mjc1NjU4LCJhdXRoX3RpbWUiOjE3ODYyNjMyODksImFtciI6WyJyb2Jsb3giXX0.cLZOdLq0Zf4WaJo7ELQ-ZHRSzimCr28KTNM6qU--R5o';
+// MM2 Empire API tokens
+let MM2_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTc4MzZmOWU3ZTc1MTFiOWUzNGZjODYiLCJ0eXBlIjoiYWNjZXNzIiwianRpIjoidEJ6OWxXZmE2ZVVyN3ZOWiIsImlhdCI6MTc4NjMwMDQxOSwiZXhwIjoxNzg2MzAxMzE5LCJhdXRoX3RpbWUiOjE3ODYzMDA0MTEsImFtciI6WyJyb2Jsb3giLCJlbWFpbCJdLCJtZmFfYXQiOjE3ODYzMDA0MTl9.H2s4nBm-RVgn_-SnVuO_4yph2CukX81fAID3MmQOtUM';
+let MM2_REFRESH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTc4MzZmOWU3ZTc1MTFiOWUzNGZjODYiLCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IkdIU0FsSEkzWmNnZ0M1ZU1QaURvZTJkSzZ0RE90VktpIiwiaWF0IjoxNzg2MzAwNDE5LCJleHAiOjE3ODg4OTI0MTksImF1dGhfdGltZSI6MTc4NjMwMDQxMSwiYW1yIjpbInJvYmxveCIsImVtYWlsIl0sIm1mYV9hdCI6MTc4NjMwMDQxOX0.32DkBL-zzc9VXgsu3TlxEvWIuk8QAf74AJFK2eSfvzw';
+
+// Discord webhook URL for upgrader notifications
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1536061298742132896/0_yl4FDrojAtnLSIMsXHhdQj4ZkWnkPpdrTk6OER4s2-l09TsqMKvdg31gk2thzOBfiX';
+
+// Helper function to refresh MM2 Empire access token
+const refreshMM2Token = async () => {
+  try {
+    console.log('Attempting to refresh MM2 Empire token...');
+    const response = await fetch('https://api.mm2empire.com/auth/refresh', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        refreshToken: MM2_REFRESH_TOKEN
+      })
+    });
+    
+    console.log('Refresh response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Refresh response data:', data);
+      if (data.accessToken) {
+        MM2_ACCESS_TOKEN = data.accessToken;
+        if (data.refreshToken) {
+          MM2_REFRESH_TOKEN = data.refreshToken;
+        }
+        console.log('MM2 Empire token refreshed successfully');
+        return data.accessToken;
+      } else {
+        console.error('No accessToken in refresh response:', data);
+      }
+    } else {
+      const errorText = await response.text();
+      console.error('Refresh failed with status:', response.status, 'Error:', errorText);
+    }
+  } catch (error) {
+    console.error('Error refreshing MM2 Empire token:', error);
+  }
+  return MM2_ACCESS_TOKEN;
+};
+
+// Helper function to get valid MM2 Empire token
+const getMM2Token = async () => {
+  try {
+    // Check if token is expired by decoding it
+    const decoded = jwt.decode(MM2_ACCESS_TOKEN);
+    if (decoded && decoded.exp) {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const timeUntilExpiry = decoded.exp - currentTime;
+      console.log('Token expires in:', timeUntilExpiry, 'seconds');
+      // Refresh if token expires within 5 minutes
+      if (timeUntilExpiry < 300) {
+        console.log('Token expiring soon, refreshing...');
+        return await refreshMM2Token();
+      }
+    }
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+  }
+  return MM2_ACCESS_TOKEN;
+};
 
 // Get io instance from server (will be set by server.js)
 let io;
@@ -37,38 +103,121 @@ const populateItemDetails = async (inventoryItems) => {
   );
 };
 
+// Helper function to send Discord webhook
+const sendDiscordWebhook = async (username, won, inputValue, outputValue, inputItems, outputItem) => {
+  try {
+    const color = won ? 0x00ff00 : 0xff0000;
+    const title = won ? '🎉 Upgrade Won!' : '❌ Upgrade Lost';
+    const description = won 
+      ? `**${username}** won an upgrade!\n**Input Value:** R${inputValue}\n**Output Value:** R${outputValue}\n**Multiplier:** ${(outputValue / inputValue).toFixed(2)}x`
+      : `**${username}** lost an upgrade.\n**Input Value:** R${inputValue}\n**Output Value:** R${outputValue}`;
+
+    const inputItemNames = inputItems.map(item => item.name).join(', ');
+    const outputItemName = outputItem ? outputItem.name : 'None';
+
+    const embed = {
+      title: title,
+      description: description,
+      color: color,
+      fields: [
+        {
+          name: 'Input Items',
+          value: inputItemNames || 'None',
+          inline: false
+        },
+        {
+          name: 'Output Item',
+          value: outputItemName,
+          inline: false
+        }
+      ],
+      timestamp: new Date().toISOString()
+    };
+
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ embeds: [embed] })
+    });
+  } catch (error) {
+    console.error('Error sending Discord webhook:', error);
+  }
+};
+
 // Get third party stock from MM2 Empire
 router.get('/third-party-stock', async (req, res) => {
   try {
-    // Fetch wallet balance first
+    // Get valid token (auto-refresh if needed)
+    const token = await getMM2Token();
+    
+    // Fetch wallet balance from MM2 Empire
     const walletResponse = await fetch('https://api.mm2empire.com/wallet', {
       headers: {
-        'authorization': `Bearer ${MM2_EMPIRE_TOKEN}`,
+        'authorization': `Bearer ${token}`,
         'Referer': 'https://mm2empire.com/'
       }
     });
     const walletData = await walletResponse.json();
-    const walletBalance = walletData?.balance || 0;
+    const walletBalance = walletData?.balances?.usd?.availableUsdCents || 0;
 
-    // Fetch marketplace items
-    const response = await fetch('https://api.mm2empire.com/marketplace?group_by_item=true&limit=48&offset=0&sort=price_desc&v=200');
-    const data = await response.json();
-    
-    if (data && data.items) {
-      const items = [];
-      data.items.forEach((item) => {
-        const availableCount = item.availableCount || 1;
-        const price = item.priceCoins || item.itemDetails?.itemValue || 0;
+    // Fetch marketplace items (paginate to get all items)
+    let allItems = [];
+    let offset = 0;
+    const limit = 200;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await fetch(`https://api.mm2empire.com/marketplace?group_by_item=true&limit=${limit}&offset=${offset}&sort=price_desc&v=204`);
+      const data = await response.json();
+      
+      if (data && data.items && data.items.length > 0) {
+        allItems = allItems.concat(data.items);
+        offset += limit;
         
-        // Only include items we can afford
-        if (price <= walletBalance) {
+        // If we got fewer items than the limit, we've reached the end
+        if (data.items.length < limit) {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    if (allItems && allItems.length > 0) {
+      const items = [];
+      
+      // Get all item names to look up in MongoDB
+      const itemNames = allItems.map(item => item.itemDetails?.itemName || item.itemDetails?.name).filter(name => name);
+      console.log('Looking up MongoDB items for names:', itemNames.slice(0, 5), '...');
+      const mongoItems = await Item.find({ name: { $in: itemNames } });
+      console.log('Found MongoDB items:', mongoItems.length);
+      const mongoItemMap = new Map(mongoItems.map(item => [item.name, item.value]));
+      
+      allItems.forEach((item) => {
+        const availableCount = item.availableCount || 1;
+        const mm2Price = item.priceCoins || item.itemDetails?.itemValue || 0;
+        const itemId = item.id || item.itemValueId;
+        const itemName = item.itemDetails?.itemName || item.itemDetails?.name;
+        
+        // Use MongoDB value if available by name, otherwise use MM2 Empire price
+        const value = mongoItemMap.get(itemName) || mm2Price;
+        
+        // Show 1.5x the value in third-party stock
+        const displayPrice = value * 1.5;
+        
+        console.log(`Item ${itemName} (${itemId}): MM2 price=${mm2Price}, MongoDB value=${mongoItemMap.get(itemName)}, Using=${value}, Display=${displayPrice}`);
+        
+        // Only include items we can afford with MM2 Empire wallet balance
+        if (mm2Price <= walletBalance && itemId) {
           for (let i = 0; i < availableCount; i++) {
             items.push({
-              name: item.itemDetails?.itemName || item.itemDetails?.name || 'Unknown',
-              price: price,
+              name: itemName || 'Unknown',
+              price: displayPrice, // Show 1.5x value
               img: item.itemDetails?.itemImage || item.itemDetails?.image || '/assets/wallet/mm2.png',
-              uniqueId: `${item.id || item.itemDetails?.id}_${i}`,
-              itemId: item.itemDetails?.id || item.id,
+              uniqueId: `${itemId}_${i}`,
+              itemId: itemId,
               isThirdParty: true
             });
           }
@@ -134,28 +283,35 @@ router.get('/stock/:robloxUserId', async (req, res) => {
 
 // Process upgrade attempt
 router.post('/upgrade', async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { userId, stockRobloxUserId, inputItemIds, desiredItemId } = req.body;
 
     if (!userId || !stockRobloxUserId || !inputItemIds || !desiredItemId) {
+      await session.abortTransaction();
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // Find stock user by robloxUserId
-    const stockUser = await User.findOne({ robloxUserId: stockRobloxUserId });
+    const stockUser = await User.findOne({ robloxUserId: stockRobloxUserId }).session(session);
     if (!stockUser) {
+      await session.abortTransaction();
       return res.status(404).json({ error: 'Stock account user not found' });
     }
 
     // Get user inventory
-    const userInventory = await Inventory.findOne({ userId });
+    const userInventory = await Inventory.findOne({ userId }).session(session);
     if (!userInventory) {
+      await session.abortTransaction();
       return res.status(404).json({ error: 'User inventory not found' });
     }
 
     // Get stock inventory
-    const stockInventory = await Inventory.findOne({ userId: stockUser._id });
+    const stockInventory = await Inventory.findOne({ userId: stockUser._id }).session(session);
     if (!stockInventory) {
+      await session.abortTransaction();
       return res.status(404).json({ error: 'Stock inventory not found' });
     }
     
@@ -164,6 +320,7 @@ router.post('/upgrade', async (req, res) => {
     for (const uniqueId of inputItemIds) {
       const itemIndex = userInventory.items.findIndex(item => item.uniqueId === uniqueId);
       if (itemIndex === -1) {
+        await session.abortTransaction();
         return res.status(400).json({ error: 'Input item not found in user inventory' });
       }
       inputItems.push(userInventory.items[itemIndex]);
@@ -176,21 +333,52 @@ router.post('/upgrade', async (req, res) => {
     if (desiredItemIndex !== -1) {
       // Site stock item
       desiredItem = stockInventory.items[desiredItemIndex];
-      desiredItemDef = await Item.findOne({ itemId: desiredItem.itemId });
+      desiredItemDef = await Item.findOne({ itemId: desiredItem.itemId }).session(session);
       desiredValue = desiredItemDef?.value || 0;
     } else {
       // Third party item - fetch from MM2 Empire API
       isThirdParty = true;
-      const response = await fetch('https://api.mm2empire.com/marketplace?group_by_item=true&limit=48&offset=0&sort=price_desc&v=200');
-      const data = await response.json();
+      // Extract actual MM2 Empire item ID from uniqueId (format: itemId_index)
+      const actualItemId = desiredItemId.split('_')[0];
+      console.log('Looking for third-party item with ID:', actualItemId);
       
-      if (data && data.items) {
-        const thirdPartyItem = data.items.find(item => item.id === desiredItemId);
+      // Fetch all marketplace items (same logic as third-party stock endpoint)
+      let allItems = [];
+      let offset = 0;
+      const limit = 200;
+      let hasMore = true;
+
+      while (hasMore) {
+        const response = await fetch(`https://api.mm2empire.com/marketplace?group_by_item=true&limit=${limit}&offset=${offset}&sort=price_desc&v=204`);
+        const data = await response.json();
+        
+        if (data && data.items && data.items.length > 0) {
+          allItems = allItems.concat(data.items);
+          offset += limit;
+          
+          if (data.items.length < limit) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      if (allItems && allItems.length > 0) {
+        const thirdPartyItem = allItems.find(item => (item.id === actualItemId || item.itemValueId === actualItemId));
         if (thirdPartyItem) {
+          // Check if item exists in MongoDB by name to get our value
+          const itemName = thirdPartyItem.itemDetails?.itemName || thirdPartyItem.itemDetails?.name;
+          const mongoItem = await Item.findOne({ name: itemName }).session(session);
+          const mm2Price = thirdPartyItem.priceCoins || thirdPartyItem.itemDetails?.itemValue || 0;
+          
+          console.log(`Upgrade item ${itemName} (${actualItemId}): MM2 price=${mm2Price}, MongoDB item found=${!!mongoItem}, MongoDB value=${mongoItem?.value}`);
+          
           desiredItem = {
-            itemId: thirdPartyItem.id,
-            name: thirdPartyItem.itemDetails?.itemName || thirdPartyItem.itemDetails?.name || 'Unknown',
-            price: thirdPartyItem.priceCoins || thirdPartyItem.itemDetails?.itemValue || 0,
+            itemId: thirdPartyItem.id || thirdPartyItem.itemValueId,
+            itemValueId: thirdPartyItem.itemValueId,
+            name: itemName || 'Unknown',
+            price: mongoItem?.value || mm2Price, // Use MongoDB value if available
             img: thirdPartyItem.itemDetails?.itemImage || thirdPartyItem.itemDetails?.image || '/assets/wallet/mm2.png'
           };
           desiredValue = desiredItem.price;
@@ -201,9 +389,12 @@ router.post('/upgrade', async (req, res) => {
             itemId: desiredItem.itemId
           };
         } else {
+          console.log('Item not found. Looking for:', actualItemId, 'Available items:', allItems.map(i => i.id || i.itemValueId));
+          await session.abortTransaction();
           return res.status(404).json({ error: 'Third party item not found' });
         }
       } else {
+        await session.abortTransaction();
         return res.status(500).json({ error: 'Failed to fetch third party stock' });
       }
     }
@@ -211,7 +402,7 @@ router.post('/upgrade', async (req, res) => {
     // Get item values for input items
     const inputItemDefs = await Promise.all(
       inputItems.map(async (invItem) => {
-        const itemDef = await Item.findOne({ itemId: invItem.itemId });
+        const itemDef = await Item.findOne({ itemId: invItem.itemId }).session(session);
         return itemDef;
       })
     );
@@ -225,6 +416,8 @@ router.post('/upgrade', async (req, res) => {
     const randomRoll = Math.random() * 100;
     const won = randomRoll < winChance;
     
+    const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     if (won) {
       // User wins - transfer desired item to user, remove input items from user
       // Remove input items from user inventory
@@ -235,7 +428,7 @@ router.post('/upgrade', async (req, res) => {
       if (isThirdParty) {
         // For third party items, we need to purchase from MM2 Empire
         // First, create the item in our database if it doesn't exist
-        let itemDef = await Item.findOne({ itemId: desiredItem.itemId });
+        let itemDef = await Item.findOne({ itemId: desiredItem.itemId }).session(session);
         if (!itemDef) {
           itemDef = new Item({
             itemId: desiredItem.itemId,
@@ -245,38 +438,50 @@ router.post('/upgrade', async (req, res) => {
             rarity: 'godly',
             category: 'gun'
           });
-          await itemDef.save();
+          await itemDef.save({ session });
         }
 
         // Add purchased item to user inventory
-        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         userInventory.items.push({
           uniqueId: newUniqueId,
           itemId: desiredItem.itemId,
           acquiredAt: new Date()
         });
 
-        // Purchase from MM2 Empire (simplified - in production you'd handle the actual purchase)
+        // Purchase from MM2 Empire using checkout API
         try {
-          await fetch('https://api.mm2empire.com/marketplace/purchase', {
+          const token = await getMM2Token();
+          const idempotencyKey = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          const checkoutResponse = await fetch('https://api.mm2empire.com/marketplace/checkout', {
             method: 'POST',
             headers: {
-              'authorization': `Bearer ${MM2_EMPIRE_TOKEN}`,
+              'authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey,
               'Referer': 'https://mm2empire.com/'
             },
             body: JSON.stringify({
-              listingId: desiredItem.itemId,
-              quantity: 1
+              listingIds: [],
+              stacks: [{
+                itemValueId: desiredItem.itemValueId,
+                priceCoins: desiredValue,
+                quantity: 1
+              }]
             })
           });
+          
+          if (!checkoutResponse.ok) {
+            const errorText = await checkoutResponse.text();
+            console.error('MM2 Empire checkout failed:', checkoutResponse.status, errorText);
+          } else {
+            console.log('MM2 Empire checkout successful');
+          }
         } catch (purchaseError) {
           console.error('Error purchasing from MM2 Empire:', purchaseError);
           // Continue anyway - item is already added to user inventory
         }
       } else {
         // Site stock item
-        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         userInventory.items.push({
           uniqueId: newUniqueId,
           itemId: desiredItem.itemId,
@@ -290,49 +495,17 @@ router.post('/upgrade', async (req, res) => {
         }
       }
 
-      try {
-        await userInventory.save();
-      } catch (versionError) {
-        if (versionError.name === 'VersionError') {
-          userInventory = await Inventory.findOne({ userId });
-          userInventory.items = userInventory.items.filter(
-            item => !inputItemIds.includes(item.uniqueId)
-          );
-          userInventory.items.push({
-            uniqueId: newUniqueId,
-            itemId: desiredItem.itemId,
-            acquiredAt: new Date()
-          });
-          await userInventory.save();
-        } else {
-          throw versionError;
-        }
-      }
+      await userInventory.save({ session });
 
       if (!isThirdParty) {
-        try {
-          await stockInventory.save();
-        } catch (versionError) {
-          if (versionError.name === 'VersionError') {
-            stockInventory = await Inventory.findOne({ userId: stockUser._id });
-            const desiredItemIndex = stockInventory.items.findIndex(
-              item => item.uniqueId === desiredItemId
-            );
-            if (desiredItemIndex !== -1) {
-              stockInventory.items.splice(desiredItemIndex, 1);
-            }
-            await stockInventory.save();
-          } else {
-            throw versionError;
-          }
-        }
+        await stockInventory.save({ session });
       }
 
       // Save to upgrader history
       const historyEntry = new UpgraderHistory({
         userId,
-        username: (await User.findById(userId)).username,
-        avatar: (await User.findById(userId)).avatar || '',
+        username: (await User.findById(userId).session(session)).username,
+        avatar: (await User.findById(userId).session(session)).avatar || '',
         inputItems: inputItems.map(item => ({
           uniqueId: item.uniqueId,
           itemId: item.itemId,
@@ -354,9 +527,26 @@ router.post('/upgrade', async (req, res) => {
         multiplier: desiredValue / inputValue,
         isThirdParty
       });
-      await historyEntry.save();
+      await historyEntry.save({ session });
 
-      // Emit socket events
+      await session.commitTransaction();
+
+      // Send Discord webhook (outside transaction)
+      const user = await User.findById(userId);
+      if (user) {
+        sendDiscordWebhook(
+          user.username,
+          true,
+          inputValue,
+          desiredValue,
+          inputItems.map(item => ({
+            name: inputItemDefs.find(def => def?.itemId === item.itemId)?.name || item.itemId
+          })),
+          desiredItemDef
+        );
+      }
+
+      // Emit socket events (outside transaction)
       if (io) {
         const populatedUserInventory = await populateItemDetails(userInventory.items);
         io.emit('inventory-updated', {
@@ -386,90 +576,37 @@ router.post('/upgrade', async (req, res) => {
       });
     } else {
       // User loses - transfer input items to stock account
+      console.log('User lost upgrade. Removing input items from user inventory...');
+      console.log('User inventory before:', userInventory.items.length);
+      console.log('Input item IDs to remove:', inputItemIds);
+      
       // Remove input items from user inventory
       userInventory.items = userInventory.items.filter(
         item => !inputItemIds.includes(item.uniqueId)
       );
+      
+      console.log('User inventory after:', userInventory.items.length);
 
       // Add input items to stock inventory
       for (const inputItem of inputItems) {
-        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const newStockUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         stockInventory.items.push({
-          uniqueId: newUniqueId,
+          uniqueId: newStockUniqueId,
           itemId: inputItem.itemId,
           acquiredAt: new Date()
         });
       }
+      
+      console.log('Stock inventory after adding items:', stockInventory.items.length);
 
-      // If third party item was desired, add it to site stock
-      if (isThirdParty && desiredItem) {
-        let itemDef = await Item.findOne({ itemId: desiredItem.itemId });
-        if (!itemDef) {
-          itemDef = new Item({
-            itemId: desiredItem.itemId,
-            name: desiredItem.name,
-            image: desiredItem.img,
-            value: desiredValue,
-            rarity: 'godly',
-            category: 'gun'
-          });
-          await itemDef.save();
-        }
-
-        const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        stockInventory.items.push({
-          uniqueId: newUniqueId,
-          itemId: desiredItem.itemId,
-          acquiredAt: new Date()
-        });
-      }
-
-      try {
-        await userInventory.save();
-      } catch (versionError) {
-        if (versionError.name === 'VersionError') {
-          userInventory = await Inventory.findOne({ userId });
-          userInventory.items = userInventory.items.filter(
-            item => !inputItemIds.includes(item.uniqueId)
-          );
-          await userInventory.save();
-        } else {
-          throw versionError;
-        }
-      }
-
-      try {
-        await stockInventory.save();
-      } catch (versionError) {
-        if (versionError.name === 'VersionError') {
-          stockInventory = await Inventory.findOne({ userId: stockUser._id });
-          for (const inputItem of inputItems) {
-            const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            stockInventory.items.push({
-              uniqueId: newUniqueId,
-              itemId: inputItem.itemId,
-              acquiredAt: new Date()
-            });
-          }
-          if (isThirdParty && desiredItem) {
-            const newUniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            stockInventory.items.push({
-              uniqueId: newUniqueId,
-              itemId: desiredItem.itemId,
-              acquiredAt: new Date()
-            });
-          }
-          await stockInventory.save();
-        } else {
-          throw versionError;
-        }
-      }
+      await userInventory.save({ session });
+      await stockInventory.save({ session });
 
       // Save to upgrader history
       const historyEntry = new UpgraderHistory({
         userId,
-        username: (await User.findById(userId)).username,
-        avatar: (await User.findById(userId)).avatar || '',
+        username: (await User.findById(userId).session(session)).username,
+        avatar: (await User.findById(userId).session(session)).avatar || '',
         inputItems: inputItems.map(item => ({
           uniqueId: item.uniqueId,
           itemId: item.itemId,
@@ -485,9 +622,26 @@ router.post('/upgrade', async (req, res) => {
         multiplier: 0,
         isThirdParty
       });
-      await historyEntry.save();
+      await historyEntry.save({ session });
 
-      // Emit socket events
+      await session.commitTransaction();
+
+      // Send Discord webhook (outside transaction)
+      const user = await User.findById(userId);
+      if (user) {
+        sendDiscordWebhook(
+          user.username,
+          false,
+          inputValue,
+          0,
+          inputItems.map(item => ({
+            name: inputItemDefs.find(def => def?.itemId === item.itemId)?.name || item.itemId
+          })),
+          null
+        );
+      }
+
+      // Emit socket events (outside transaction)
       if (io) {
         const populatedUserInventory = await populateItemDetails(userInventory.items);
         io.emit('inventory-updated', {
@@ -511,12 +665,15 @@ router.post('/upgrade', async (req, res) => {
         winChance: winChance.toFixed(2),
         inputValue,
         desiredValue,
-        message: 'Upgrade failed. Your items were transferred to the stock account.'
+        message: 'Upgrade failed. You lost your items.'
       });
     }
   } catch (error) {
-    console.error('Error processing upgrade:', error);
+    await session.abortTransaction();
+    console.error('Upgrade error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    session.endSession();
   }
 });
 

@@ -330,7 +330,12 @@ export default function UpgraderPage() {
       />
       <Sidebar onProfileClick={handleProfileClick} onGiftClick={() => setIsCreateGiveawayOpen(true)} onRulesClick={() => setIsRulesModalOpen(true)} />
 
-      <div className="page-content-area" style={{ overflow: 'auto', pointerEvents: 'auto' }}>
+      <div className="page-content-area" style={{ overflow: 'auto', pointerEvents: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <style jsx>{`
+          .page-content-area::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
         <div
           style={{
             minHeight: '100vh',
@@ -533,13 +538,15 @@ export default function UpgraderPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img
-                        src={win.avatar}
-                        alt=""
-                        width={16}
-                        height={16}
-                        style={{ borderRadius: '50%' }}
-                      />
+                      {win.avatar && (
+                        <img
+                          src={win.avatar}
+                          alt=""
+                          width={16}
+                          height={16}
+                          style={{ borderRadius: '50%' }}
+                        />
+                      )}
                       <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px', color: '#FFFFFF' }}>
                         {win.username}
                       </span>

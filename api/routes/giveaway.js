@@ -41,7 +41,14 @@ const checkAndCompleteGiveaways = async () => {
           // Add items to winner's inventory
           const winnerInventory = await Inventory.findOne({ userId: winnerId });
           if (winnerInventory) {
-            winnerInventory.items.push(...giveaway.items);
+            // Generate unique IDs for each item before adding to inventory
+            const itemsWithUniqueIds = giveaway.items.map(item => ({
+              ...item.toObject ? item.toObject() : item,
+              uniqueId: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              acquiredAt: new Date()
+            }));
+            
+            winnerInventory.items.push(...itemsWithUniqueIds);
             await winnerInventory.save();
             
             console.log(`Added ${giveaway.items.length} items to winner ${winner.username}'s inventory`);

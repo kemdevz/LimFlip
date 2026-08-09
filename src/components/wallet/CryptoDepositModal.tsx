@@ -29,31 +29,31 @@ export default function CryptoDepositModal({ isOpen, onClose, cryptoType = 'BTC'
   const cryptoConfig = {
     BTC: {
       name: 'Bitcoin (BTC)',
-      address: 'teth1qrh83f8hzxdqgyuy5yyv6npweef03smm..',
+      address: 'bc1qrrpzxxse84pdvzw88vkvyx72mpfdpqha0w8la3..',
       icon: '/assets/wallet/btc.png',
       color: 'rgba(247, 147, 26, 0.25)',
     },
     ETH: {
       name: 'Ethereum (ETH)',
-      address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+      address: '0xf1F31085Ca82786C9b2312CE9a1813E0C1067d10',
       icon: '/assets/wallet/eth.png',
       color: 'rgba(26, 141, 247, 0.25)',
     },
     LTC: {
       name: 'Litecoin (LTC)',
-      address: 'ltc1qrh83f8hzxdqgyuy5yyv6npweef03smm..',
+      address: 'LZeDCtPFRzhosRDjydDRqLyN6tgEuRULAj..',
       icon: '/assets/wallet/ltc.png',
       color: 'rgba(141, 141, 141, 0.25)',
     },
     USDT: {
       name: 'USDT (ERC20)',
-      address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+      address: '0xf1F31085Ca82786C9b2312CE9a1813E0C1067d10',
       icon: '/assets/wallet/usdt.png',
       color: 'rgba(83, 174, 148, 0.25)',
     },
     SOL: {
       name: 'Solana (SOL)',
-      address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+      address: '7p59FpE9H5wXHPBDL9SSSfasuWbE3fce6dQrYorbGc6v',
       icon: '/assets/wallet/sol.png',
       color: 'rgba(126, 123, 217, 0.25)',
     },

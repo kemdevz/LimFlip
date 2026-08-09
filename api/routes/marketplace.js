@@ -130,6 +130,13 @@ router.post('/create', authenticateToken, async (req, res) => {
     
     await listing.save();
 
+    // Mark item as listed in marketplace
+    const itemIndex = inventory.items.findIndex(item => item.uniqueId === inventoryItemUniqueId);
+    if (itemIndex !== -1) {
+      inventory.items[itemIndex].listedInMarketplace = true;
+      await inventory.save();
+    }
+
     // Fetch updated inventory with populated item details
     const updatedInventory = await Inventory.findOne({ userId: req.userId });
     const populatedInventory = updatedInventory ? {
@@ -286,6 +293,16 @@ router.post('/cancel/:listingId', authenticateToken, async (req, res) => {
     
     listing.status = 'cancelled';
     await listing.save();
+
+    // Unmark item as listed in marketplace
+    const inventory = await Inventory.findOne({ userId: req.userId });
+    if (inventory) {
+      const itemIndex = inventory.items.findIndex(item => item.uniqueId === listing.inventoryItemUniqueId);
+      if (itemIndex !== -1) {
+        inventory.items[itemIndex].listedInMarketplace = false;
+        await inventory.save();
+      }
+    }
     
     res.json(listing);
   } catch (error) {

@@ -22,6 +22,10 @@ const inventoryItemSchema = new mongoose.Schema({
   wagered: {
     type: Boolean,
     default: false
+  },
+  listedInMarketplace: {
+    type: Boolean,
+    default: false
   }
 });
 

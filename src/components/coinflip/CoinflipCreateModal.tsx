@@ -95,9 +95,11 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
     }
   }, [isOpen]);
 
-  // Sort inventory items by value (high to low)
+  // Sort inventory items by value (high to low) and filter out marketplace items
   const sortedItems = inventory?.items 
-    ? [...inventory.items].sort((a, b) => (b.value || 0) - (a.value || 0))
+    ? [...inventory.items]
+        .filter(item => !item.listedInMarketplace)
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
     : [];
 
   if (!isVisible) return null;

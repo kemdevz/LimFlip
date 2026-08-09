@@ -18,6 +18,9 @@ export interface InventoryItem {
   value: number;
   category: string;
   acquiredAt?: string;
+  source?: 'marketplace' | 'wager' | 'other';
+  wagered?: boolean;
+  listedInMarketplace?: boolean;
 }
 
 export interface Inventory {

@@ -1113,7 +1113,7 @@ export default function UpgraderPage() {
                           onChange={(e) => setUseMM2Values(e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>USE MM2 EMPIRE VALUES</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>USE BALANCE</span>
                       </label>
                     </div>
                     <input
@@ -1532,7 +1532,7 @@ export default function UpgraderPage() {
                           onChange={(e) => setUseMM2Values(e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '12px', color: '#FFFFFF' }}>USE MM2 EMPIRE VALUES</span>
+                        <span style={{ fontSize: '12px', color: '#FFFFFF' }}>USE BALANCE</span>
                       </label>
                     </div>
                     <input

@@ -517,7 +517,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             if (selectedItems.size > 0 && user?.id && !isCreating) {
               setIsCreating(true);
               try {
-                const response = await fetch('https://api-bash.onrender.com/coinflip/create', {
+                const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/create', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

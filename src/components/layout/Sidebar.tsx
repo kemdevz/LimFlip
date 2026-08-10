@@ -75,7 +75,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
         return;
       }
 
-      const response = await fetch(`https://api-bash.onrender.com/giveaway/${giveaway.id}/join`, {
+      const response = await fetch(`https://api-bash-0ouj.onrender.com/giveaway/${giveaway.id}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch('https://api-bash.onrender.com/messages/recent');
+      const response = await fetch('https://api-bash-0ouj.onrender.com/messages/recent');
       const data = await response.json();
       if (Array.isArray(data)) {
         setMessages(data);
@@ -137,7 +137,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
 
   const fetchGiveaway = async () => {
     try {
-      const response = await fetch('https://api-bash.onrender.com/giveaway/active');
+      const response = await fetch('https://api-bash-0ouj.onrender.com/giveaway/active');
       const data = await response.json();
       if (Array.isArray(data) && data.length > 0) {
         setGiveaway(data[0]); // Get the most recent active giveaway

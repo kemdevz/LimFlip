@@ -53,7 +53,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
 
   const fetchUserBalance = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash-0ouj.onrender.com';
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/auth/me`, {
         headers: {
@@ -71,7 +71,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
 
   const fetchListings = async (search?: string) => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash-0ouj.onrender.com';
       const url = search 
         ? `${API_URL}/marketplace/listings?search=${encodeURIComponent(search)}`
         : `${API_URL}/marketplace/listings`;
@@ -88,7 +88,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
 
   const fetchRecentlySold = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash-0ouj.onrender.com';
       const response = await fetch(`${API_URL}/marketplace/recently-sold`);
       const data = await response.json();
       setRecentlySold(data);
@@ -143,7 +143,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
     setPurchaseError('');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash-0ouj.onrender.com';
       const token = localStorage.getItem('token');
 
       // Purchase each item in cart

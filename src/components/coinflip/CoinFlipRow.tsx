@@ -78,7 +78,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
     if (!user || !game?._id) return;
 
     try {
-      const response = await fetch('https://api-bash.onrender.com/coinflip/cancel/' + game._id, {
+      const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/cancel/' + game._id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -36,7 +36,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose }) => {
 
   const fetchCurrencies = async () => {
     try {
-      const response = await fetch('https://api-bash.onrender.com/deposit/currencies');
+      const response = await fetch('https://api-bash-0ouj.onrender.com/deposit/currencies');
       const data = await response.json();
       setCurrencies(data.currencies || []);
     } catch (error) {
@@ -52,7 +52,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose }) => {
 
     setIsGenerating(true);
     try {
-      const response = await fetch('https://api-bash.onrender.com/deposit/generate-address', {
+      const response = await fetch('https://api-bash-0ouj.onrender.com/deposit/generate-address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

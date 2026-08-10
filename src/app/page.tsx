@@ -223,7 +223,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('https://api-bash.onrender.com/coinflip/active');
+        const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/active');
         const data = await response.json();
         const newGames = data.games || [];
         
@@ -363,7 +363,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
     if (!user?.id) return;
     
     try {
-      const response = await fetch('https://api-bash.onrender.com/coinflip/create', {
+      const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -491,7 +491,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
                   body.uniqueIds = Array.from(selectedItems);
                 }
 
-                const response = await fetch(`https://api-bash.onrender.com/coinflip/join/${game._id}`, {
+                const response = await fetch(`https://api-bash-0ouj.onrender.com/coinflip/join/${game._id}`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

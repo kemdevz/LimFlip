@@ -107,7 +107,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
 
     setIsWithdrawing(true);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-bash-0ouj.onrender.com';
 
       // Create withdrawal request
       const response = await fetch(`${API_URL}/mm2/withdraw/request`, {

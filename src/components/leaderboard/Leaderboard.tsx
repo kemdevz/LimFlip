@@ -30,7 +30,7 @@ export default function Leaderboard({ items, onClose }: LeaderboardProps) {
     const fetchLeaderboardData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`https://api-bash.onrender.com/coinflip/leaderboard?type=${activeTab}`);
+        const response = await fetch(`https://api-bash-0ouj.onrender.com/coinflip/leaderboard?type=${activeTab}`);
         const data = await response.json();
         setLeaderboardData(data.leaderboard || []);
       } catch (error) {

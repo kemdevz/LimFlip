@@ -78,7 +78,7 @@ export default function UpgraderPage() {
 
   const fetchThirdPartyStock = async () => {
     try {
-      const response = await fetch('https://api-bash.onrender.com/upgrader/third-party-stock');
+      const response = await fetch('https://api-bash-0ouj.onrender.com/upgrader/third-party-stock');
       const data = await response.json();
       
       if (data && data.items) {
@@ -119,7 +119,7 @@ export default function UpgraderPage() {
         // Fetch user inventory using the actual user's id
         if (user?.id) {
           console.log('Fetching user inventory for:', user.id);
-          const userResponse = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`);
+          const userResponse = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${user.id}`);
           const userData = await userResponse.json();
           console.log('User inventory response:', userData);
           if (userData.items) {
@@ -134,7 +134,7 @@ export default function UpgraderPage() {
           }
           
           // Fetch user balance
-          const userBalanceResponse = await fetch(`https://api-bash.onrender.com/auth/user/${user.id}`);
+          const userBalanceResponse = await fetch(`https://api-bash-0ouj.onrender.com/auth/user/${user.id}`);
           const userBalanceData = await userBalanceResponse.json();
           if (userBalanceData.balance !== undefined) {
             setUserBalance(userBalanceData.balance);
@@ -145,7 +145,7 @@ export default function UpgraderPage() {
 
         // Fetch stock inventory
         console.log('Fetching stock inventory for:', STOCK_USER_ID);
-        const stockResponse = await fetch(`https://api-bash.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
+        const stockResponse = await fetch(`https://api-bash-0ouj.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
         const stockData = await stockResponse.json();
         console.log('Stock inventory response:', stockData);
         if (stockData.items) {
@@ -205,7 +205,7 @@ export default function UpgraderPage() {
     await new Promise(resolve => setTimeout(resolve, 50));
 
     try {
-      const response = await fetch('https://api-bash.onrender.com/upgrader/upgrade', {
+      const response = await fetch('https://api-bash-0ouj.onrender.com/upgrader/upgrade', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ export default function UpgraderPage() {
 
           // Refresh inventories after upgrade
           if (user?.id) {
-            const userResponse = await fetch(`https://api-bash.onrender.com/inventory/${user.id}`);
+            const userResponse = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${user.id}`);
             const userData = await userResponse.json();
             if (userData.items) {
               setUserInventory(userData.items.map((item: any) => ({
@@ -267,14 +267,14 @@ export default function UpgraderPage() {
             }
             
             // Refresh user balance
-            const userBalanceResponse = await fetch(`https://api-bash.onrender.com/user/${user.id}`);
+            const userBalanceResponse = await fetch(`https://api-bash-0ouj.onrender.com/user/${user.id}`);
             const userBalanceData = await userBalanceResponse.json();
             if (userBalanceData.balance !== undefined) {
               setUserBalance(userBalanceData.balance);
             }
           }
 
-          const stockResponse = await fetch(`https://api-bash.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
+          const stockResponse = await fetch(`https://api-bash-0ouj.onrender.com/upgrader/stock/${STOCK_USER_ID}`);
           const stockData = await stockResponse.json();
           if (stockData.items) {
             setStockInventory(stockData.items.map((item: any) => ({
@@ -303,7 +303,7 @@ export default function UpgraderPage() {
   useEffect(() => {
     const fetchUpgraderHistory = async () => {
       try {
-        const response = await fetch('https://api-bash.onrender.com/upgrader/history?limit=10');
+        const response = await fetch('https://api-bash-0ouj.onrender.com/upgrader/history?limit=10');
         const history = await response.json();
         
         const formattedWins: LiveWin[] = history.map((entry: any) => ({

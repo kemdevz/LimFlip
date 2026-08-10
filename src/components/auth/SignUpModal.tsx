@@ -38,7 +38,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
     try {
       if (step === 1) {
         // Step 1: Check if username exists
-        const endpoint = 'https://api-bash.onrender.com/auth/check-username';
+        const endpoint = 'https://api-bash-0ouj.onrender.com/auth/check-username';
         const body = { username };
 
         const response = await fetch(endpoint, {
@@ -64,7 +64,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           
           // Fetch avatar URL from Roblox API
           try {
-            const searchResponse = await fetch(`https://api-bash.onrender.com/roblox/search?q=${encodeURIComponent(username)}`);
+            const searchResponse = await fetch(`https://api-bash-0ouj.onrender.com/roblox/search?q=${encodeURIComponent(username)}`);
             const searchData = await searchResponse.json();
             console.log('Search results:', searchData);
             if (searchData && searchData.length > 0) {
@@ -88,7 +88,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
         setStep(3);
       } else {
         // Step 3: Verify description and login/signup
-        const endpoint = 'https://api-bash.onrender.com/auth/verify-description';
+        const endpoint = 'https://api-bash-0ouj.onrender.com/auth/verify-description';
         const body = { username, robloxUserId: robloxUserId?.toString() };
 
         console.log('Sending to verify-description:', { username, robloxUserId });

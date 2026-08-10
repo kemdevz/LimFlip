@@ -37,7 +37,7 @@ export default function ProfileModal({
   const fetchUserStats = async (targetUserId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://api-bash.onrender.com/user/${targetUserId}/stats`);
+      const response = await fetch(`https://api-bash-0ouj.onrender.com/user/${targetUserId}/stats`);
       if (response.ok) {
         const data = await response.json();
         setUserData(data);

@@ -1274,7 +1274,7 @@ color: '#FFFFFF',
                 if (!game?._id || !user?.id) return;
                 setIsCancelling(true);
                 try {
-                  const response = await fetch(`https://api-bash.onrender.com/coinflip/cancel/${game._id}`, {
+                  const response = await fetch(`https://api-bash-0ouj.onrender.com/coinflip/cancel/${game._id}`, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

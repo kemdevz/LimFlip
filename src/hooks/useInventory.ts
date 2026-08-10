@@ -38,7 +38,7 @@ export const useInventory = (userId: string | null) => {
     console.log('useInventory: Fetching inventory for userId:', userId);
 
     try {
-      const response = await fetch(`https://api-bash.onrender.com/inventory/${userId}`);
+      const response = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${userId}`);
       const data = await response.json();
 
       console.log('useInventory: Response:', data);
@@ -86,7 +86,7 @@ export const useInventory = (userId: string | null) => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`https://api-bash.onrender.com/inventory/${userId}/add`, {
+      const response = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${userId}/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export const useInventory = (userId: string | null) => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`https://api-bash.onrender.com/inventory/${userId}/remove/${itemId}`, {
+      const response = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${userId}/remove/${itemId}`, {
         method: 'DELETE',
       });
 

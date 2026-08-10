@@ -85,6 +85,7 @@ export default function UpgraderPage() {
         const items = data.items.map((item: any) => ({
           name: item.name,
           price: item.price,
+          mm2Value: item.mm2Value,
           img: item.img,
           uniqueId: item.uniqueId,
           itemId: item.itemId
@@ -125,6 +126,7 @@ export default function UpgraderPage() {
             setUserInventory(userData.items.map((item: any) => ({
               name: item.name,
               price: item.value,
+              mm2Value: item.mm2Value,
               img: item.image,
               uniqueId: item.uniqueId,
               itemId: item.itemId
@@ -132,7 +134,7 @@ export default function UpgraderPage() {
           }
           
           // Fetch user balance
-          const userBalanceResponse = await fetch(`https://api-bash.onrender.com/user/${user.id}`);
+          const userBalanceResponse = await fetch(`https://api-bash.onrender.com/auth/user/${user.id}`);
           const userBalanceData = await userBalanceResponse.json();
           if (userBalanceData.balance !== undefined) {
             setUserBalance(userBalanceData.balance);
@@ -150,6 +152,7 @@ export default function UpgraderPage() {
           setStockInventory(stockData.items.map((item: any) => ({
             name: item.name,
             price: item.value,
+            mm2Value: item.mm2Value,
             img: item.image,
             uniqueId: item.uniqueId,
             itemId: item.itemId
@@ -220,8 +223,8 @@ export default function UpgraderPage() {
 
       if (result.success) {
         // Calculate win percentage for landing position
-        const inputValue = usingBalance ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + item.price, 0);
-        const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + item.price, 0);
+        const inputValue = usingBalance ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+        const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
         const winPercentage = (inputValue / desiredValue) * 100;
         const winDegrees = winPercentage * 3.6;
 
@@ -800,7 +803,7 @@ export default function UpgraderPage() {
                     }}
                   >
                     {/* Static stroke showing win percentage */}
-                    {selectedDesiredItems && selectedInputItems.length > 0 && (
+                    {selectedDesiredItems && (selectedInputItems.length > 0 || balanceAmount.trim() !== '') && (
                       <svg
                         style={{
                           position: 'absolute',
@@ -820,7 +823,13 @@ export default function UpgraderPage() {
                           stroke="#0276FF"
                           strokeWidth="8"
                           strokeLinecap="round"
-                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 283} 283`}
+                          strokeDasharray={`${(() => {
+                            if (selectedDesiredItems.length === 0) return '0 283';
+                            const inputValue = balanceAmount.trim() !== '' ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            if (inputValue === 0) return '0 283';
+                            return `${(inputValue / desiredValue) * 283} 283`;
+                          })()}`}
                           transform="rotate(-90 50 50)"
                         />
                       </svg>
@@ -866,9 +875,13 @@ export default function UpgraderPage() {
                       <div style={{ textAlign: 'center', gridArea: '1 / 1 / -1 / -1' }}>
                         <span style={{ fontSize: '24px', fontWeight: 500 }}></span>
                         <span style={{ display: 'block', fontSize: '48px', fontWeight: 600, color: '#FFFFFF' }}>
-                          {selectedDesiredItems.length > 0 && selectedInputItems.length > 0
-                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 100).toFixed(2) + '%'
-                            : '0.00%'}
+                          {(() => {
+                            if (selectedDesiredItems.length === 0) return '0.00%';
+                            const inputValue = balanceAmount.trim() !== '' ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            if (inputValue === 0) return '0.00%';
+                            return ((inputValue / desiredValue) * 100).toFixed(2) + '%';
+                          })()}
                         </span>
                         <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' }}>Chance of receiving selected items</span>
                       </div>
@@ -895,7 +908,7 @@ export default function UpgraderPage() {
                             </span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                               <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                              <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                              <span style={{ fontWeight: 600 }}>{selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0)}</span>
                             </span>
                           </div>
                           <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -927,7 +940,7 @@ export default function UpgraderPage() {
                             <span style={{ display: 'block', fontSize: '20px', fontWeight: 600 }}>{selectedDesiredItems.length} item{selectedDesiredItems.length > 1 ? 's' : ''}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                               <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                              <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                              <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0)}</span>
                             </span>
                           </div>
                           <div style={{ zIndex: 20, gridColumn: '1 / -1', gridRow: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1100,7 +1113,7 @@ export default function UpgraderPage() {
                           onChange={(e) => setUseMM2Values(e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>USE BALANCE</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>USE MM2 EMPIRE VALUES</span>
                       </label>
                     </div>
                     <input
@@ -1176,7 +1189,7 @@ export default function UpgraderPage() {
                     <div style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF' }}>Desired Total</div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#0276FF' }}>
                       <img src="/assets/svg/home/wallet.svg" width={16} height={14} />
-                      <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)}</span>
+                      <span style={{ fontWeight: 600 }}>{selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0)}</span>
                     </span>
                   </div>
                 </div>
@@ -1369,7 +1382,7 @@ export default function UpgraderPage() {
                     }}
                   >
                     {/* Static stroke showing win percentage */}
-                    {selectedDesiredItems && selectedInputItems.length > 0 && (
+                    {selectedDesiredItems && (selectedInputItems.length > 0 || balanceAmount.trim() !== '') && (
                       <svg
                         style={{
                           position: 'absolute',
@@ -1389,7 +1402,13 @@ export default function UpgraderPage() {
                           stroke="#0276FF"
                           strokeWidth="8"
                           strokeLinecap="round"
-                          strokeDasharray={`${(selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 283} 283`}
+                          strokeDasharray={`${(() => {
+                            if (selectedDesiredItems.length === 0) return '0 283';
+                            const inputValue = balanceAmount.trim() !== '' ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            if (inputValue === 0) return '0 283';
+                            return `${(inputValue / desiredValue) * 283} 283`;
+                          })()}`}
                           transform="rotate(-90 50 50)"
                         />
                       </svg>
@@ -1435,9 +1454,13 @@ export default function UpgraderPage() {
                       <div style={{ textAlign: 'center', gridArea: '1 / 1 / -1 / -1' }}>
                         <span style={{ fontSize: '16px', fontWeight: 500 }}></span>
                         <span style={{ display: 'block', fontSize: '32px', fontWeight: 600, color: '#FFFFFF' }}>
-                          {selectedDesiredItems.length > 0 && selectedInputItems.length > 0
-                            ? ((selectedInputItems.reduce((sum, item) => sum + item.price, 0) / selectedDesiredItems.reduce((sum, item) => sum + item.price, 0)) * 100).toFixed(2) + '%'
-                            : '0.00%'}
+                          {(() => {
+                            if (selectedDesiredItems.length === 0) return '0.00%';
+                            const inputValue = balanceAmount.trim() !== '' ? parseFloat(balanceAmount) : selectedInputItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            const desiredValue = selectedDesiredItems.reduce((sum, item) => sum + (useMM2Values ? (item.mm2Value || item.price) : item.price), 0);
+                            if (inputValue === 0) return '0.00%';
+                            return ((inputValue / desiredValue) * 100).toFixed(2) + '%';
+                          })()}
                         </span>
                         <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' }}>Chance</span>
                       </div>
@@ -1509,7 +1532,7 @@ export default function UpgraderPage() {
                           onChange={(e) => setUseMM2Values(e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
-                        <span style={{ fontSize: '12px', color: '#FFFFFF' }}>USE BALANCE</span>
+                        <span style={{ fontSize: '12px', color: '#FFFFFF' }}>USE MM2 EMPIRE VALUES</span>
                       </label>
                     </div>
                     <input
@@ -1697,6 +1720,9 @@ export default function UpgraderPage() {
                         <button
                           key={item.uniqueId || i}
                           onClick={() => {
+                            // Prevent item selection if balance is being used
+                            if (balanceAmount.trim() !== '') return;
+                            
                             const isSelected = selectedInputItems.some(selected => selected.uniqueId === item.uniqueId);
                             if (isSelected) {
                               setSelectedInputItems(selectedInputItems.filter(selected => selected.uniqueId !== item.uniqueId));
@@ -1705,7 +1731,7 @@ export default function UpgraderPage() {
                             }
                           }}
                           style={{
-                            cursor: 'pointer',
+                            cursor: balanceAmount.trim() !== '' ? 'not-allowed' : 'pointer',
                             borderRadius: '8px',
                             borderTop: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderRight: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
@@ -1751,7 +1777,7 @@ export default function UpgraderPage() {
                               {item.name}
                             </span>
                             <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px', color: '#0276FF' }}>
-                              R${item.price}
+                              R${useMM2Values ? (item.mm2Value || item.price) : item.price}
                             </span>
                           </div>
                         </button>
@@ -1855,6 +1881,9 @@ export default function UpgraderPage() {
                         <button
                           key={item.uniqueId || i}
                           onClick={() => {
+                            // Prevent item selection if balance is being used
+                            if (balanceAmount.trim() !== '') return;
+                            
                             const isSelected = selectedDesiredItems.some(i => i.uniqueId === item.uniqueId);
                             if (isSelected) {
                               setSelectedDesiredItems(selectedDesiredItems.filter(i => i.uniqueId !== item.uniqueId));
@@ -1863,7 +1892,7 @@ export default function UpgraderPage() {
                             }
                           }}
                           style={{
-                            cursor: 'pointer',
+                            cursor: balanceAmount.trim() !== '' ? 'not-allowed' : 'pointer',
                             borderRadius: '8px',
                             borderTop: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderRight: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
@@ -1909,7 +1938,7 @@ export default function UpgraderPage() {
                               {item.name}
                             </span>
                             <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px', color: '#0276FF' }}>
-                              R${item.price}
+                              R${useMM2Values ? (item.mm2Value || item.price) : item.price}
                             </span>
                           </div>
                         </button>
@@ -1976,6 +2005,9 @@ export default function UpgraderPage() {
                         <button
                           key={item.uniqueId || i}
                           onClick={() => {
+                            // Prevent item selection if balance is being used
+                            if (balanceAmount.trim() !== '') return;
+                            
                             const isSelected = selectedInputItems.some(selected => selected.uniqueId === item.uniqueId);
                             if (isSelected) {
                               setSelectedInputItems(selectedInputItems.filter(selected => selected.uniqueId !== item.uniqueId));
@@ -1984,7 +2016,7 @@ export default function UpgraderPage() {
                             }
                           }}
                           style={{
-                            cursor: 'pointer',
+                            cursor: balanceAmount.trim() !== '' ? 'not-allowed' : 'pointer',
                             borderRadius: '8px',
                             borderTop: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderRight: selectedInputItems.some(selected => selected.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
@@ -2030,7 +2062,7 @@ export default function UpgraderPage() {
                               {item.name}
                             </span>
                             <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#0276FF' }}>
-                              R${item.price}
+                              R${useMM2Values ? (item.mm2Value || item.price) : item.price}
                             </span>
                           </div>
                         </button>
@@ -2106,6 +2138,9 @@ export default function UpgraderPage() {
                         <button
                           key={item.uniqueId || i}
                           onClick={() => {
+                            // Prevent item selection if balance is being used
+                            if (balanceAmount.trim() !== '') return;
+                            
                             const isSelected = selectedDesiredItems.some(i => i.uniqueId === item.uniqueId);
                             if (isSelected) {
                               setSelectedDesiredItems(selectedDesiredItems.filter(i => i.uniqueId !== item.uniqueId));
@@ -2114,7 +2149,7 @@ export default function UpgraderPage() {
                             }
                           }}
                           style={{
-                            cursor: 'pointer',
+                            cursor: balanceAmount.trim() !== '' ? 'not-allowed' : 'pointer',
                             borderRadius: '8px',
                             borderTop: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
                             borderRight: selectedDesiredItems.some(i => i.uniqueId === item.uniqueId) ? '2px solid #0276FF' : '2px solid transparent',
@@ -2160,7 +2195,7 @@ export default function UpgraderPage() {
                               {item.name}
                             </span>
                             <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '12px', color: '#0276FF' }}>
-                              R${item.price}
+                              R${useMM2Values ? (item.mm2Value || item.price) : item.price}
                             </span>
                           </div>
                         </button>

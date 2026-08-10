@@ -57,6 +57,7 @@ router.get('/:userId', async (req, res) => {
             image: itemDef.image,
             rarity: itemDef.rarity,
             value: itemDef.value,
+            mm2Value: itemDef.mm2Value,
             category: itemDef.category
           };
         }

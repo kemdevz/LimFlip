@@ -29,6 +29,59 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
   const [underlineLeft, setUnderlineLeft] = useState(0);
   const [underlineWidth, setUnderlineWidth] = useState(87);
 
+  // Animated balance - smoothly transitions, never flashes to 0
+  const previousBalanceRef = useRef<number | null>(null);
+  const [displayBalance, setDisplayBalance] = useState(0);
+  const animationRef = useRef<number | null>(null);
+
+  const targetBalance = user?.balance ?? previousBalanceRef.current ?? 0;
+  if (user?.balance !== undefined) {
+    previousBalanceRef.current = user.balance;
+  }
+
+  useEffect(() => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    const startBalance = displayBalance;
+    const endBalance = targetBalance;
+    const diff = endBalance - startBalance;
+
+    if (Math.abs(diff) < 0.01) {
+      setDisplayBalance(endBalance);
+      return;
+    }
+
+    const duration = 600;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = startBalance + diff * eased;
+      setDisplayBalance(current);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayBalance(endBalance);
+        animationRef.current = null;
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [targetBalance]);
+
   const formatAmount = (amount: number) => {
     if (amount >= 1000000) {
       return `B$${(amount / 1000000).toFixed(1)}M`;
@@ -195,7 +248,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-          {user ? (
+          {(user || previousBalanceRef.current !== null) ? (
             <>
               {!isMobile && (
                 <>
@@ -239,7 +292,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                       <div style={{ position: 'absolute', left: '0', top: '0', width: '130px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                         <img src="/assets/svg/navbar/wallet.svg" alt="Wallet" style={{ width: '21px', height: '17px' }} />
                         <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '15px', color: '#FFFFFF' }}>
-                          {formatAmount(user?.balance || 0)}
+                          {formatAmount(displayBalance)}
                         </span>
                       </div>
                     </div>
@@ -263,7 +316,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                 >
                   {!isMobile && (
                     <span style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '16px', color: '#FFFFFF', maxWidth: '74px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {user.username}
+                      {user?.username || ''}
                     </span>
                   )}
                   <div

@@ -216,6 +216,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [games, setGames] = useState<any[]>([]);
+  const [removingGameIds, setRemovingGameIds] = useState<Set<string>>(new Set());
   const [newGameIds, setNewGameIds] = useState<Set<string>>(new Set());
   const prevGameIdsRef = useRef<Set<string>>(new Set());
   const { socket, isConnected } = useSocket();
@@ -223,7 +224,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/active');
+        const response = await fetch('http://localhost:3001/coinflip/active');
         const data = await response.json();
         const newGames = data.games || [];
         
@@ -248,9 +249,35 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
             newlyAddedIds.add(id);
           }
         });
-        
+
+        // Detect removed games and fade them out
+        const removedIds = new Set<string>();
+        prevIds.forEach((id: string) => {
+          if (!currentIds.has(id)) {
+            removedIds.add(id);
+          }
+        });
+
+        if (removedIds.size > 0) {
+          // Start fade-out for removed games
+          setRemovingGameIds((prev) => new Set([...prev, ...removedIds]));
+          // Remove after animation
+          setTimeout(() => {
+            setGames((prevGames) => prevGames.filter((g) => !removedIds.has(g._id)));
+            setRemovingGameIds((prev) => {
+              const next = new Set(prev);
+              removedIds.forEach((id) => next.delete(id));
+              return next;
+            });
+          }, 400);
+        }
+
+        // Update games, keeping removing ones so they can animate out
+        setGames((prevGames) => {
+          const removingGames = prevGames.filter((g) => removedIds.has(g._id));
+          return [...sortedGames, ...removingGames];
+        });
         setNewGameIds(newlyAddedIds);
-        setGames(sortedGames);
         prevGameIdsRef.current = currentIds;
         
         // Clear new game IDs after animation
@@ -328,11 +355,19 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
         setSelectedGame(data.game);
       }
       
-      // Remove completed game after 5 minutes
+      // Remove completed game after 5 minutes with fade-out animation
       setTimeout(() => {
-        setGames((prevGames) => {
-          return prevGames.filter((game) => game._id !== data.game._id);
-        });
+        // Start fade-out
+        setRemovingGameIds((prev) => new Set([...prev, data.game._id]));
+        // Actually remove after animation completes
+        setTimeout(() => {
+          setGames((prevGames) => prevGames.filter((game) => game._id !== data.game._id));
+          setRemovingGameIds((prev) => {
+            const next = new Set(prev);
+            next.delete(data.game._id);
+            return next;
+          });
+        }, 400);
       }, 300000); // 5 minutes
     };
 
@@ -363,7 +398,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
     if (!user?.id) return;
     
     try {
-      const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/create', {
+      const response = await fetch('http://localhost:3001/coinflip/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -438,6 +473,7 @@ function NotFoundPage({ onSignUpClick, onProfileClick }: { onSignUpClick: () => 
             setIsCoinflipViewModalOpen(true);
           }}
           isNew={newGameIds.has(game._id)}
+          isRemoving={removingGameIds.has(game._id)}
         />
       ))}
       </div>

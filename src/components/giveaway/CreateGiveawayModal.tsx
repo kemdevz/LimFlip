@@ -56,7 +56,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch(`https://api-bash-0ouj.onrender.com/inventory/${user.id}`, {
+        const response = await fetch(`http://localhost:3001/inventory/${user.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -114,7 +114,7 @@ const CreateGiveawayModal: React.FC<CreateGiveawayModalProps> = ({ isOpen, onClo
           category: item.category
         }));
 
-      const response = await fetch('https://api-bash-0ouj.onrender.com/giveaway/create', {
+      const response = await fetch('http://localhost:3001/giveaway/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

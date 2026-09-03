@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Coinflip = require('../models/Coinflip');
 const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
@@ -49,6 +50,45 @@ const formatAmount = (amount) => {
     return `B$${amount.toFixed(0)}`;
   }
 };
+
+// Get coinflip stats (all-time)
+router.get('/stats', async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    // Total bets: sum of totalValue across all completed games
+    const totalBetsAgg = await Coinflip.aggregate([
+      { $match: { status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$totalValue' } } }
+    ]);
+    const totalBets = totalBetsAgg.length > 0 ? totalBetsAgg[0].total : 0;
+
+    // Unique players: count distinct creators + joiners across completed games
+    const uniquePlayersAgg = await Coinflip.aggregate([
+      { $match: { status: 'completed' } },
+      { $project: { players: { $setUnion: ['$creator', { $ifNull: ['$joiner', []] }] } } },
+      { $unwind: '$players' },
+      { $group: { _id: null, uniquePlayers: { $addToSet: '$players' } } },
+      { $project: { count: { $size: '$uniquePlayers' } } }
+    ]);
+    const playerCount = uniquePlayersAgg.length > 0 ? uniquePlayersAgg[0].count : 0;
+
+    // Your bets: sum of totalValue for games where user is creator or joiner
+    let yourBets = 0;
+    if (userId) {
+      const yourBetsAgg = await Coinflip.aggregate([
+        { $match: { status: 'completed', $or: [{ creator: mongoose.Types.ObjectId(userId) }, { joiner: mongoose.Types.ObjectId(userId) }] } },
+        { $group: { _id: null, total: { $sum: '$totalValue' } } }
+      ]);
+      yourBets = yourBetsAgg.length > 0 ? yourBetsAgg[0].total : 0;
+    }
+
+    res.json({ playerCount, totalBets, yourBets });
+  } catch (error) {
+    console.error('Error fetching coinflip stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Get leaderboard data
 router.get('/leaderboard', async (req, res) => {

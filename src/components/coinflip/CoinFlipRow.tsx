@@ -12,9 +12,10 @@ interface CoinFlipRowProps {
   onJoinClick?: (gameId: string) => void;
   onViewClick?: () => void;
   isNew?: boolean;
+  isRemoving?: boolean;
 }
 
-export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onViewClick, isNew }: CoinFlipRowProps) {
+export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onViewClick, isNew, isRemoving }: CoinFlipRowProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [hoveredItem, setHoveredItem] = useState<any>(null);
@@ -78,7 +79,7 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
     if (!user || !game?._id) return;
 
     try {
-      const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/cancel/' + game._id, {
+      const response = await fetch('http://localhost:3001/coinflip/cancel/' + game._id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,9 +128,9 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
           backgroundColor: '#191D29',
           top: isMobile ? undefined : `calc(20px + 5px + 70px + ${topOffset}px)`,
           marginTop: isMobile ? `${topOffset === 0 ? 12 : topOffset + 12}px` : undefined,
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(-20px)',
-          transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+          opacity: isRemoving ? 0 : (isVisible ? 1 : 0),
+          transform: isRemoving ? 'translateY(-20px) scale(0.95)' : (isVisible ? 'translateY(0)' : 'translateY(-20px)'),
+          transition: 'opacity 0.4s ease-out, transform 0.4s ease-out, top 0.4s ease-out, margin-top 0.4s ease-out',
         }}
       >
       
@@ -819,10 +820,13 @@ export default function CoinFlipRow({ game, topOffset, winner, onJoinClick, onVi
             <span
               style={{
                 position: 'absolute',
-                width: canCancel ? '42px' : '31px',
-                height: '16px',
-                left: canCancel ? '16px' : '18px',
-                top: '7px',
+                left: '0%',
+                right: '9.46%',
+                top: '0%',
+                bottom: '0%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
                 fontWeight: '600',

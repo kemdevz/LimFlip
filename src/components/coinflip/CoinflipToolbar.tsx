@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useSocket } from '@/context/SocketContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface CoinflipToolbarProps {
@@ -28,39 +27,29 @@ export default function CoinflipToolbar({ onBetItemsClick, onPlaceBetClick }: Co
   const [selectedCoin, setSelectedCoin] = useState<'heads' | 'tails'>('heads');
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const { user } = useAuth();
-  const { onlineCount } = useSocket();
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/active');
+        const url = user?.id
+          ? `http://localhost:3001/coinflip/stats?userId=${user.id}`
+          : 'http://localhost:3001/coinflip/stats';
+        const response = await fetch(url);
         const data = await response.json();
-        const games = data.games || [];
 
-        // Calculate total bets
-        const total = games.reduce((sum: number, game: any) => sum + (game.totalValue || 0), 0);
-        setTotalBets(total);
-
-        // Calculate your bets
-        if (user?.id) {
-          const yourTotal = games
-            .filter((game: any) => game.creator === user.id || game.joiner === user.id)
-            .reduce((sum: number, game: any) => sum + (game.totalValue || 0), 0);
-          setYourBets(yourTotal);
-        }
-
-        // Set player count from socket
-        setPlayerCount(onlineCount);
+        setPlayerCount(data.playerCount || 0);
+        setTotalBets(data.totalBets || 0);
+        setYourBets(data.yourBets || 0);
       } catch (error) {
         console.error('Error fetching stats:', error);
       }
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    const interval = setInterval(fetchStats, 10000);
     return () => clearInterval(interval);
-  }, [user?.id, onlineCount]);
+  }, [user?.id]);
 
   return (
     <div className="coinflip-toolbar">

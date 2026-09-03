@@ -1,7 +1,7 @@
 [
   {
     "itemName": "Corrupt",
-    "itemValue": 460,
+    "itemValue": 450,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/corrupt.png",
     "category": "uniques"
   },
@@ -404,7 +404,7 @@
   {
     "itemName": "Bronze Elderwood",
     "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/bronze-eslderwood.png",
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/bronze-elderwood.png",
     "category": "uniques"
   },
   {
@@ -649,7 +649,7 @@
   },
   {
     "itemName": "Celestial",
-    "itemValue": 2225,
+    "itemValue": 2350,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/celestial.png",
     "category": "ancients"
   },
@@ -883,7 +883,7 @@
   },
   {
     "itemName": "Chroma Evergreen",
-    "itemValue": 49000,
+    "itemValue": 48000,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-evergreen.png",
     "category": "chromas"
   },
@@ -919,19 +919,13 @@
   },
   {
     "itemName": "Chroma Raygun",
-    "itemValue": 12250,
+    "itemValue": 12750,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-raygun.png",
     "category": "chromas"
   },
   {
-    "itemName": "Chroma Snowcannon",
-    "itemValue": 8250,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-snowcannon.png",
-    "category": "chromas"
-  },
-  {
     "itemName": "Chroma Sunset",
-    "itemValue": 8250,
+    "itemValue": 8750,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-sunset.png",
     "category": "chromas"
   },
@@ -942,9 +936,9 @@
     "category": "chromas"
   },
   {
-    "itemName": "Chroma Snow Dagger",
-    "itemValue": 4250,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-snow-dagger.png",
+    "itemName": "Chroma Snowcannon",
+    "itemValue": 8000,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-snowcannon.png",
     "category": "chromas"
   },
   {
@@ -960,6 +954,12 @@
     "category": "chromas"
   },
   {
+    "itemName": "Chroma Snow Dagger",
+    "itemValue": 4000,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-snow-dagger.png",
+    "category": "chromas"
+  },
+  {
     "itemName": "Chroma Watergun",
     "itemValue": 3400,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-watergun.png",
@@ -967,7 +967,7 @@
   },
   {
     "itemName": "Chroma Treat",
-    "itemValue": 2850,
+    "itemValue": 2700,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-treat.png",
     "category": "chromas"
   },
@@ -985,20 +985,20 @@
   },
   {
     "itemName": "Chroma Sands",
-    "itemValue": 1800,
+    "itemValue": 1850,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-sands.png",
+    "category": "chromas"
+  },
+  {
+    "itemName": "Chroma Beachy",
+    "itemValue": 1800,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-beachy.png",
     "category": "chromas"
   },
   {
     "itemName": "Chroma Ornament",
     "itemValue": 1800,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-ornament.png",
-    "category": "chromas"
-  },
-  {
-    "itemName": "Chroma Beachy",
-    "itemValue": 1750,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chroma-beachy.png",
     "category": "chromas"
   },
   {
@@ -1201,31 +1201,31 @@
   },
   {
     "itemName": "Darkshot",
-    "itemValue": 1675,
+    "itemValue": 1725,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/darkshot.png",
     "category": "godlies"
   },
   {
     "itemName": "Darksword",
-    "itemValue": 1650,
+    "itemValue": 1700,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/darksword.png",
     "category": "godlies"
   },
   {
     "itemName": "Raygun",
-    "itemValue": 1500,
+    "itemValue": 1600,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/raygun.png",
     "category": "godlies"
   },
   {
     "itemName": "Blossom",
-    "itemValue": 1320,
+    "itemValue": 1340,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/blossom.png",
     "category": "godlies"
   },
   {
     "itemName": "Sakura",
-    "itemValue": 1310,
+    "itemValue": 1330,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/sakura.png",
     "category": "godlies"
   },
@@ -1417,13 +1417,13 @@
   },
   {
     "itemName": "Pearlshine",
-    "itemValue": 90,
+    "itemValue": 85,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/pearlshine.png",
     "category": "godlies"
   },
   {
     "itemName": "Pearl",
-    "itemValue": 85,
+    "itemValue": 80,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/pearl.png",
     "category": "godlies"
   },
@@ -1513,7 +1513,7 @@
   },
   {
     "itemName": "Ornament",
-    "itemValue": 27,
+    "itemValue": 28,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/ornament.png",
     "category": "godlies"
   },
@@ -1933,25 +1933,25 @@
   },
   {
     "itemName": "Spectral (Knife)",
-    "itemValue": 60,
+    "itemValue": 55,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/spectral-(knife).png",
     "category": "legendaries"
   },
   {
     "itemName": "Traveler (Gun)",
-    "itemValue": 60,
+    "itemValue": 55,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/traveler-(gun).png",
     "category": "legendaries"
   },
   {
     "itemName": "Aurora (Gun)",
-    "itemValue": 55,
+    "itemValue": 50,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/aurora-(gun).png",
     "category": "legendaries"
   },
   {
     "itemName": "Vampire (Gun)",
-    "itemValue": 55,
+    "itemValue": 50,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/vampire-(gun).png",
     "category": "legendaries"
   },
@@ -2112,12 +2112,6 @@
     "category": "legendaries"
   },
   {
-    "itemName": "Bubbles",
-    "itemValue": 1,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/bubbles.png",
-    "category": "legendaries"
-  },
-  {
     "itemName": "Chromatic (Knife)",
     "itemValue": 1,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/chromatic-(knife).png",
@@ -2235,6 +2229,12 @@
     "itemName": "Aquarium (Gun)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/aquarium-(gun).png",
+    "category": "legendaries"
+  },
+  {
+    "itemName": "Bubbles",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/bubbles.png",
     "category": "legendaries"
   },
   {
@@ -2377,19 +2377,19 @@
   },
   {
     "itemName": "Cane (Knife)",
-    "itemValue": 675,
+    "itemValue": 625,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/cane-(knife).png",
     "category": "rares"
   },
   {
     "itemName": "Dungeon",
-    "itemValue": 240,
+    "itemValue": 225,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/dungeon.png",
     "category": "rares"
   },
   {
     "itemName": "Darkknife",
-    "itemValue": 75,
+    "itemValue": 70,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/darkknife.png",
     "category": "rares"
   },
@@ -2413,25 +2413,25 @@
   },
   {
     "itemName": "Starry (Gun)",
-    "itemValue": 27,
+    "itemValue": 25,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/starry-(gun).png",
     "category": "rares"
   },
   {
     "itemName": "Swirl",
-    "itemValue": 25,
+    "itemValue": 22,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/swirl.png",
     "category": "rares"
   },
   {
     "itemName": "Watcher (Gun)",
-    "itemValue": 25,
+    "itemValue": 20,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/watcher-(gun).png",
     "category": "rares"
   },
   {
     "itemName": "Magma (Gun)",
-    "itemValue": 17,
+    "itemValue": 15,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/magma-(gun).png",
     "category": "rares"
   },
@@ -2460,15 +2460,15 @@
     "category": "rares"
   },
   {
-    "itemName": "Aurora (Knife)",
-    "itemValue": 8,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/aurora-(knife).png",
-    "category": "rares"
-  },
-  {
     "itemName": "Ghastly (Gun)",
     "itemValue": 7,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/ghastly-(gun).png",
+    "category": "rares"
+  },
+  {
+    "itemName": "Aurora (Knife)",
+    "itemValue": 7,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/aurora-(knife).png",
     "category": "rares"
   },
   {
@@ -2478,21 +2478,15 @@
     "category": "rares"
   },
   {
-    "itemName": "Icicles (Gun)",
-    "itemValue": 5,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/icicles-(gun).png",
-    "category": "rares"
-  },
-  {
     "itemName": "Wraith (Knife)",
     "itemValue": 5,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/wraith-(knife).png",
     "category": "rares"
   },
   {
-    "itemName": "Candy Swirl (Gun)",
+    "itemName": "Icicles (Gun)",
     "itemValue": 3,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/candy-swirl-(gun).png",
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/icicles-(gun).png",
     "category": "rares"
   },
   {
@@ -2508,12 +2502,6 @@
     "category": "rares"
   },
   {
-    "itemName": "Sun",
-    "itemValue": 3,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sun.png",
-    "category": "rares"
-  },
-  {
     "itemName": "Vampire (Gun)",
     "itemValue": 3,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/vampire-(gun).png",
@@ -2523,6 +2511,18 @@
     "itemName": "Magma",
     "itemValue": 3,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/magma.png",
+    "category": "rares"
+  },
+  {
+    "itemName": "Candy Swirl (Gun)",
+    "itemValue": 2,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/candy-swirl-(gun).png",
+    "category": "rares"
+  },
+  {
+    "itemName": "Sun",
+    "itemValue": 2,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sun.png",
     "category": "rares"
   },
   {
@@ -2826,12 +2826,6 @@
     "category": "rares"
   },
   {
-    "itemName": "Pier",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/pier.png",
-    "category": "rares"
-  },
-  {
     "itemName": "Pop Art (Knife)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/pop-art-(knife).png",
@@ -2844,15 +2838,21 @@
     "category": "rares"
   },
   {
-    "itemName": "Sunset",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sunset.png",
-    "category": "rares"
-  },
-  {
     "itemName": "Xeno (Knife)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/xeno-(knife).png",
+    "category": "rares"
+  },
+  {
+    "itemName": "Pier",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/pier.png",
+    "category": "rares"
+  },
+  {
+    "itemName": "Sunset",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sunset.png",
     "category": "rares"
   },
   {
@@ -3121,13 +3121,13 @@
   },
   {
     "itemName": "Bones",
-    "itemValue": 230,
+    "itemValue": 225,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/bones.png",
     "category": "uncommons"
   },
   {
     "itemName": "Brains",
-    "itemValue": 145,
+    "itemValue": 140,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/brains.png",
     "category": "uncommons"
   },
@@ -3139,7 +3139,7 @@
   },
   {
     "itemName": "Gingerbread (Knife)",
-    "itemValue": 75,
+    "itemValue": 80,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/gingerbread-(knife).png",
     "category": "uncommons"
   },
@@ -3162,6 +3162,12 @@
     "category": "uncommons"
   },
   {
+    "itemName": "Mummy (2017)",
+    "itemValue": 18,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/mummy-(2017).png",
+    "category": "uncommons"
+  },
+  {
     "itemName": "Skulls",
     "itemValue": 15,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/skulls.png",
@@ -3180,9 +3186,15 @@
     "category": "uncommons"
   },
   {
-    "itemName": "Mummy (2017)",
-    "itemValue": 10,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/mummy-(2017).png",
+    "itemName": "Wrap (Gun)",
+    "itemValue": 12,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/wrap-(gun).png",
+    "category": "uncommons"
+  },
+  {
+    "itemName": "Wrap (Knife)",
+    "itemValue": 12,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/wrap-(knife).png",
     "category": "uncommons"
   },
   {
@@ -3192,15 +3204,9 @@
     "category": "uncommons"
   },
   {
-    "itemName": "Wrap (Gun)",
-    "itemValue": 8,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/wrap-(gun).png",
-    "category": "uncommons"
-  },
-  {
-    "itemName": "Wrap (Knife)",
-    "itemValue": 8,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/wrap-(knife).png",
+    "itemName": "Gingerbread (Knife)",
+    "itemValue": 7,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/gingerbread-(knife).png",
     "category": "uncommons"
   },
   {
@@ -3234,6 +3240,12 @@
     "category": "uncommons"
   },
   {
+    "itemName": "Gingerbread (Gun)",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/gingerbread-(gun).png",
+    "category": "uncommons"
+  },
+  {
     "itemName": "Lantern",
     "itemValue": 3,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/lantern.png",
@@ -3261,12 +3273,6 @@
     "itemName": "Potion (2017)",
     "itemValue": 3,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/potion-(2017).png",
-    "category": "uncommons"
-  },
-  {
-    "itemName": "Gingerbread (Knife)",
-    "itemValue": 2,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/gingerbread-(knife).png",
     "category": "uncommons"
   },
   {
@@ -3315,12 +3321,6 @@
     "itemName": "Potion (Knife)",
     "itemValue": 2,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/potion-(knife).png",
-    "category": "uncommons"
-  },
-  {
-    "itemName": "Gingerbread (Gun)",
-    "itemValue": 1,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/gingerbread-(gun).png",
     "category": "uncommons"
   },
   {
@@ -3384,6 +3384,12 @@
     "category": "uncommons"
   },
   {
+    "itemName": "Cookie (Knife)",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/cookie-(knife).png",
+    "category": "uncommons"
+  },
+  {
     "itemName": "Gothic (Knife)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/gothic-(knife).png",
@@ -3429,12 +3435,6 @@
     "itemName": "Gifted",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/gifted.png",
-    "category": "uncommons"
-  },
-  {
-    "itemName": "Cookie (Knife)",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/cookie-(knife).png",
     "category": "uncommons"
   },
   {
@@ -3708,12 +3708,6 @@
     "category": "uncommons"
   },
   {
-    "itemName": "Floral",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/floral.png",
-    "category": "uncommons"
-  },
-  {
     "itemName": "Future",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/future.png",
@@ -3747,12 +3741,6 @@
     "itemName": "Mistletoe (Knife)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/mistletoe-(knife).png",
-    "category": "uncommons"
-  },
-  {
-    "itemName": "Neopolitan",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/neopolitan.png",
     "category": "uncommons"
   },
   {
@@ -3810,21 +3798,33 @@
     "category": "uncommons"
   },
   {
-    "itemName": "Turtles",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/turtles.png",
-    "category": "uncommons"
-  },
-  {
     "itemName": "Canes (Knife)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/canes-(knife).png",
     "category": "uncommons"
   },
   {
+    "itemName": "Floral",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/floral.png",
+    "category": "uncommons"
+  },
+  {
+    "itemName": "Neopolitan",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/neopolitan.png",
+    "category": "uncommons"
+  },
+  {
     "itemName": "Snowman (2023)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/snowman-(2023).png",
+    "category": "uncommons"
+  },
+  {
+    "itemName": "Turtles",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/turtles.png",
     "category": "uncommons"
   },
   {
@@ -4201,13 +4201,13 @@
   },
   {
     "itemName": "Glitch2",
-    "itemValue": 40,
+    "itemValue": 35,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/glitch2.png",
     "category": "commons"
   },
   {
     "itemName": "Bats (Knife)",
-    "itemValue": 230,
+    "itemValue": 240,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/bats-(knife).png",
     "category": "commons"
   },
@@ -4236,6 +4236,18 @@
     "category": "commons"
   },
   {
+    "itemName": "Mummified",
+    "itemValue": 30,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/mummified.png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Snowflakes (Gun)",
+    "itemValue": 30,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/snowflakes-(gun).png",
+    "category": "commons"
+  },
+  {
     "itemName": "Wrapped (Gun)",
     "itemValue": 30,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/wrapped-(gun).png",
@@ -4245,12 +4257,6 @@
     "itemName": "Sparkle9",
     "itemValue": 30,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/sparkle9.png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Snowflakes (Gun)",
-    "itemValue": 25,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/snowflakes-(gun).png",
     "category": "commons"
   },
   {
@@ -4278,9 +4284,9 @@
     "category": "commons"
   },
   {
-    "itemName": "Mummified",
+    "itemName": "Slimy",
     "itemValue": 20,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/mummified.png",
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/slimy.png",
     "category": "commons"
   },
   {
@@ -4302,12 +4308,6 @@
     "category": "commons"
   },
   {
-    "itemName": "Elf (Knife)",
-    "itemValue": 17,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/elf-(knife).png",
-    "category": "commons"
-  },
-  {
     "itemName": "RIP",
     "itemValue": 17,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/rip.png",
@@ -4320,9 +4320,21 @@
     "category": "commons"
   },
   {
-    "itemName": "Slimy",
+    "itemName": "Elf (Knife)",
     "itemValue": 15,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/slimy.png",
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/elf-(knife).png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Candy Corn (2019)",
+    "itemValue": 12,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/candy-corn-(2019).png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Elf (2018)",
+    "itemValue": 12,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/elf-(2018).png",
     "category": "commons"
   },
   {
@@ -4344,18 +4356,6 @@
     "category": "commons"
   },
   {
-    "itemName": "Candy Corn (2019)",
-    "itemValue": 10,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/candy-corn-(2019).png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Elf (2018)",
-    "itemValue": 10,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/elf-(2018).png",
-    "category": "commons"
-  },
-  {
     "itemName": "Combat II",
     "itemValue": 10,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/combat-ii.png",
@@ -4365,6 +4365,12 @@
     "itemName": "Phantom",
     "itemValue": 10,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/phantom.png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Zombie",
+    "itemValue": 10,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/zombie.png",
     "category": "commons"
   },
   {
@@ -4389,24 +4395,6 @@
     "itemName": "Tailslide",
     "itemValue": 7,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/tailslide.png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Zombie",
-    "itemValue": 7,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/zombie.png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Ollie",
-    "itemValue": 5,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/ollie.png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Sidewinder",
-    "itemValue": 5,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sidewinder.png",
     "category": "commons"
   },
   {
@@ -4437,6 +4425,18 @@
     "itemName": "Euro",
     "itemValue": 4,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/euro.png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Ollie",
+    "itemValue": 4,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/ollie.png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Sidewinder",
+    "itemValue": 4,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/sidewinder.png",
     "category": "commons"
   },
   {
@@ -4500,21 +4500,9 @@
     "category": "commons"
   },
   {
-    "itemName": "Grave (Gun)",
-    "itemValue": 2,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/grave-(gun).png",
-    "category": "commons"
-  },
-  {
     "itemName": "Grind",
     "itemValue": 2,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/grind.png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Slime (Knife)",
-    "itemValue": 2,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/slime-(knife).png",
     "category": "commons"
   },
   {
@@ -4533,6 +4521,12 @@
     "itemName": "Bats (Gun)",
     "itemValue": 1,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/bats-(gun).png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Grave (Gun)",
+    "itemValue": 1,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/grave-(gun).png",
     "category": "commons"
   },
   {
@@ -4557,6 +4551,12 @@
     "itemName": "Slime (Gun)",
     "itemValue": 1,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/slime-(gun).png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Slime (Knife)",
+    "itemValue": 1,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/slime-(knife).png",
     "category": "commons"
   },
   {
@@ -4824,18 +4824,6 @@
     "category": "commons"
   },
   {
-    "itemName": "Fragile (Gun)",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fragile-(gun).png",
-    "category": "commons"
-  },
-  {
-    "itemName": "Fragile (Knife)",
-    "itemValue": 0,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fragile-(knife).png",
-    "category": "commons"
-  },
-  {
     "itemName": "Love (2023)",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/love-(2023).png",
@@ -4875,6 +4863,18 @@
     "itemName": "Webs",
     "itemValue": 0,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/webs.png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Fragile (Gun)",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fragile-(gun).png",
+    "category": "commons"
+  },
+  {
+    "itemName": "Fragile (Knife)",
+    "itemValue": 0,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fragile-(knife).png",
     "category": "commons"
   },
   {
@@ -5881,7 +5881,7 @@
   },
   {
     "itemName": "Elf (2019)",
-    "itemValue": 525,
+    "itemValue": 575,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/elf-(2019).png",
     "category": "pets"
   },
@@ -5893,7 +5893,7 @@
   },
   {
     "itemName": "Dogey",
-    "itemValue": 160,
+    "itemValue": 150,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/dogey.png",
     "category": "pets"
   },
@@ -5905,7 +5905,7 @@
   },
   {
     "itemName": "Black Cat",
-    "itemValue": 90,
+    "itemValue": 80,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/black-cat.png",
     "category": "pets"
   },
@@ -5941,26 +5941,20 @@
   },
   {
     "itemName": "Red Pumpkin",
-    "itemValue": 25,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/red-pumpkin.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Red Pumpkin",
     "itemValue": 20,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/red-pumpkin.png",
     "category": "pets"
   },
   {
     "itemName": "Mr. Snowman",
-    "itemValue": 17,
+    "itemValue": 18,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/mr.-snowman.png",
     "category": "pets"
   },
   {
-    "itemName": "Green Pumpkin",
-    "itemValue": 15,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/green-pumpkin.png",
+    "itemName": "Red Pumpkin",
+    "itemValue": 17,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/red-pumpkin.png",
     "category": "pets"
   },
   {
@@ -5971,20 +5965,20 @@
   },
   {
     "itemName": "Green Pumpkin",
-    "itemValue": 13,
+    "itemValue": 12,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/green-pumpkin.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Green Pumpkin",
+    "itemValue": 10,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/green-pumpkin.png",
     "category": "pets"
   },
   {
     "itemName": "Blue Pumpkin",
-    "itemValue": 8,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/blue-pumpkin.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Shadow Pumpkin",
     "itemValue": 7,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/shadow-pumpkin.png",
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/blue-pumpkin.png",
     "category": "pets"
   },
   {
@@ -5994,93 +5988,15 @@
     "category": "pets"
   },
   {
+    "itemName": "Shadow Pumpkin",
+    "itemValue": 5,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/shadow-pumpkin.png",
+    "category": "pets"
+  },
+  {
     "itemName": "Nobledragon",
     "itemValue": 5,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/nobledragon.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Chilly",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chilly.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Eyeball",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/eyeball.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Fairy",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fairy.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Green Pumpkin",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/green-pumpkin.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Jetstream",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/jetstream.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Overseer Eye",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/overseer-eye.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Pengy",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/pengy.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Purple Pumpkin",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/purple-pumpkin.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Red Pumpkin",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/red-pumpkin.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Reindeer",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/reindeer.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Rudolph",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/rudolph.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Seahorsey",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/seahorsey.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Tankie",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/tankie.png",
-    "category": "pets"
-  },
-  {
-    "itemName": "Vampire Bat",
-    "itemValue": 4,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/vampire-bat.png",
     "category": "pets"
   },
   {
@@ -6102,21 +6018,105 @@
     "category": "pets"
   },
   {
+    "itemName": "Chilly",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/chilly.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Eyeball",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/eyeball.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Fairy",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/fairy.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Green Pumpkin",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/green-pumpkin.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Jetstream",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/jetstream.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Overseer Eye",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/overseer-eye.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Pengy",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/pengy.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Purple Pumpkin",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/purple-pumpkin.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Red Pumpkin",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/red-pumpkin.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Reindeer",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/reindeer.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Rudolph",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/rudolph.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Seahorsey",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/seahorsey.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Tankie",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/tankie.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Vampire Bat",
+    "itemValue": 3,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/vampire-bat.png",
+    "category": "pets"
+  },
+  {
     "itemName": "Lil' Alien",
     "itemValue": 1,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/lil'-alien.png",
     "category": "pets"
   },
   {
-    "itemName": "Blue Pumpkin",
-    "itemValue": 1,
-    "imageUrl": "https://mm2.rocks/images/mm2-wiki/blue-pumpkin.png",
-    "category": "pets"
-  },
-  {
     "itemName": "Badger",
     "itemValue": 1,
     "imageUrl": "https://mm2.rocks/images/mm2-wiki/badger.png",
+    "category": "pets"
+  },
+  {
+    "itemName": "Blue Pumpkin",
+    "itemValue": 1,
+    "imageUrl": "https://mm2.rocks/images/mm2-wiki/blue-pumpkin.png",
     "category": "pets"
   },
   {

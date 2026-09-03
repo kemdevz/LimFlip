@@ -99,6 +99,9 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
     if (isOpen) {
       setIsVisible(true);
       setIsAnimatingOut(false);
+      // Reset selections when modal opens
+      setSelectedItems(new Set());
+      setBalanceAmount('');
     } else {
       setIsAnimatingOut(true);
       const timer = setTimeout(() => {
@@ -491,7 +494,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
                   body.uniqueIds = Array.from(selectedItems);
                 }
 
-                const response = await fetch(`https://api-bash-0ouj.onrender.com/coinflip/join/${game._id}`, {
+                const response = await fetch(`http://localhost:3001/coinflip/join/${game._id}`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

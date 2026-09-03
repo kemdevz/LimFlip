@@ -37,7 +37,7 @@ export default function ProfileModal({
   const fetchUserStats = async (targetUserId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://api-bash-0ouj.onrender.com/user/${targetUserId}/stats`);
+      const response = await fetch(`http://localhost:3001/user/${targetUserId}/stats`);
       if (response.ok) {
         const data = await response.json();
         setUserData(data);
@@ -57,6 +57,23 @@ export default function ProfileModal({
     } else {
       return `B$${amount.toFixed(2)}`;
     }
+  };
+
+  const formatJoinDate = (dateStr: string) => {
+    if (!dateStr) return dateStr;
+    const months: Record<string, string> = {
+      'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+      'May': 'May', 'June': 'June', 'July': 'July', 'August': 'Aug',
+      'September': 'Sept', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+    };
+    let result = dateStr;
+    for (const [full, abbr] of Object.entries(months)) {
+      if (result.startsWith(full)) {
+        result = result.replace(full, abbr);
+        break;
+      }
+    }
+    return result;
   };
 
   // Generate SVG path from profit history data
@@ -282,7 +299,7 @@ export default function ProfileModal({
               <div className="w-[245px] h-[39px] left-0 top-0 absolute">
                 <div className="w-[245px] h-[39px] left-0 top-0 absolute rounded-[15px]" style={{ background: '#202634' }} />
                 <div className="w-[67px] h-[23px] left-[17px] top-[8px] absolute justify-start text-[#8890A2] text-[15px] font-semibold font-['Poppins'] leading-[22px]">Joined</div>
-                <div className="w-[111.68px] h-[23px] left-[112.2px] top-[8px] absolute justify-start text-white text-[15px] font-semibold font-['Poppins'] leading-[22px]">{userData?.joinDate || 'May 29, 2021'}</div>
+                <div className="w-[111.68px] h-[23px] left-[112.2px] top-[8px] absolute justify-start text-white text-[15px] font-semibold font-['Poppins'] leading-[22px]">{formatJoinDate(userData?.joinDate || 'May 29, 2021')}</div>
                 <div className="w-px h-[13px] left-[92px] top-[13px] absolute bg-[#8890A2] rounded-[8px]" />
               </div>
             </div>

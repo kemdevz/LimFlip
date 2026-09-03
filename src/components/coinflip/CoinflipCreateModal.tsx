@@ -86,6 +86,9 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
     if (isOpen) {
       setIsVisible(true);
       setIsAnimatingOut(false);
+      // Reset selections when modal opens
+      setSelectedItems(new Set());
+      setSelectedSide('tails');
     } else {
       setIsAnimatingOut(true);
       const timer = setTimeout(() => {
@@ -517,7 +520,7 @@ const CoinflipCreateModal: React.FC<CoinflipCreateModalProps> = ({ isOpen, onClo
             if (selectedItems.size > 0 && user?.id && !isCreating) {
               setIsCreating(true);
               try {
-                const response = await fetch('https://api-bash-0ouj.onrender.com/coinflip/create', {
+                const response = await fetch('http://localhost:3001/coinflip/create', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

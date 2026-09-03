@@ -3,10 +3,23 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { checkUsernameExists, searchRobloxUsers, getUserDescription } = require('../utils/roblox');
-const noblox = require('noblox.js');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
+// Fetch Roblox avatar directly from thumbnails API (same approach as bloxpvp)
+async function getRobloxAvatar(robloxId) {
+  try {
+    const res = await fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxId}&size=420x420&format=Png&isCircular=false`
+    );
+    const data = await res.json();
+    return data?.data?.[0]?.imageUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxId}&width=420&height=420&format=png`;
+  } catch (error) {
+    console.error('Failed to fetch Roblox avatar:', error.message);
+    return `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxId}&width=420&height=420&format=png`;
+  }
+}
 
 const words = [
   'crew', 'omit', 'gadget', 'win', 'pond', 'jealous', 'warfare', 'eight',
@@ -105,14 +118,13 @@ router.post('/login', async (req, res) => {
 
     let user = await User.findOne({ username });
 
-    // Always fetch fresh avatar URL from Roblox using noblox
+    // Always fetch fresh avatar URL from Roblox directly (no noblox)
     let avatarUrl;
     try {
-      const userThumbnail = await noblox.getPlayerThumbnail(robloxUserId, 420, 'png', false, 'Headshot');
-      avatarUrl = userThumbnail[0].imageUrl;
-      console.log('Login using noblox avatar URL:', avatarUrl);
+      avatarUrl = await getRobloxAvatar(robloxUserId);
+      console.log('Login using direct Roblox avatar URL:', avatarUrl);
     } catch (error) {
-      console.error('Error fetching thumbnail with noblox:', error);
+      console.error('Error fetching avatar:', error);
       avatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
     }
 
@@ -184,10 +196,7 @@ router.post('/verify-description', async (req, res) => {
     let user = await User.findOne({ username });
 
     if (!user) {
-      const users = await searchRobloxUsers(username);
-      console.log('Search results:', users);
-      const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-      const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
+      const avatarUrl = await getRobloxAvatar(robloxUserId);
       console.log('Using avatar URL:', avatarUrl);
       console.log('Roblox userId from request:', robloxUserId);
 
@@ -203,10 +212,7 @@ router.post('/verify-description', async (req, res) => {
     } else {
       user.verifiedAt = new Date();
       if (!user.avatarUrl) {
-        const users = await searchRobloxUsers(username);
-        console.log('Search results for existing user:', users);
-        const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-        const avatarUrl = foundUser?.avatar || `https://www.roblox.com/headshot-thumbnail/image?userId=${robloxUserId}&width=420&height=420&format=png`;
+        const avatarUrl = await getRobloxAvatar(robloxUserId);
         console.log('Verify using avatar URL:', avatarUrl);
         console.log('Roblox userId from request:', robloxUserId);
         user.avatarUrl = avatarUrl;
@@ -265,8 +271,21 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Use cached avatar URL from MongoDB - no fresh fetch to avoid slow loading
-    const avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
+    // Fetch fresh avatar URL from Roblox
+    let avatarUrl = user.avatarUrl;
+    if (user.robloxUserId) {
+      try {
+        avatarUrl = await getRobloxAvatar(user.robloxUserId);
+        // Update cached avatar if it changed
+        if (avatarUrl !== user.avatarUrl) {
+          user.avatarUrl = avatarUrl;
+          await user.save();
+        }
+      } catch (e) {
+        // Fall back to cached avatar
+        avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
+      }
+    }
 
     res.json({
       id: user._id.toString(),
@@ -402,8 +421,19 @@ router.get('/profile/:username', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Use cached avatar URL from MongoDB
-    const avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
+    // Fetch fresh avatar URL from Roblox
+    let avatarUrl = user.avatarUrl;
+    if (user.robloxUserId) {
+      try {
+        avatarUrl = await getRobloxAvatar(user.robloxUserId);
+        if (avatarUrl !== user.avatarUrl) {
+          user.avatarUrl = avatarUrl;
+          await user.save();
+        }
+      } catch (e) {
+        avatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.robloxUserId}&width=420&height=420&format=png`;
+      }
+    }
 
     res.json({
       success: true,

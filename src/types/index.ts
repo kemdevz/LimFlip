@@ -44,11 +44,19 @@ export interface JackpotEntry {
 
 export interface Jackpot {
   _id: string;
-  status: 'waiting' | 'active' | 'completed' | 'refunded';
+  status: 'waiting' | 'active' | 'resolving' | 'completed' | 'refunded';
   entries: JackpotEntry[];
   totalValue: number;
   winner?: string | { _id: string; username?: string; avatarUrl?: string };
   winningPercentage?: number;
+  eosBlockNumber?: number;
+  eosBlockId?: string;
+  eosBlockTimestamp?: string;
+  eosChainId?: string;
+  resultHash?: string;
+  winningTicket?: number;
+  totalTickets?: number;
+  ticketScale?: number;
   timerEndsAt?: string;
   startedAt?: string;
   completedAt?: string;

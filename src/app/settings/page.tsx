@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import Subnavbar from '@/components/layout/Subnavbar';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -14,7 +14,7 @@ import RulesModal from '@/components/rules/RulesModal';
 import FaqModal from '@/components/faq/FaqModal';
 
 export default function ProfilePage() {
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery('(max-width: 1919px)');
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'account' | 'linking'>('account');
 
   return (
-    <div className="page-shell page-shell--fixed">
+    <div className="page-shell">
       
       <div
         className="page-bg page-bg--main"
@@ -64,7 +64,7 @@ export default function ProfilePage() {
           height: isMobile ? 'auto' : '1167px',
           left: isMobile ? '0' : '0px',
           top: isMobile ? '0' : '0px',
-          padding: isMobile ? '20px' : '0',
+          padding: isMobile ? 'calc(var(--content-top) + 20px) 20px calc(var(--mnav-h, 0px) + 24px) calc(var(--content-left) + 20px)' : '0',
         }}
       >
         

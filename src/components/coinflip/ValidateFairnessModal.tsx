@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { Jackpot } from '@/types';
 
 interface ValidateFairnessModalProps {
   isOpen: boolean;
   onClose: () => void;
   showOverlay?: boolean;
+  jackpot?: Jackpot | null;
 }
 
-const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, onClose, showOverlay = true }) => {
+const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, onClose, showOverlay = true, jackpot }) => {
+  const isMobile = useIsMobile();
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -27,6 +31,60 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
   }, [isOpen]);
 
   if (!isVisible) return null;
+
+  if (isMobile) {
+    const fields = jackpot
+      ? [
+          ['EOS Block Number', jackpot.eosBlockNumber ?? '...'],
+          ['EOS Block ID', jackpot.eosBlockId || '...'],
+          ['Winning Ticket', jackpot.winningTicket ?? '...'],
+          ['Total Tickets', jackpot.totalTickets ?? '...'],
+        ]
+      : [
+          ['Random Seed', '...'],
+          ['Server Seed Hash', '...'],
+          ['Starter Sum', '...'],
+          ['Joiner Sum', '...'],
+        ];
+
+    return (
+      <div
+        className="responsive-modal-overlay"
+        style={{ backgroundColor: showOverlay ? 'rgba(0, 0, 0, 0.5)' : 'transparent', animation: isAnimatingOut ? 'fadeOut 0.2s ease-out forwards' : 'fadeIn 0.2s ease-out forwards' }}
+        onClick={showOverlay ? onClose : undefined}
+      >
+        <div
+          className="responsive-modal-panel responsive-modal-panel--center"
+          style={{ width: 'min(100%, 640px)', maxHeight: 'calc(100dvh - 32px)', padding: '24px', overflowY: 'auto', background: '#191D29', border: '1px solid #222530', borderRadius: '16px', fontFamily: 'Poppins, sans-serif' }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <strong style={{ color: '#FFFFFF', fontSize: '18px' }}>Validate Fairness</strong>
+            <button type="button" onClick={onClose} aria-label="Close" style={{ width: '36px', height: '36px', flexShrink: 0, border: 0, borderRadius: '10px', background: '#262937', color: '#FFFFFF', cursor: 'pointer' }}>×</button>
+          </div>
+          <p style={{ margin: '12px 0 20px', color: '#686B7B', fontSize: '13px', lineHeight: '20px' }}>
+            {jackpot
+              ? 'The winner is derived from an irreversible EOS mainnet block selected after betting locks.'
+              : 'Game outcomes are predetermined before bets. Hashed results are shared before each game, ensuring fairness.'}
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '14px' }}>
+            {fields.map(([label, value]) => (
+              <label key={String(label)} style={{ minWidth: 0, color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>
+                {label}
+                <span style={{ display: 'block', width: '100%', minHeight: '40px', marginTop: '7px', padding: '10px 12px', overflowWrap: 'anywhere', borderRadius: '12px', background: '#262937', color: '#7B829D', fontSize: '13px', fontWeight: 500 }}>
+                  {value}
+                </span>
+              </label>
+            ))}
+          </div>
+          <button type="button" style={{ width: '100%', minHeight: '48px', marginTop: '20px', border: 0, borderRadius: '12px', background: '#C77DFF', color: '#FFFFFF', fontFamily: 'Poppins', fontWeight: 600 }}>
+            Validate Fairness
+          </button>
+          {jackpot && <p style={{ margin: '14px 0 0', color: '#53576B', fontSize: '12px', overflowWrap: 'anywhere' }}>SHA-256(EOS block ID + &quot;:&quot; + round ID) modulo total tickets</p>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -123,7 +181,9 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
             color: '#686B7B',
           }}
         >
-          Game outcomes are predetermined before bets. Hashed results are shared before each game, ensuring fairness.
+          {jackpot
+            ? 'The winner is derived from an irreversible EOS mainnet block selected after betting locks.'
+            : 'Game outcomes are predetermined before bets. Hashed results are shared before each game, ensuring fairness.'}
         </div>
 
         <div
@@ -150,7 +210,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#FFFFFF',
             }}
           >
-            Random Seed
+            {jackpot ? 'EOS Block Number' : 'Random Seed'}
           </div>
           <div
             style={{
@@ -166,7 +226,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
           <span
             style={{
               position: 'absolute',
-              width: '11px',
+              width: '300px',
               height: '20px',
               left: '10px',
               top: '39px',
@@ -178,7 +238,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#5E6482',
             }}
           >
-            ...
+            {jackpot?.eosBlockNumber ?? '...'}
           </span>
         </div>
 
@@ -206,7 +266,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#FFFFFF',
             }}
           >
-            Server Seed Hash
+            {jackpot ? 'EOS Block ID' : 'Server Seed Hash'}
           </div>
           <div
             style={{
@@ -222,7 +282,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
           <span
             style={{
               position: 'absolute',
-              width: '11px',
+              width: '300px',
               height: '20px',
               left: '10px',
               top: '39px',
@@ -234,7 +294,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#5E6482',
             }}
           >
-            ...
+            {jackpot?.eosBlockId || '...'}
           </span>
         </div>
 
@@ -262,7 +322,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#FFFFFF',
             }}
           >
-            Starter Sum
+            {jackpot ? 'Winning Ticket' : 'Starter Sum'}
           </div>
           <div
             style={{
@@ -278,7 +338,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
           <span
             style={{
               position: 'absolute',
-              width: '11px',
+              width: '300px',
               height: '20px',
               left: '10px',
               top: '39px',
@@ -290,7 +350,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#5E6482',
             }}
           >
-            ...
+            {jackpot?.winningTicket ?? '...'}
           </span>
 
           <div
@@ -308,7 +368,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#FFFFFF',
             }}
           >
-            Joiner Sum
+            {jackpot ? 'Total Tickets' : 'Joiner Sum'}
           </div>
           <div
             style={{
@@ -324,7 +384,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
           <span
             style={{
               position: 'absolute',
-              width: '11px',
+              width: '300px',
               height: '20px',
               left: '339px',
               top: '39px',
@@ -336,7 +396,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               color: '#5E6482',
             }}
           >
-            ...
+            {jackpot?.totalTickets ?? '...'}
           </span>
         </div>
 
@@ -383,7 +443,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
         <span
           style={{
             position: 'absolute',
-            width: '74px',
+            width: '500px',
             height: '20px',
             left: '31px',
             top: '430px',
@@ -396,7 +456,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
             cursor: 'pointer',
           }}
         >
-          Show Code
+          {jackpot ? 'SHA-256(EOS block ID + ":" + round ID) modulo total tickets' : 'Show Code'}
         </span>
       </div>
       </div>

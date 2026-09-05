@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -7,7 +8,51 @@ const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
 const User = require('../models/User');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const EOS_RPC_URL = (process.env.EOS_RPC_URL || 'https://eos.greymass.com').replace(/\/$/, '');
+const EOS_MAINNET_CHAIN_ID = 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906';
+const EOS_BLOCK_OFFSET = 2;
+const EOS_POLL_INTERVAL_MS = 500;
+const EOS_POLL_ATTEMPTS = 120;
+const TICKET_SCALE = 100;
 const jackpotTimers = new Map();
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+const requestEos = async (path, body = {}) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(`${EOS_RPC_URL}/v1/chain/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error(`EOS RPC ${path} returned ${response.status}`);
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const waitForIrreversibleEosBlock = async (blockNumber) => {
+  let lastError;
+  for (let attempt = 0; attempt < EOS_POLL_ATTEMPTS; attempt++) {
+    try {
+      const info = await requestEos('get_info');
+      if (info.chain_id !== EOS_MAINNET_CHAIN_ID) throw new Error('EOS RPC is not connected to EOS mainnet');
+      if (info.last_irreversible_block_num >= blockNumber) {
+        const block = await requestEos('get_block', { block_num_or_id: blockNumber });
+        if (block.block_num !== blockNumber || !block.id) throw new Error('EOS RPC returned an invalid block');
+        return block;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+    await wait(EOS_POLL_INTERVAL_MS);
+  }
+  throw lastError || new Error(`EOS block ${blockNumber} did not become irreversible`);
+};
 
 // Get io instance from server (will be set by server.js)
 let io;
@@ -59,8 +104,8 @@ const scheduleJackpot = (jackpotId, timerEndsAt) => {
     try {
       jackpotTimers.delete(id);
       const jackpot = await Jackpot.findById(id);
-      if (!jackpot || !['waiting', 'active'].includes(jackpot.status)) return;
-      if (jackpot.entries.length >= 2) await completeJackpot(id);
+      if (!jackpot || !['waiting', 'active', 'resolving'].includes(jackpot.status)) return;
+      if (jackpot.status === 'resolving' || jackpot.entries.length >= 2) await completeJackpot(id);
       else await refundJackpot(id);
     } catch (error) {
       console.error('Error resolving jackpot timer:', error);
@@ -70,8 +115,12 @@ const scheduleJackpot = (jackpotId, timerEndsAt) => {
 };
 
 const resumeJackpotTimers = async () => {
-  const jackpots = await Jackpot.find({ status: { $in: ['waiting', 'active'] } });
+  const jackpots = await Jackpot.find({ status: { $in: ['waiting', 'active', 'resolving'] } });
   for (const jackpot of jackpots) {
+    if (jackpot.status === 'resolving') {
+      scheduleJackpot(jackpot._id, new Date());
+      continue;
+    }
     if (!jackpot.timerEndsAt) {
       jackpot.timerEndsAt = new Date(Date.now() + 60000);
       await jackpot.save();
@@ -83,7 +132,8 @@ const resumeJackpotTimers = async () => {
 // Get active jackpot
 router.get('/active', async (req, res) => {
   try {
-    const activeJackpot = await Jackpot.findOne({ status: { $in: ['waiting', 'active'] } })
+    const activeJackpot = await Jackpot.findOne({ status: { $in: ['waiting', 'active', 'resolving'] } })
+      .sort({ createdAt: 1 })
       .populate('entries.userId', 'username avatarUrl')
       .populate('winner', 'username avatarUrl');
     
@@ -261,50 +311,70 @@ async function completeJackpot(jackpotId) {
     const jackpot = await Jackpot.findById(jackpotId)
       .populate('entries.userId', 'username avatarUrl');
     
-    if (!jackpot || jackpot.status === 'completed') {
+    if (!jackpot || ['completed', 'refunded'].includes(jackpot.status)) {
       return;
     }
     
     // Calculate winning percentage based on total value
     const totalValue = jackpot.totalValue;
     
-    if (totalValue === 0 || jackpot.entries.length === 0) {
+    if (totalValue <= 0 || jackpot.entries.length === 0) {
       console.error('Invalid jackpot: totalValue is 0 or no entries');
       return;
     }
-    
-    const randomValue = Math.random() * totalValue;
-    
-    let cumulativeValue = 0;
-    let winner = null;
-    let winningPercentage = 0;
-    
-    for (const entry of jackpot.entries) {
-      const entryPercentage = entry.totalValue / totalValue;
-      cumulativeValue += entry.totalValue;
-      
-      if (randomValue <= cumulativeValue) {
-        winner = entry.userId;
-        winningPercentage = entryPercentage;
+
+    if (jackpot.status !== 'resolving') {
+      jackpot.status = 'resolving';
+      await jackpot.save();
+    }
+
+    if (!jackpot.eosBlockNumber) {
+      const info = await requestEos('get_info');
+      if (info.chain_id !== EOS_MAINNET_CHAIN_ID) throw new Error('EOS RPC is not connected to EOS mainnet');
+      jackpot.eosBlockNumber = info.head_block_num + EOS_BLOCK_OFFSET;
+      jackpot.eosChainId = info.chain_id;
+      await jackpot.save();
+    }
+
+    const lockedJackpot = await populateJackpot(jackpot._id);
+    if (io) io.emit('jackpot-locked', { jackpot: lockedJackpot });
+
+    const eosBlock = await waitForIrreversibleEosBlock(jackpot.eosBlockNumber);
+    const resultHash = crypto
+      .createHash('sha256')
+      .update(`${eosBlock.id}:${jackpot._id}`)
+      .digest('hex');
+    const entryTickets = jackpot.entries.map((entry) => Math.max(0, Math.round(entry.totalValue * TICKET_SCALE)));
+    const totalTickets = entryTickets.reduce((sum, tickets) => sum + tickets, 0);
+    if (!Number.isSafeInteger(totalTickets) || totalTickets <= 0) throw new Error('Jackpot has no valid tickets');
+    const winningTicket = Number(BigInt(`0x${resultHash}`) % BigInt(totalTickets));
+
+    let cumulativeTickets = 0;
+    let winningEntry = jackpot.entries[jackpot.entries.length - 1];
+    for (let index = 0; index < jackpot.entries.length; index++) {
+      cumulativeTickets += entryTickets[index];
+      if (winningTicket < cumulativeTickets) {
+        winningEntry = jackpot.entries[index];
         break;
       }
     }
-    
-    // If no winner found (shouldn't happen), pick random
-    if (!winner && jackpot.entries.length > 0) {
-      const randomIndex = Math.floor(Math.random() * jackpot.entries.length);
-      winner = jackpot.entries[randomIndex].userId;
-      winningPercentage = jackpot.entries[randomIndex].totalValue / totalValue;
-    }
-    
-    // Ensure winningPercentage is a valid number
-    if (isNaN(winningPercentage) || winningPercentage === 0) {
-      winningPercentage = 1 / jackpot.entries.length;
-    }
-    
+
+    const winner = winningEntry.userId._id || winningEntry.userId;
+    const winnerValue = jackpot.entries.reduce((sum, entry) => {
+      const entryUserId = entry.userId._id || entry.userId;
+      return entryUserId.toString() === winner.toString() ? sum + entry.totalValue : sum;
+    }, 0);
+    const winningPercentage = winnerValue / totalValue;
+
     jackpot.status = 'completed';
     jackpot.winner = winner;
     jackpot.winningPercentage = winningPercentage;
+    jackpot.eosBlockId = eosBlock.id;
+    jackpot.eosBlockTimestamp = new Date(eosBlock.timestamp.endsWith('Z') ? eosBlock.timestamp : `${eosBlock.timestamp}Z`);
+    jackpot.resultHash = resultHash;
+    jackpot.winningTicket = winningTicket;
+    jackpot.totalTickets = totalTickets;
+    jackpot.ticketScale = TICKET_SCALE;
     jackpot.completedAt = new Date();
     await jackpot.save();
     
@@ -374,6 +444,8 @@ async function completeJackpot(jackpotId) {
     }
   } catch (error) {
     console.error('Error completing jackpot:', error);
+    const jackpot = await Jackpot.findById(jackpotId).select('status');
+    if (jackpot?.status === 'resolving') scheduleJackpot(jackpotId, new Date(Date.now() + 5000));
   }
 }
 

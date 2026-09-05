@@ -3,14 +3,18 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --sidebar-width: min(22vw, 352px);
+  --sidebar-width: clamp(260px, 18vw, 352px);
   --subnav-height: min(3.5vh, 39px);
   --navbar-height: min(8vh, 92px);
   --content-left: var(--sidebar-width);
   --content-top: calc(var(--subnav-height) + var(--navbar-height));
-  --content-width: calc(100vw - var(--sidebar-width));
+  --content-width: calc(100% - var(--sidebar-width));
   --page-padding-x: 20px;
   --mobile-drawer-width: 300px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 @theme inline {
@@ -27,7 +31,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   :root {
     --sidebar-width: 0px;
     --subnav-height: 0px;
@@ -40,16 +44,16 @@
   }
 }
 
-/* Tablet - use desktop layout at full size with horizontal scroll */
-@media (min-width: 769px) and (max-width: 1024px) {
-  body {
-    min-width: 1366px;
-    overflow-x: auto;
+/* Tablet and compact desktop layouts use the available viewport */
+@media (min-width: 1201px) and (max-width: 1439px) {
+  :root {
+    --sidebar-width: 0px;
+    --content-left: 0px;
+    --content-width: 100vw;
   }
-  
-  #desktop-scale-wrapper {
-    width: 1366px;
-    min-width: 1366px;
+
+  .sidebar-panel {
+    display: none;
   }
 }
 
@@ -59,7 +63,8 @@ html.mobile {
 
 html.mobile, html.mobile body {
   height: auto;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 @keyframes pulse {
@@ -94,10 +99,17 @@ html.mobile, html.mobile body {
 }
 
 body {
+  min-width: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+}
+
+#desktop-scale-wrapper {
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
 }
 
 /* Page shells */
@@ -110,12 +122,13 @@ body {
 }
 
 .page-shell--fixed {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .page-shell--fixed {
     height: auto;
     min-height: 100vh;
@@ -144,10 +157,10 @@ body {
   top: var(--content-top);
   width: var(--content-width);
   bottom: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .page-content-area {
     position: relative;
     left: 0;
@@ -178,7 +191,7 @@ body {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .sidebar-backdrop {
     display: block;
     position: fixed;
@@ -221,7 +234,7 @@ body {
   z-index: 50;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .app-navbar {
     position: fixed;
     left: 0;
@@ -243,7 +256,7 @@ body {
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .app-subnavbar {
     display: none;
   }
@@ -260,7 +273,7 @@ body {
   transition: bottom 0.3s ease;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .app-footer {
     position: relative;
     left: 0;
@@ -318,7 +331,7 @@ body {
   overflow: auto;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .responsive-modal-overlay {
     align-items: flex-end;
     padding: 0;
@@ -345,7 +358,7 @@ body {
   right: var(--page-padding-x);
   top: 20px;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   z-index: 10;
@@ -364,7 +377,7 @@ body {
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .coinflip-toolbar {
     position: relative;
     left: 0;
@@ -396,7 +409,7 @@ body {
   left: var(--page-padding-x);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .coinflip-row {
     position: relative;
     left: 0;
@@ -425,7 +438,7 @@ body {
   flex-direction: column;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .marketplace-root {
     position: relative;
     left: 0;
@@ -464,7 +477,7 @@ body {
     bottom: 0 !important;
     top: auto !important;
     width: 100% !important;
-    height: auto !important;
+    height: 45dvh !important;
     max-height: 45dvh;
     border-radius: 16px 16px 0 0 !important;
     z-index: 60;
@@ -486,7 +499,7 @@ body {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .signup-modal-panel {
     width: 100% !important;
     height: auto !important;
@@ -516,6 +529,16 @@ body {
     top: 50% !important;
     transform: translateY(-50%) !important;
     overflow: auto;
+  }
+}
+
+.history-table > * {
+  min-width: 1100px;
+}
+
+@media (max-width: 1600px) and (min-width: 1201px) {
+  .jackpot-round-summary {
+    display: none;
   }
 }
 

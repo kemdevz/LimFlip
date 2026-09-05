@@ -3,12 +3,33 @@
 import { useState } from 'react';
 import JoinJackpotModal from './JoinJackpotModal';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
-import { Jackpot } from '@/types';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { Jackpot, JackpotEntry } from '@/types';
 
 interface Card {
   image: string;
   playerId: string;
 }
+
+const getEntryUserId = (entry: JackpotEntry) =>
+  typeof entry.userId === 'string' ? entry.userId : entry.userId._id;
+
+const groupEntriesByUser = (entries: JackpotEntry[]) => {
+  const users = new Map<string, JackpotEntry>();
+
+  for (const entry of entries) {
+    const userId = getEntryUserId(entry);
+    const existing = users.get(userId);
+    users.set(userId, existing ? {
+      ...entry,
+      _id: existing._id,
+      items: [...existing.items, ...entry.items],
+      totalValue: existing.totalValue + entry.totalValue,
+    } : { ...entry });
+  }
+
+  return Array.from(users.values());
+};
 
 interface JackpotWheelProps {
   jackpot: Jackpot | null;
@@ -16,9 +37,12 @@ interface JackpotWheelProps {
 }
 
 export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelProps) {
+  const isMobile = useIsMobile();
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
-  const latestEntry = jackpot?.entries[jackpot.entries.length - 1];
+  const userEntries = groupEntriesByUser(jackpot?.entries || []);
+  const canJoin = !jackpot || ['waiting', 'active'].includes(jackpot.status);
+  const participantPanelHeight = userEntries.length > 0 ? userEntries.length * 96 + (userEntries.length - 1) * 15 : 96;
   
   // Default waiting cards
   const waitingCards = [
@@ -29,25 +53,99 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
     '/assets/jackpot/gingerscope.png',
   ];
 
-  const cards: Card[] = latestEntry
-    ? latestEntry.items.map((item) => ({ image: item.image, playerId: String(latestEntry._id || latestEntry.username) }))
-    : waitingCards.map((image) => ({ image, playerId: 'waiting' }));
   const itemCount = jackpot?.entries.reduce((sum, entry) => sum + entry.items.length, 0) || 0;
-  const latestChance = latestEntry && jackpot?.totalValue
-    ? (latestEntry.totalValue / jackpot.totalValue) * 100
-    : 0;
+
+  if (isMobile) {
+    return (
+      <div style={{ width: '100%', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <button
+            type="button"
+            disabled={!canJoin}
+            onClick={() => setIsJoinModalOpen(true)}
+            style={{ minHeight: '44px', padding: '0 18px', background: '#C77DFF', border: 0, borderRadius: '12px', color: '#FFFFFF', fontFamily: 'Poppins', fontWeight: 700, cursor: canJoin ? 'pointer' : 'not-allowed', opacity: canJoin ? 1 : 0.6 }}
+          >
+            BET ITEMS
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginLeft: 'auto', color: '#FFFFFF', fontFamily: 'Poppins', fontWeight: 600 }}>
+            <img src="/assets/jackpot/dice.svg" alt="Items" style={{ width: '24px', height: '20px' }} />
+            {itemCount}
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsValidateFairnessOpen(true)}
+            aria-label="Validate fairness"
+            style={{ width: '44px', height: '44px', flexShrink: 0, border: 0, borderRadius: '12px', background: '#202634', color: '#656F86', cursor: 'pointer', fontSize: '18px' }}
+          >
+            i
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {userEntries.map((entry) => {
+            const userId = getEntryUserId(entry);
+            const chance = jackpot?.totalValue ? (entry.totalValue / jackpot.totalValue) * 100 : 0;
+            return (
+              <div key={userId} style={{ display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', alignItems: 'center', gap: '10px', minHeight: '86px', padding: '12px', background: '#191D29', border: '2px solid #1B1F2D', borderRadius: '15px' }}>
+                <img src={entry.avatarUrl || '/assets/images/coinflip/item_1side.png'} alt={entry.username} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', background: '#131620' }} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#FFFFFF', fontFamily: 'Poppins', fontWeight: 600 }}>{entry.username}</div>
+                  <div className="hide-scrollbar" style={{ display: 'flex', gap: '4px', marginTop: '7px', overflowX: 'auto' }}>
+                    {entry.items.map((item) => (
+                      <div key={item.uniqueId} style={{ width: '34px', height: '34px', flexShrink: 0, borderRadius: '50%', overflow: 'hidden', background: '#11151D', border: '1px solid #181E2E' }}>
+                        <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', fontFamily: 'Poppins', whiteSpace: 'nowrap' }}>
+                  <div style={{ color: '#C77DFF', fontWeight: 700 }}>B${Math.round(entry.totalValue).toLocaleString()}</div>
+                  <div style={{ marginTop: '4px', color: '#656F86', fontSize: '12px' }}>{chance.toFixed(2)}%</div>
+                </div>
+              </div>
+            );
+          })}
+          {userEntries.length === 0 && (
+            <div style={{ display: 'grid', placeItems: 'center', minHeight: '86px', color: '#656F86', background: '#191D29', border: '2px solid #1B1F2D', borderRadius: '15px', fontFamily: 'Poppins' }}>
+              Waiting for players
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '10px', padding: '14px 16px', background: '#191D29', border: '2px solid #1B1F2D', borderRadius: '15px', fontFamily: 'Poppins' }}>
+          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: '#999FAE', whiteSpace: 'nowrap' }}>{jackpot ? `Round #${jackpot._id.slice(-8)}` : 'Waiting for round'}</span>
+          <strong style={{ color: '#C77DFF', whiteSpace: 'nowrap' }}>B${Math.round(jackpot?.totalValue || 0).toLocaleString()}</strong>
+        </div>
+
+        <JoinJackpotModal
+          isOpen={isJoinModalOpen}
+          onClose={() => setIsJoinModalOpen(false)}
+          onJackpotJoined={(nextJackpot) => {
+            if (canJoin) onJackpotJoined(nextJackpot);
+          }}
+        />
+        <ValidateFairnessModal
+          isOpen={isValidateFairnessOpen}
+          onClose={() => setIsValidateFairnessOpen(false)}
+          jackpot={jackpot}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
       style={{
         position: 'relative',
         width: '1057px',
-        height: '403px',
+        height: `${Math.max(403, 61 + participantPanelHeight)}px`,
       }}
     >
       
       <div
-        onClick={() => setIsJoinModalOpen(true)}
+        onClick={() => {
+          if (canJoin) setIsJoinModalOpen(true);
+        }}
         style={{
           position: 'absolute',
           width: '141px',
@@ -57,7 +155,8 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer',
+          cursor: canJoin ? 'pointer' : 'not-allowed',
+          opacity: canJoin ? 1 : 0.6,
         }}
       >
         <div
@@ -147,18 +246,27 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
           gap: '15px',
           position: 'absolute',
           width: '1057px',
-          height: '96px',
+          minHeight: '96px',
+          height: `${participantPanelHeight}px`,
           left: '0px',
           top: '61px',
-          background: '#191D29',
-          border: '2px solid #1B1F2D',
+          background: userEntries.length === 0 ? '#191D29' : 'transparent',
+          border: userEntries.length === 0 ? '2px solid #1B1F2D' : 'none',
           borderRadius: '15px',
         }}
       >
-        
+        {userEntries.map((entry) => {
+          const userId = getEntryUserId(entry);
+          const cards: Card[] = entry.items.length > 0
+            ? entry.items.map((item) => ({ image: item.image, playerId: userId }))
+            : waitingCards.map((image) => ({ image, playerId: userId }));
+          const chance = jackpot?.totalValue ? (entry.totalValue / jackpot.totalValue) * 100 : 0;
+
+          return (
         <div
+          key={userId}
           style={{
-            visibility: latestEntry ? 'visible' : 'hidden',
+            position: 'relative',
             width: '1057px',
             height: '96px',
             background: '#191D29',
@@ -211,8 +319,8 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
                   }}
                 >
                   <img
-                    src={latestEntry?.avatarUrl || '/assets/images/coinflip/item_1side.png'}
-                    alt={latestEntry?.username || 'Waiting'}
+                    src={entry?.avatarUrl || '/assets/images/coinflip/item_1side.png'}
+                    alt={entry?.username || 'Waiting'}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -245,7 +353,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
                 color: '#FFFFFF',
               }}
             >
-              {latestEntry?.username}
+              {entry?.username}
             </div>
           </div>
 
@@ -294,7 +402,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
                 backgroundClip: 'text',
               }}
             >
-              {latestChance.toFixed(2)}%
+              {chance.toFixed(2)}%
             </div>
           </div>
 
@@ -410,10 +518,12 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
                 color: '#C77DFF',
               }}
             >
-              B${Math.round(latestEntry?.totalValue || 0).toLocaleString()}
+              B${Math.round(entry.totalValue).toLocaleString()}
             </div>
           </div>
         </div>
+          );
+        })}
       </div>
 
       
@@ -458,6 +568,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
 
       
       <div
+        className="jackpot-round-summary"
         style={{
           position: 'absolute',
           right: '-440px',
@@ -595,11 +706,14 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
       <JoinJackpotModal
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
-        onJackpotJoined={onJackpotJoined}
+        onJackpotJoined={(nextJackpot) => {
+          if (canJoin) onJackpotJoined(nextJackpot);
+        }}
       />
       <ValidateFairnessModal
         isOpen={isValidateFairnessOpen}
         onClose={() => setIsValidateFairnessOpen(false)}
+        jackpot={jackpot}
       />
     </div>
   );

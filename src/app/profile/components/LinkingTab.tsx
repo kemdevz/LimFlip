@@ -9,6 +9,7 @@ export default function LinkingTab() {
         gap: '28px',
         width: '100%',
         marginTop: '20px',
+        overflowX: 'auto',
       }}
     >
       

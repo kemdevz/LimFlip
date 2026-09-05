@@ -232,7 +232,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       <div
         className="absolute"
         style={{
-          width: isMobile ? '100%' : '352px',
+          width: '100%',
           height: isMobile ? '88px' : 'var(--content-top)',
           left: '0px',
           top: '0px',
@@ -247,8 +247,9 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
             style={{
               width: '194.96px',
               height: '36px',
-              left: '79px',
+              left: '50%',
               top: isMobile ? '48px' : 'calc((var(--content-top) - 36px) / 2)',
+              transform: 'translateX(-50%)',
               cursor: 'pointer',
             }}
           >
@@ -296,7 +297,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       <div
         className="absolute"
         style={{
-          width: isMobile ? 'calc(100% - 32px)' : '327px',
+          width: 'calc(100% - 32px)',
           height: '34px',
           left: '16px',
           top: isMobile ? '98px' : 'calc(var(--content-top) + 10px)',
@@ -307,7 +308,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
         <div
           style={{
             position: 'absolute',
-            width: '327px',
+            width: '100%',
             height: '34px',
             left: '0px',
             top: '0px',

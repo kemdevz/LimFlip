@@ -1,3 +1,7 @@
+'use client';
+
+import { useIsMobile } from '@/hooks/useMediaQuery';
+
 interface JackpotStatsProps {
   jackpotValue: number;
   userWager: number;
@@ -10,14 +14,16 @@ const formatValue = (value: number) => value >= 1000
   : `B$${Math.round(value)}`;
 
 export default function JackpotStats({ jackpotValue, userWager, userChance, timeRemaining }: JackpotStatsProps) {
+  const isMobile = useIsMobile();
+
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'row',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'minmax(280px, 1.6fr) repeat(3, minmax(150px, 1fr))',
         alignItems: 'center',
         padding: '0px',
-        gap: '18px',
+        gap: isMobile ? '10px' : '18px',
         width: '100%',
         marginTop: '20px',
       }}
@@ -26,9 +32,10 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
       <div
         style={{
           position: 'relative',
-          width: '391px',
-          minWidth: '300px',
+          width: '100%',
+          minWidth: 0,
           height: '108px',
+          gridColumn: isMobile ? '1 / -1' : 'auto',
           background: '#111625',
           borderRadius: '13px',
           flex: 'none',
@@ -44,9 +51,9 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
         <div
           style={{
             position: 'absolute',
-            width: '394px',
-            height: '112px',
             left: '-3px',
+            right: '-3px',
+            height: '112px',
             top: '-2px',
             border: '1px solid rgba(168, 85, 247, 0.26)',
             borderRadius: '15px',
@@ -71,7 +78,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
         <div
           style={{
             position: 'relative',
-            width: '380px',
+            width: '100%',
             height: '99px',
             borderRadius: '9px',
             zIndex: 2,
@@ -81,9 +88,9 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
           <div
             style={{
               position: 'absolute',
-              width: '379px',
-              height: '97px',
+              left: '1px',
               right: '1px',
+              height: '97px',
               top: '1px',
               background: 'linear-gradient(270deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0) 100%), url(/assets/jackpot/background.png), #191D29',
               backgroundSize: 'cover, cover',
@@ -97,7 +104,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
           <div
             style={{
               position: 'absolute',
-              width: '378px',
+              width: '100%',
               height: '137px',
               background: 'url(/assets/images/coinflip/item_1side.png)',
               backgroundSize: 'cover',
@@ -153,7 +160,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
       <div
         style={{
           flex: 1,
-          minWidth: '200px',
+          minWidth: 0,
           height: '93px',
           background: '#191D29',
           border: '2px solid #1B1F2D',
@@ -162,7 +169,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
+          padding: isMobile ? '10px' : '20px',
         }}
       >
         <span
@@ -197,7 +204,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
       <div
         style={{
           flex: 1,
-          minWidth: '200px',
+          minWidth: 0,
           height: '93px',
           background: '#191D29',
           border: '2px solid #1B1F2D',
@@ -206,7 +213,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
+          padding: isMobile ? '10px' : '20px',
         }}
       >
         <span
@@ -241,7 +248,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
       <div
         style={{
           flex: 1,
-          minWidth: '200px',
+          minWidth: 0,
           height: '93px',
           background: '#191D29',
           border: '2px solid #1B1F2D',
@@ -250,7 +257,7 @@ export default function JackpotStats({ jackpotValue, userWager, userChance, time
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
+          padding: isMobile ? '10px' : '20px',
         }}
       >
         <span

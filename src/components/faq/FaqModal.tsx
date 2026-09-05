@@ -68,8 +68,8 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
           className="responsive-modal-panel"
           style={{
             position: 'relative',
-            width: '696px',
-            height: '473px',
+            width: 'min(696px, 100%)',
+            height: 'min(473px, calc(100dvh - 32px))',
             filter: 'drop-shadow(0px 4px 27.2px rgba(0, 0, 0, 0.25))',
             animation: isAnimatingOut ? 'scaleOut 0.2s ease-out forwards' : 'scaleIn 0.2s ease-out forwards',
           }}
@@ -79,9 +79,9 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
           style={{
             boxSizing: 'border-box',
             position: 'absolute',
-            width: '688px',
-            height: '473px',
-            left: '8px',
+            width: 'calc(100% - 8px)',
+            height: '100%',
+            left: '4px',
             top: '0px',
             background: '#191D29',
             border: '1px solid #222530',
@@ -93,7 +93,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
           onClick={onClose}
           style={{
             position: 'absolute',
-            left: '648px',
+            right: '30px',
             top: '32px',
             cursor: 'pointer',
             fontSize: '28px',
@@ -128,7 +128,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
         <div
           style={{
             position: 'absolute',
-            width: '630px',
+            width: 'calc(100% - 60px)',
             height: '39px',
             left: '30px',
             top: '55.79px',
@@ -146,7 +146,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
         <div
           style={{
             position: 'absolute',
-            width: '630px',
+            width: 'calc(100% - 60px)',
             height: '350px',
             left: '30px',
             top: '113.79px',

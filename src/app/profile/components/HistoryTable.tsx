@@ -1,6 +1,7 @@
 export default function HistoryTable() {
   return (
     <div
+      className="history-table hide-scrollbar"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -9,6 +10,7 @@ export default function HistoryTable() {
         gap: '16px',
         width: '100%',
         marginTop: '20px',
+        overflowX: 'auto',
       }}
     >
       

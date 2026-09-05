@@ -1,9 +1,15 @@
+'use client';
+
+import { useIsMobile } from '@/hooks/useMediaQuery';
+
 export default function ProfileTab() {
+  const isMobile = useIsMobile();
+
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: isMobile ? 'column' : 'row',
         gap: '18px',
         width: '100%',
         marginTop: '20px',

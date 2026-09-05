@@ -131,15 +131,21 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
   const activeIndex = navItems.findIndex((item) => item.active);
 
   useEffect(() => {
-    if (!isMobile && activeIndex >= 0 && navRefs.current[activeIndex]) {
-      const navbar = document.querySelector('.app-navbar');
-      if (navbar) {
-        const navbarRect = navbar.getBoundingClientRect();
-        const navItemRect = navRefs.current[activeIndex]!.getBoundingClientRect();
-        setUnderlineLeft(navItemRect.left - navbarRect.left);
-        setUnderlineWidth(navItemRect.width);
+    const updateUnderline = () => {
+      if (!isMobile && activeIndex >= 0 && navRefs.current[activeIndex]) {
+        const navbar = document.querySelector('.app-navbar');
+        if (navbar) {
+          const navbarRect = navbar.getBoundingClientRect();
+          const navItemRect = navRefs.current[activeIndex]!.getBoundingClientRect();
+          setUnderlineLeft(navItemRect.left - navbarRect.left);
+          setUnderlineWidth(navItemRect.width);
+        }
       }
-    }
+    };
+
+    updateUnderline();
+    window.addEventListener('resize', updateUnderline);
+    return () => window.removeEventListener('resize', updateUnderline);
   }, [activeIndex, isMobile]);
 
 

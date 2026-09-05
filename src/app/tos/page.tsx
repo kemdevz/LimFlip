@@ -14,7 +14,7 @@ export default function TOSPage() {
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   return (
-    <div className="page-shell page-shell--fixed bg-[#12151C]">
+    <div className="page-shell bg-[#12151C]">
       
       <div
         className="page-bg"
@@ -69,8 +69,8 @@ export default function TOSPage() {
             fontFamily: 'Poppins, sans-serif',
             fontStyle: 'normal',
             fontWeight: 600,
-            fontSize: '20px',
-            lineHeight: '30px',
+            fontSize: 'clamp(14px, 2vw, 20px)',
+            lineHeight: '1.5',
           }}
         >
         <p style={{ marginBottom: '20px', color: '#C77DFF' }}>

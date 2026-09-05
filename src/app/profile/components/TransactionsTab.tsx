@@ -12,8 +12,10 @@ export default function TransactionsTab({ activeSubTab, onSubTabChange }: Transa
         alignItems: 'flex-start',
         padding: '0px',
         gap: '12px',
-        width: '405px',
-        height: '38px',
+        width: '100%',
+        maxWidth: '405px',
+        minHeight: '38px',
+        overflowX: 'auto',
         marginTop: '20px',
       }}
     >

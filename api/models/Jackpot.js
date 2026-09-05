@@ -57,7 +57,7 @@ const jackpotEntrySchema = new mongoose.Schema({
 const jackpotSchema = new mongoose.Schema({
   status: {
     type: String,
-    enum: ['waiting', 'active', 'completed', 'refunded'],
+    enum: ['waiting', 'active', 'resolving', 'completed', 'refunded'],
     default: 'waiting'
   },
   entries: [jackpotEntrySchema],
@@ -70,6 +70,30 @@ const jackpotSchema = new mongoose.Schema({
     ref: 'User'
   },
   winningPercentage: {
+    type: Number
+  },
+  eosBlockNumber: {
+    type: Number
+  },
+  eosBlockId: {
+    type: String
+  },
+  eosBlockTimestamp: {
+    type: Date
+  },
+  eosChainId: {
+    type: String
+  },
+  resultHash: {
+    type: String
+  },
+  winningTicket: {
+    type: Number
+  },
+  totalTickets: {
+    type: Number
+  },
+  ticketScale: {
     type: Number
   },
   timerEndsAt: {

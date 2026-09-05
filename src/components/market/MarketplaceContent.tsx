@@ -294,7 +294,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 alignItems: 'flex-start',
                 padding: '0px',
                 gap: '3px',
-                width: isMobile ? 'calc(50% - 6px)' : '177px',
+                width: '177px',
                 height: '78px',
                 position: 'relative',
                 marginRight: isMobile ? '12px' : '12px',

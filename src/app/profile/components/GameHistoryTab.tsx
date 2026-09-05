@@ -12,8 +12,10 @@ export default function GameHistoryTab({ activeSubTab, onSubTabChange }: GameHis
         alignItems: 'flex-start',
         padding: '0px',
         gap: '12px',
-        width: '312px',
-        height: '38px',
+        width: '100%',
+        maxWidth: '312px',
+        minHeight: '38px',
+        overflowX: 'auto',
         marginTop: '20px',
       }}
     >

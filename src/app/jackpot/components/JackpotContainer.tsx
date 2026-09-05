@@ -1,7 +1,13 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import WaitingCard from './WaitingCard';
-import { JackpotEntry } from '@/types';
+import { Jackpot, JackpotEntry } from '@/types';
 
 const REEL_SLOT_COUNT = 14;
+const SLOT_WIDTH = 219;
+const SPIN_REPETITIONS = 10;
+const SPIN_DURATION_MS = 7000;
 
 const getEntryUserId = (entry: JackpotEntry) =>
   typeof entry.userId === 'string' ? entry.userId : entry.userId._id;
@@ -59,10 +65,49 @@ const buildWeightedReel = (entries: JackpotEntry[]) => {
   return [...reel.slice(rotation), ...reel.slice(0, rotation)];
 };
 
-export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
+export default function JackpotContainer({ jackpot }: { jackpot: Jackpot | null }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [spinOffset, setSpinOffset] = useState(0);
+  const [isSettling, setIsSettling] = useState(false);
+  const entries = jackpot?.entries || [];
   const reelHalf = buildWeightedReel(entries);
-  const reelSlots = [...reelHalf, ...reelHalf];
-  const reelKey = entries.map((entry) => entry._id || `${entry.username}-${entry.joinedAt}`).join('|') || 'empty';
+  const winnerId = jackpot?.winner
+    ? typeof jackpot.winner === 'string' ? jackpot.winner : jackpot.winner._id
+    : null;
+  const winnerEntry = winnerId
+    ? reelHalf.find((entry) => entry && getEntryUserId(entry) === winnerId)
+      || entries.find((entry) => getEntryUserId(entry) === winnerId)
+    : undefined;
+  const isCompleted = jackpot?.status === 'completed' && Boolean(winnerEntry && jackpot.resultHash);
+  const reelSlots = isCompleted
+    ? Array.from({ length: SPIN_REPETITIONS }, () => reelHalf).flat()
+    : [...reelHalf, ...reelHalf];
+  const finalReelStart = reelSlots.length - REEL_SLOT_COUNT;
+  const winnerSlotOffset = isCompleted
+    ? reelSlots.slice(finalReelStart).findIndex((entry) => entry && getEntryUserId(entry) === winnerId)
+    : -1;
+  const targetIndex = winnerSlotOffset >= 0 ? finalReelStart + winnerSlotOffset : reelSlots.length - 3;
+  if (isCompleted && winnerEntry && winnerSlotOffset < 0) reelSlots[targetIndex] = winnerEntry;
+  const reelKey = `${entries.map((entry) => entry._id || `${entry.username}-${entry.joinedAt}`).join('|') || 'empty'}-${jackpot?.status || 'waiting'}`;
+
+  useEffect(() => {
+    const resultHash = jackpot?.resultHash;
+    if (!isCompleted || !resultHash || !viewportRef.current) return;
+
+    setIsSettling(false);
+    setSpinOffset(0);
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const hashOffset = parseInt(resultHash.slice(0, 8), 16) / 0xffffffff;
+        const landingOffset = (hashOffset - 0.5) * 120;
+        const viewportCenter = viewportRef.current?.clientWidth ? viewportRef.current.clientWidth / 2 : 0;
+        setIsSettling(true);
+        setSpinOffset(viewportCenter - targetIndex * SLOT_WIDTH - 101.5 + landingOffset);
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [isCompleted, jackpot?.resultHash, targetIndex]);
 
   return (
     <div
@@ -142,6 +187,7 @@ export default function JackpotContainer({ entries }: { entries: JackpotEntry[] 
       />
       
       <div
+        ref={viewportRef}
         style={{
           position: 'absolute',
           left: '0',
@@ -161,7 +207,9 @@ export default function JackpotContainer({ entries }: { entries: JackpotEntry[] 
             display: 'flex',
             gap: '16px',
             width: 'max-content',
-            animation: 'scrollRight 30s linear infinite',
+            animation: isCompleted ? 'none' : 'scrollRight 30s linear infinite',
+            transform: isCompleted ? `translateX(${spinOffset}px)` : undefined,
+            transition: isCompleted && isSettling ? `transform ${SPIN_DURATION_MS}ms cubic-bezier(0.12, 0.68, 0.12, 1)` : 'none',
             willChange: 'transform',
           }}
         >

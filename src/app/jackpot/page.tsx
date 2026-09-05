@@ -56,7 +56,12 @@ export default function JackpotPage() {
 
   useEffect(() => {
     if (!socket) return;
-    const update = ({ jackpot: nextJackpot }: { jackpot: Jackpot }) => setJackpot(nextJackpot);
+    const update = ({ jackpot: nextJackpot }: { jackpot: Jackpot }) => setJackpot((currentJackpot) => {
+      if (currentJackpot && ['resolving', 'completed'].includes(currentJackpot.status) && currentJackpot._id !== nextJackpot._id) {
+        return currentJackpot;
+      }
+      return nextJackpot;
+    });
     const resolve = () => {
       fetchActiveJackpot()
         .then(setJackpot)
@@ -65,13 +70,15 @@ export default function JackpotPage() {
     socket.on('jackpot-joined', update);
     socket.on('jackpot-timer-started', update);
     socket.on('jackpot-started', update);
-    socket.on('jackpot-completed', resolve);
+    socket.on('jackpot-locked', update);
+    socket.on('jackpot-completed', update);
     socket.on('jackpot-refunded', resolve);
     return () => {
       socket.off('jackpot-joined', update);
       socket.off('jackpot-timer-started', update);
       socket.off('jackpot-started', update);
-      socket.off('jackpot-completed', resolve);
+      socket.off('jackpot-locked', update);
+      socket.off('jackpot-completed', update);
       socket.off('jackpot-refunded', resolve);
     };
   }, [socket]);
@@ -86,7 +93,7 @@ export default function JackpotPage() {
     : null;
 
   useEffect(() => {
-    if (!jackpot?._id || timeRemaining !== 0 || !['waiting', 'active'].includes(jackpot.status)) return;
+    if (!jackpot?._id || timeRemaining !== 0 || !['waiting', 'active', 'resolving'].includes(jackpot.status)) return;
 
     let cancelled = false;
     const syncResolvedRound = async () => {
@@ -95,8 +102,12 @@ export default function JackpotPage() {
         if (!response.ok) return;
         const data: { jackpot: Jackpot } = await response.json();
         if (cancelled) return;
-        if (data.jackpot.status === 'completed' || data.jackpot.status === 'refunded') {
+        if (data.jackpot.status === 'completed') {
+          setJackpot(data.jackpot);
+        } else if (data.jackpot.status === 'refunded') {
           setJackpot(await fetchActiveJackpot());
+        } else if (data.jackpot.status === 'resolving') {
+          setJackpot(data.jackpot);
         }
       } catch (error) {
         console.error('Error checking expired jackpot:', error);
@@ -110,6 +121,16 @@ export default function JackpotPage() {
       window.clearInterval(poll);
     };
   }, [jackpot?._id, jackpot?.status, timeRemaining]);
+
+  useEffect(() => {
+    if (jackpot?.status !== 'completed') return;
+    const timer = window.setTimeout(() => {
+      fetchActiveJackpot()
+        .then(setJackpot)
+        .catch((error) => console.error('Error loading next jackpot:', error));
+    }, 8000);
+    return () => window.clearTimeout(timer);
+  }, [jackpot?._id, jackpot?.status]);
 
   const handleProfileClick = (username: string) => {
     console.log('Profile clicked:', username);
@@ -173,7 +194,7 @@ export default function JackpotPage() {
               userChance={userChance}
               timeRemaining={timeRemaining}
             />
-            <JackpotContainer entries={jackpot?.entries || []} />
+            <JackpotContainer jackpot={jackpot} />
             <JackpotWheel jackpot={jackpot} onJackpotJoined={setJackpot} />
           </div>
         </div>
@@ -181,6 +202,7 @@ export default function JackpotPage() {
       <ValidateFairnessModal
         isOpen={isValidateFairnessOpen}
         onClose={() => setIsValidateFairnessOpen(false)}
+        jackpot={jackpot}
       />
       <MyListingsModal
         isOpen={isMyListingsOpen}

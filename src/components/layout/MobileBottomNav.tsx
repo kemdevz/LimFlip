@@ -52,9 +52,11 @@ export default function MobileBottomNav() {
       const buttonRect = button.getBoundingClientRect();
       
       if (containerRect) {
+        const underlineWidth = Math.min(108, containerRect.width);
+        const centeredLeft = buttonRect.left - containerRect.left + (buttonRect.width / 2) - (underlineWidth / 2);
         setUnderlineStyle({
-          left: buttonRect.left - containerRect.left + (buttonRect.width / 2) - 54,
-          width: '108px',
+          left: Math.max(0, Math.min(centeredLeft, containerRect.width - underlineWidth)),
+          width: `${underlineWidth}px`,
         });
       }
     }

@@ -47,7 +47,7 @@ export default function JackpotPage() {
         if (!cancelled) setJackpot(activeJackpot);
       })
       .catch((error) => console.error('Error loading jackpot:', error));
-    const clock = window.setInterval(() => setNow(Date.now()), 1000);
+    const clock = window.setInterval(() => setNow(Date.now()), 250);
     return () => {
       cancelled = true;
       window.clearInterval(clock);

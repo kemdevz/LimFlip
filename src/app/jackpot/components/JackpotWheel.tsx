@@ -224,6 +224,42 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
             </div>
           </div>
 
+          <div
+            style={{
+              position: 'absolute',
+              width: '109px',
+              height: '50px',
+              left: '82px',
+              top: '27px',
+            }}
+          >
+            <div
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 600,
+                fontSize: '17px',
+                lineHeight: '26px',
+                color: '#FFFFFF',
+              }}
+            >
+              {latestEntry?.username}
+            </div>
+            <div
+              style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 600,
+                fontSize: '14px',
+                lineHeight: '21px',
+                color: '#656F86',
+              }}
+            >
+              Joined
+            </div>
+          </div>
+
           
           <div
             style={{

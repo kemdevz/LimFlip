@@ -488,13 +488,11 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
         className="absolute chat-messages-container hide-scrollbar"
         style={{
           width: '100%',
-          height: isMobile
-            ? `calc(100dvh - 88px - 34px - ${giveaway ? '140px' : '0px'} - 16px - 60px - 20px)`
-            : `calc(100vh - var(--content-top) - 34px - 20px - ${giveaway ? '152px' : '0px'} - 16px - 60px)`,
           left: '0px',
           top: isMobile
             ? `calc(88px + 34px + ${giveaway ? '140px' : '0px'} + 16px)`
             : `calc(var(--content-top) + 34px + 20px + ${giveaway ? '152px' : '0px'} + 16px)`,
+          bottom: isMobile ? '127px' : '68px',
           background: '#191D29',
           overflowY: 'auto',
         }}

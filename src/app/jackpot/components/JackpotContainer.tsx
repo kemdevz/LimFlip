@@ -2,6 +2,10 @@ import WaitingCard from './WaitingCard';
 import { JackpotEntry } from '@/types';
 
 export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
+  const reelHalf = Array.from({ length: 14 }, (_, index) => entries[index]);
+  const reelSlots = [...reelHalf, ...reelHalf];
+  const reelKey = entries.map((entry) => entry._id || `${entry.username}-${entry.joinedAt}`).join('|') || 'empty';
+
   return (
     <div
       style={{
@@ -94,17 +98,19 @@ export default function JackpotContainer({ entries }: { entries: JackpotEntry[] 
         }}
       >
         <div
+          key={reelKey}
           style={{
             display: 'flex',
             gap: '16px',
             width: 'max-content',
             animation: 'scrollRight 30s linear infinite',
+            willChange: 'transform',
           }}
         >
-          {Array.from({ length: 28 }, (_, index) => (
+          {reelSlots.map((entry, index) => (
             <WaitingCard
-              key={entries[index]?._id || `waiting-${index}`}
-              entry={entries[index]}
+              key={`reel-${index}`}
+              entry={entry}
             />
           ))}
         </div>

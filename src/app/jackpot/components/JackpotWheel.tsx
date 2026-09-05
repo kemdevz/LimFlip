@@ -229,7 +229,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
               position: 'absolute',
               width: '109px',
               height: '50px',
-              left: '82px',
+              left: '105px',
               top: '27px',
             }}
           >
@@ -309,7 +309,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
               position: 'absolute',
               width: '311.07px',
               height: '65px',
-              left: '210px',
+              left: '280px',
               top: '17px',
             }}
           >

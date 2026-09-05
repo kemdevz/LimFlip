@@ -130,6 +130,10 @@ export default function WaitingCard({ entry }: { entry?: JackpotEntry }) {
           height: '32px',
           left: '28px',
           top: '167px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
         }}
       >
         <div
@@ -148,20 +152,14 @@ export default function WaitingCard({ entry }: { entry?: JackpotEntry }) {
           src="/assets/svg/navbar/wallet.svg"
           alt="Wallet"
           style={{
-            position: 'absolute',
-            left: '29px',
-            top: '8px',
             width: '16px',
             height: '13px',
+            flex: 'none',
+            zIndex: 2,
           }}
         />
         <span
           style={{
-            position: 'absolute',
-            width: '66px',
-            height: '23px',
-            left: '54px',
-            top: '4px',
             fontFamily: 'Poppins',
             fontStyle: 'normal',
             fontWeight: 600,
@@ -169,6 +167,8 @@ export default function WaitingCard({ entry }: { entry?: JackpotEntry }) {
             lineHeight: '22px',
             textAlign: 'center',
             color: '#FFFFFF',
+            whiteSpace: 'nowrap',
+            zIndex: 2,
           }}
         >
           {entry ? `B$${Math.round(entry.totalValue).toLocaleString()}` : 'B$0.00'}

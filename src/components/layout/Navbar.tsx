@@ -110,14 +110,6 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
       badge: 'B$3.2k',
     },
     {
-      id: 'upgrader',
-      label: 'Upgrader',
-      icon: '/assets/svg/navbar/upgrader.svg',
-      activeIcon: '/assets/svg/navbar/upgrader-active.svg',
-      active: pathname === '/upgrader',
-      onClick: () => router.push('/upgrader'),
-    },
-    {
       id: 'market',
       label: '',
       icon: '/assets/svg/ui/market.svg',

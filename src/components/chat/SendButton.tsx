@@ -13,11 +13,10 @@ export default function SendButton({ onSend }: SendButtonProps) {
       className="absolute"
       onClick={onSend}
       style={{
-        width: isMobile ? '50px' : '47.55px',
-        height: isMobile ? '50px' : '46.58px',
+        width: isMobile ? '50px' : 'min(4vh, 46px)',
+        height: isMobile ? '50px' : 'min(4vh, 46px)',
         left: isMobile ? 'calc(100% - 60px)' : 'calc(9px + 280px + 8px)',
         bottom: '10px',
-        top: '5px',
         opacity: 0.44,
         cursor: 'pointer',
         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -43,7 +42,7 @@ export default function SendButton({ onSend }: SendButtonProps) {
           width: '100%',
           height: '100%',
           left: '0px',
-          top: isMobile ? '0px' : '-0.97px',
+          top: '0px',
           background: '#1F232F',
           borderRadius: '10.6755px',
           transition: 'background 0.2s ease',
@@ -54,11 +53,9 @@ export default function SendButton({ onSend }: SendButtonProps) {
         alt="Send"
         style={{
           position: 'absolute',
-          left: isMobile ? '50%' : '31.54%',
-          right: isMobile ? 'auto' : '30.72%',
-          top: isMobile ? '50%' : '30.68%',
-          bottom: isMobile ? 'auto' : '32.12%',
-          transform: isMobile ? 'translate(-50%, -50%)' : 'none',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
           width: isMobile ? '20px' : '18px',
           height: isMobile ? '20px' : '18px',
         }}

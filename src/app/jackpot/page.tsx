@@ -19,6 +19,13 @@ import { Jackpot } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useSocket } from '@/context/SocketContext';
 
+const fetchActiveJackpot = async (): Promise<Jackpot | null> => {
+  const response = await fetch('http://localhost:3001/jackpot/active', { cache: 'no-store' });
+  if (!response.ok) throw new Error('Unable to load jackpot');
+  const data = await response.json();
+  return data.jackpot;
+};
+
 export default function JackpotPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -35,13 +42,9 @@ export default function JackpotPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('http://localhost:3001/jackpot/active', { cache: 'no-store' })
-      .then((response) => {
-        if (!response.ok) throw new Error('Unable to load jackpot');
-        return response.json();
-      })
-      .then((data) => {
-        if (!cancelled) setJackpot(data.jackpot);
+    fetchActiveJackpot()
+      .then((activeJackpot) => {
+        if (!cancelled) setJackpot(activeJackpot);
       })
       .catch((error) => console.error('Error loading jackpot:', error));
     const clock = window.setInterval(() => setNow(Date.now()), 1000);
@@ -54,17 +57,22 @@ export default function JackpotPage() {
   useEffect(() => {
     if (!socket) return;
     const update = ({ jackpot: nextJackpot }: { jackpot: Jackpot }) => setJackpot(nextJackpot);
+    const resolve = () => {
+      fetchActiveJackpot()
+        .then(setJackpot)
+        .catch((error) => console.error('Error refreshing resolved jackpot:', error));
+    };
     socket.on('jackpot-joined', update);
     socket.on('jackpot-timer-started', update);
     socket.on('jackpot-started', update);
-    socket.on('jackpot-completed', update);
-    socket.on('jackpot-refunded', update);
+    socket.on('jackpot-completed', resolve);
+    socket.on('jackpot-refunded', resolve);
     return () => {
       socket.off('jackpot-joined', update);
       socket.off('jackpot-timer-started', update);
       socket.off('jackpot-started', update);
-      socket.off('jackpot-completed', update);
-      socket.off('jackpot-refunded', update);
+      socket.off('jackpot-completed', resolve);
+      socket.off('jackpot-refunded', resolve);
     };
   }, [socket]);
 
@@ -76,6 +84,32 @@ export default function JackpotPage() {
   const timeRemaining = jackpot?.timerEndsAt
     ? Math.max(0, Math.ceil((new Date(jackpot.timerEndsAt).getTime() - now) / 1000))
     : null;
+
+  useEffect(() => {
+    if (!jackpot?._id || timeRemaining !== 0 || !['waiting', 'active'].includes(jackpot.status)) return;
+
+    let cancelled = false;
+    const syncResolvedRound = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/jackpot/${jackpot._id}`, { cache: 'no-store' });
+        if (!response.ok) return;
+        const data: { jackpot: Jackpot } = await response.json();
+        if (cancelled) return;
+        if (data.jackpot.status === 'completed' || data.jackpot.status === 'refunded') {
+          setJackpot(await fetchActiveJackpot());
+        }
+      } catch (error) {
+        console.error('Error checking expired jackpot:', error);
+      }
+    };
+
+    syncResolvedRound();
+    const poll = window.setInterval(syncResolvedRound, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(poll);
+    };
+  }, [jackpot?._id, jackpot?.status, timeRemaining]);
 
   const handleProfileClick = (username: string) => {
     console.log('Profile clicked:', username);

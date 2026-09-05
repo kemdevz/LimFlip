@@ -2,7 +2,11 @@ import WaitingCard from './WaitingCard';
 import { JackpotEntry } from '@/types';
 
 export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
-  const reelHalf = Array.from({ length: 14 }, (_, index) => entries[index]);
+  const reelHalf = Array<JackpotEntry | undefined>(14).fill(undefined);
+  const slotOrder = [2, 1, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  entries.slice(-14).reverse().forEach((entry, index) => {
+    reelHalf[slotOrder[index]] = entry;
+  });
   const reelSlots = [...reelHalf, ...reelHalf];
   const reelKey = entries.map((entry) => entry._id || `${entry.username}-${entry.joinedAt}`).join('|') || 'empty';
 

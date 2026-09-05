@@ -36,7 +36,7 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
         style={{
           width: isMobile ? 'calc(100% - 120px)' : '280px',
           height: isMobile ? '50px' : 'min(4vh, 46px)',
-          left: '9px',
+          left: isMobile ? '9px' : '0px',
           bottom: '10px',
         }}
       >
@@ -63,7 +63,7 @@ export default function ChatInput({ onMessageChange, message, onSend }: ChatInpu
             position: 'absolute',
             width: 'calc(100% - 60px)',
             height: '100%',
-            left: isMobile ? '15px' : 'min(8%, 23px)',
+            left: isMobile ? '15px' : '16px',
             top: '0px',
             fontFamily: 'Poppins, sans-serif',
             fontSize: isMobile ? '16px' : 'min(1.1vw, 14px)',

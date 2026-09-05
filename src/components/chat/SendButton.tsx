@@ -15,18 +15,18 @@ export default function SendButton({ onSend }: SendButtonProps) {
       style={{
         width: isMobile ? '50px' : 'min(4vh, 46px)',
         height: isMobile ? '50px' : 'min(4vh, 46px)',
-        left: isMobile ? 'calc(100% - 60px)' : 'calc(9px + 280px + 8px)',
+        left: isMobile ? 'calc(100% - 60px)' : '295px',
         bottom: '10px',
-        opacity: 0.44,
+        opacity: 1,
         cursor: 'pointer',
         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.opacity = '0.7';
+        e.currentTarget.style.opacity = '0.85';
         e.currentTarget.style.transform = 'scale(1.05)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = '0.44';
+        e.currentTarget.style.opacity = '1';
         e.currentTarget.style.transform = 'scale(1)';
       }}
       onMouseDown={(e) => {
@@ -44,7 +44,7 @@ export default function SendButton({ onSend }: SendButtonProps) {
           left: '0px',
           top: '0px',
           background: '#1F232F',
-          borderRadius: '10.6755px',
+          borderRadius: '7.76401px',
           transition: 'background 0.2s ease',
         }}
       />

@@ -1,12 +1,66 @@
 import WaitingCard from './WaitingCard';
 import { JackpotEntry } from '@/types';
 
-export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
-  const reelHalf = Array<JackpotEntry | undefined>(14).fill(undefined);
-  const slotOrder = [2, 1, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-  entries.slice(-14).reverse().forEach((entry, index) => {
-    reelHalf[slotOrder[index]] = entry;
+const REEL_SLOT_COUNT = 14;
+
+const getEntryUserId = (entry: JackpotEntry) =>
+  typeof entry.userId === 'string' ? entry.userId : entry.userId._id;
+
+const buildWeightedReel = (entries: JackpotEntry[]) => {
+  if (entries.length === 0) return Array<JackpotEntry | undefined>(REEL_SLOT_COUNT).fill(undefined);
+
+  const users = new Map<string, JackpotEntry>();
+  for (const entry of entries) {
+    const userId = getEntryUserId(entry);
+    const existing = users.get(userId);
+    users.set(userId, existing ? {
+      ...existing,
+      items: [...existing.items, ...entry.items],
+      totalValue: existing.totalValue + entry.totalValue,
+      joinedAt: entry.joinedAt,
+    } : { ...entry });
+  }
+
+  const entrants = Array.from(users.values());
+  const totalValue = entrants.reduce((sum, entry) => sum + entry.totalValue, 0);
+  if (totalValue <= 0) return Array<JackpotEntry | undefined>(REEL_SLOT_COUNT).fill(undefined);
+
+  const quotas = entrants.map((entry, index) => {
+    const exact = (entry.totalValue / totalValue) * REEL_SLOT_COUNT;
+    return { index, slots: Math.floor(exact), remainder: exact - Math.floor(exact) };
   });
+  let slotsLeft = REEL_SLOT_COUNT - quotas.reduce((sum, quota) => sum + quota.slots, 0);
+  [...quotas]
+    .sort((a, b) => b.remainder - a.remainder || a.index - b.index)
+    .forEach((quota) => {
+      if (slotsLeft > 0) {
+        quotas[quota.index].slots += 1;
+        slotsLeft -= 1;
+      }
+    });
+
+  const weighted = quotas.map((quota) => ({
+    entry: entrants[quota.index],
+    weight: quota.slots,
+    current: 0,
+  }));
+  const reel: JackpotEntry[] = [];
+  for (let slot = 0; slot < REEL_SLOT_COUNT; slot += 1) {
+    weighted.forEach((candidate) => { candidate.current += candidate.weight; });
+    const winner = weighted.reduce((best, candidate) => candidate.current > best.current ? candidate : best);
+    reel.push(winner.entry);
+    winner.current -= REEL_SLOT_COUNT;
+  }
+
+  const newestUserId = getEntryUserId(entries[entries.length - 1]);
+  const newestIndex = reel.findIndex((entry) => getEntryUserId(entry) === newestUserId);
+  if (newestIndex < 0) return reel;
+  const rotation = (newestIndex - 2 + REEL_SLOT_COUNT) % REEL_SLOT_COUNT;
+  return [...reel.slice(rotation), ...reel.slice(0, rotation)];
+};
+
+export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
+  const reelHalf = buildWeightedReel(entries);
   const reelSlots = [...reelHalf, ...reelHalf];
   const reelKey = entries.map((entry) => entry._id || `${entry.username}-${entry.joinedAt}`).join('|') || 'empty';
 

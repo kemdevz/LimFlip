@@ -89,7 +89,7 @@ export default function GiveawayCard({ giveaway, onJoin }: GiveawayCardProps) {
         width: isMobile ? 'calc(100% - 20px)' : '331px',
         height: isMobile ? '140px' : '152px',
         left: isMobile ? '10px' : '10px',
-        top: isMobile ? '0px' : '186px',
+        top: isMobile ? '0px' : 'calc(var(--content-top) + 54px)',
         overflow: 'hidden',
       }}
     >

@@ -139,7 +139,7 @@ export default function JackpotPage() {
               userChance={userChance}
               timeRemaining={timeRemaining}
             />
-            <JackpotContainer entries={jackpot?.entries || []} status={jackpot?.status} />
+            <JackpotContainer entries={jackpot?.entries || []} />
             <JackpotWheel jackpot={jackpot} onJackpotJoined={setJackpot} />
           </div>
         </div>

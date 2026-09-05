@@ -1,13 +1,7 @@
 import WaitingCard from './WaitingCard';
 import { JackpotEntry } from '@/types';
 
-interface JackpotContainerProps {
-  entries: JackpotEntry[];
-  status?: 'waiting' | 'active' | 'completed' | 'refunded';
-}
-
-export default function JackpotContainer({ entries, status }: JackpotContainerProps) {
-  const shouldSpin = status === 'active' || status === 'completed';
+export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
   return (
     <div
       style={{
@@ -104,12 +98,12 @@ export default function JackpotContainer({ entries, status }: JackpotContainerPr
             display: 'flex',
             gap: '16px',
             width: 'max-content',
-            animation: shouldSpin ? 'scrollRight 10s cubic-bezier(0.12, 0.75, 0.15, 1) forwards' : 'none',
+            animation: 'scrollRight 30s linear infinite',
           }}
         >
           {Array.from({ length: 28 }, (_, index) => (
             <WaitingCard
-              key={`jackpot-slot-${index}`}
+              key={entries[index]?._id || `waiting-${index}`}
               entry={entries[index]}
             />
           ))}

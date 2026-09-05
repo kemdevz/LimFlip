@@ -234,7 +234,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                           fontWeight: 600,
                           fontSize: '17px',
                           lineHeight: '24px',
-                          color: '#286DFF',
+                          color: '#C77DFF',
                         }}
                       >
                         {item.badge}
@@ -252,11 +252,11 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
             <>
               {!isMobile && (
                 <>
-                  <button type="button" onClick={() => onSellItemsClick && onSellItemsClick()} style={{ width: '126px', height: '44px', background: '#0276FF', borderRadius: '12px', border: 'none', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <button type="button" onClick={() => onSellItemsClick && onSellItemsClick()} style={{ width: '126px', height: '44px', background: '#C77DFF', borderRadius: '12px', border: 'none', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ position: 'absolute', width: '23px', height: '23px', left: '13px', top: '10px', background: '#D9D9D9', borderRadius: '37px' }}>
                       <svg width="16.56" height="17.48" viewBox="0 0 16.56 17.48" fill="none" style={{ position: 'absolute', left: '2.76px', top: '2.76px', transform: 'rotate(-90deg)' }}>
-                        <path d="M3.65 8.74L12.91 8.74" stroke="#006EFF" strokeWidth="2" />
-                        <path d="M8.28 14.07L13.61 8.74L8.28 3.41" stroke="#006EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3.65 8.74L12.91 8.74" stroke="#A855F7" strokeWidth="2" />
+                        <path d="M8.28 14.07L13.61 8.74L8.28 3.41" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <span style={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '14px', color: '#FFFFFF', position: 'absolute', left: '43.73px', top: '11px' }}>
@@ -279,7 +279,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                           top: 0,
                           width: '115px',
                           height: '44px',
-                          background: '#0276FF',
+                          background: '#C77DFF',
                           borderRadius: '0 12px 12px 0',
                           display: 'flex',
                           alignItems: 'center',
@@ -410,7 +410,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                           fontWeight: 500,
                           fontSize: '13px',
                           lineHeight: '20px',
-                          color: pathname === '/market' ? '#0276FF' : '#FFFFFF',
+                          color: pathname === '/market' ? '#C77DFF' : '#FFFFFF',
                           cursor: 'pointer',
                           flex: 'none',
                           order: 1,
@@ -473,8 +473,8 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
                         }}
                       >
                         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                          <path d="M6.5 2.5V10.5" stroke="#006EFF" strokeWidth="2" strokeLinecap="round" />
-                          <path d="M3.5 7.5L6.5 10.5L9.5 7.5" stroke="#006EFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M6.5 2.5V10.5" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M3.5 7.5L6.5 10.5L9.5 7.5" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </div>
                       <span
@@ -506,7 +506,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
               style={{
                 height: isMobile ? '36px' : '44px',
                 padding: isMobile ? '0 14px' : '0 24px',
-                background: '#0276FF',
+                background: '#C77DFF',
                 borderRadius: '12px',
                 border: 'none',
                 cursor: 'pointer',
@@ -521,6 +521,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
           )}
           
           
+          {user && (
           <div style={{ position: 'relative', width: '45px', height: '45px', marginLeft: '8px' }}>
             <div 
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -537,6 +538,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
             </div>
             {/* <Notifications isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} /> */}
           </div>
+          )}
         </div>
       </div>
 
@@ -548,7 +550,7 @@ export default function Navbar({ onSignUpClick, onLogInClick, onCoinflipClick, o
             height: '4px',
             left: `${underlineLeft}px`,
             bottom: 0,
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '26px 26px 0 0',
             transition: 'left 0.3s ease-out, width 0.3s ease-out',
           }}

@@ -37,7 +37,7 @@ export default function JackpotStats() {
             height: '112px',
             left: '-3px',
             top: '-2px',
-            border: '1px solid rgba(0, 77, 179, 0.26)',
+            border: '1px solid rgba(168, 85, 247, 0.26)',
             borderRadius: '15px',
             zIndex: 0,
           }}
@@ -74,7 +74,7 @@ export default function JackpotStats() {
               height: '97px',
               right: '1px',
               top: '1px',
-              background: 'linear-gradient(270deg, rgba(0, 110, 255, 0.15) 0%, rgba(0, 110, 255, 0) 100%), url(/assets/jackpot/background.png), #191D29',
+              background: 'linear-gradient(270deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0) 100%), url(/assets/jackpot/background.png), #191D29',
               backgroundSize: 'cover, cover',
               backgroundPosition: 'center, center',
               backgroundBlendMode: 'normal, luminosity, normal',
@@ -117,7 +117,7 @@ export default function JackpotStats() {
                 fontSize: '24px',
                 lineHeight: '35px',
                 textAlign: 'center',
-                color: '#0276FF',
+                color: '#C77DFF',
               }}
             >
               B$48.3K

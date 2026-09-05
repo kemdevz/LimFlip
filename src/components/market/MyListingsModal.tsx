@@ -377,7 +377,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            Selected: <span style={{ color: '#006EFF' }}>{formatAmount(totalSelectedAmount)}</span>
+            Selected: <span style={{ color: '#A855F7' }}>{formatAmount(totalSelectedAmount)}</span>
           </span>
           <span
             style={{
@@ -391,7 +391,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               color: '#FFFFFF',
             }}
           >
-            Inventory Value: <span style={{ color: '#006EFF' }}>{formatAmount(inventory?.totalValue || 0)}</span>
+            Inventory Value: <span style={{ color: '#A855F7' }}>{formatAmount(inventory?.totalValue || 0)}</span>
           </span>
         </div>
 
@@ -440,7 +440,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
                       height: '203.81px',
                       left: '0px',
                       top: '0px',
-                      border: '1px solid #006EFF',
+                      border: '1px solid #A855F7',
                       borderRadius: '7.91501px',
                       zIndex: 10,
                     }}
@@ -636,7 +636,7 @@ export default function MyListingsModal({ isOpen, onClose }: MyListingsModalProp
               height: '50px',
               left: '0px',
               top: '0px',
-              background: isListing ? '#404763' : '#006EFF',
+              background: isListing ? '#404763' : '#A855F7',
               borderRadius: '15px',
               cursor: isListing ? 'not-allowed' : 'pointer',
             }}

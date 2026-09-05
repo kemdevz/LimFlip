@@ -59,7 +59,7 @@ export default function WaitingCard() {
             height: '34px',
             left: '44px',
             top: '227px',
-            background: '#0276FF',
+            background: '#C77DFF',
             opacity: 0.44,
             filter: 'blur(49.5px)',
             zIndex: 1,

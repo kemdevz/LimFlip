@@ -319,7 +319,7 @@ export default function HistoryTable() {
                 gap: '10px',
                 width: '58px',
                 height: '32px',
-                background: 'rgba(2, 118, 255, 0.11)',
+                background: 'rgba(199, 125, 255, 0.11)',
                 borderRadius: '24px',
               }}
             >
@@ -330,7 +330,7 @@ export default function HistoryTable() {
                   fontWeight: 600,
                   fontSize: '15px',
                   lineHeight: '16px',
-                  color: '#0276FF',
+                  color: '#C77DFF',
                 }}
               >
                 {index % 2 === 1 ? '0.00x' : '2.00x'}
@@ -367,7 +367,7 @@ export default function HistoryTable() {
                 fontWeight: 600,
                 fontSize: '15px',
                 lineHeight: '16px',
-                color: '#0276FF',
+                color: '#C77DFF',
               }}
             >
               160.00

@@ -97,7 +97,7 @@ export default function JackpotWarningModal({ onContinue }: JackpotWarningModalP
           style={{
             width: '100%',
             height: '44px',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '11px',
             border: 'none',
             fontFamily: 'Poppins',
@@ -111,7 +111,7 @@ export default function JackpotWarningModal({ onContinue }: JackpotWarningModalP
             e.currentTarget.style.background = '#0056CC';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#0276FF';
+            e.currentTarget.style.background = '#C77DFF';
           }}
         >
           Continue

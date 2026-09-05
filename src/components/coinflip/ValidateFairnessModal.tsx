@@ -356,7 +356,7 @@ const ValidateFairnessModal: React.FC<ValidateFairnessModalProps> = ({ isOpen, o
               height: '53px',
               left: '0px',
               top: '-0.21px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '15px',
               cursor: 'pointer',
             }}

@@ -360,8 +360,8 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                   <path d="M9.5 2C5.26205 1.99984 1.99996 5.37499 2 9.50002C2.00005 13.325 5.03178 17 9.5 17C13.6568 17 17 13.625 17 9.50002" stroke="url(#paint0_linear)" strokeWidth="3" strokeLinecap="round"/>
                   <defs>
                     <linearGradient id="paint0_linear" x1="9.5" y1="18.25" x2="17" y2="17" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#1983FF"/>
-                      <stop offset="1" stopColor="#1983FF" stopOpacity="0"/>
+                      <stop stopColor="#C77DFF"/>
+                      <stop offset="1" stopColor="#C77DFF" stopOpacity="0"/>
                     </linearGradient>
                   </defs>
                 </svg>
@@ -698,7 +698,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                           fontWeight: 600,
                           fontSize: '13px',
                           lineHeight: '13px',
-                          color: '#006EFF',
+                          color: '#A855F7',
                           whiteSpace: 'nowrap',
                         }}
                       >
@@ -761,7 +761,7 @@ export default function CoinflipViewModal({ isOpen, onClose, game }: CoinflipVie
                           fontWeight: 600,
                           fontSize: '13px',
                           lineHeight: '13px',
-                          color: '#006EFF',
+                          color: '#A855F7',
                           whiteSpace: 'nowrap',
                         }}
                       >
@@ -1182,7 +1182,7 @@ color: '#FFFFFF',
                 height: '65px',
                 left: '0px',
                 top: '-90px',
-                background: 'rgba(2, 118, 255, 0.07)',
+                background: 'rgba(199, 125, 255, 0.07)',
                 filter: 'blur(45.65px)',
                 borderRadius: '66px',
               }}
@@ -1218,7 +1218,7 @@ color: '#FFFFFF',
                 height: '65px',
                 left: '0px',
                 top: '-180px',
-                background: 'rgba(2, 118, 255, 0.07)',
+                background: 'rgba(199, 125, 255, 0.07)',
                 filter: 'blur(45.65px)',
                 borderRadius: '66px',
               }}

@@ -239,7 +239,7 @@ export default function Subnavbar({ onTermsClick, onSupportClick, onProvablyFair
               fontWeight: 500,
               fontSize: '13px',
               lineHeight: '20px',
-              color: '#006EFF',
+              color: '#A855F7',
               cursor: 'pointer',
             }}
           >

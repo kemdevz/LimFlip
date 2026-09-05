@@ -258,7 +258,7 @@ export default function ProfileModal({
         <div className="w-[1062px] h-[701px] left-0 top-0 absolute rounded-2xl border border-zinc-800" style={{ background: '#191D29' }} />
 
         
-        <div className="w-[124px] h-[36px] left-[824px] top-[100px] absolute rounded-[15px]" style={{ background: '#0276FF' }}>
+        <div className="w-[124px] h-[36px] left-[824px] top-[100px] absolute rounded-[15px]" style={{ background: '#C77DFF' }}>
           <div className="w-[67px] h-[19px] left-[28px] top-[8px] absolute justify-start text-white text-[15px] font-semibold font-['Poppins'] leading-[22px]">Send Tip</div>
         </div>
 
@@ -341,7 +341,7 @@ export default function ProfileModal({
             </svg>
             
             <svg className="w-[840px] h-[201px] left-0 top-0 absolute" width="840" height="201" viewBox="0 0 840 201" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d={generateChartPath()} stroke="#0276FF" strokeWidth="3" strokeLinecap="round"/>
+              <path d={generateChartPath()} stroke="#C77DFF" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           </div>
           

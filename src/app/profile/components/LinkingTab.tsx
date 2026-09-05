@@ -95,7 +95,7 @@ export default function LinkingTab() {
             height: '47px',
             left: '310px',
             top: '10px',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '17px',
           }}
         >
@@ -116,7 +116,7 @@ export default function LinkingTab() {
                 height: '31px',
                 left: '0px',
                 top: '0px',
-                background: 'rgba(82, 162, 255, 0.57)',
+                background: 'rgba(199, 125, 255, 0.57)',
                 borderRadius: '11px',
               }}
             />
@@ -416,7 +416,7 @@ export default function LinkingTab() {
             height: '47px',
             left: '310px',
             top: '10px',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '17px',
           }}
         >
@@ -437,7 +437,7 @@ export default function LinkingTab() {
                 height: '31px',
                 left: '0px',
                 top: '0px',
-                background: 'rgba(82, 162, 255, 0.57)',
+                background: 'rgba(199, 125, 255, 0.57)',
                 borderRadius: '11px',
               }}
             />

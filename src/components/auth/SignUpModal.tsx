@@ -440,7 +440,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     height: '54px',
                     left: isMobile ? '0' : '0px',
                     top: isMobile ? '0' : '100px',
-                    background: loading ? '#1a4d8c' : '#0276FF',
+                    background: loading ? '#1a4d8c' : '#C77DFF',
                     borderRadius: '15px',
                     border: 'none',
                     cursor: loading ? 'not-allowed' : 'pointer',
@@ -609,7 +609,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                   textAlign: isMobile ? 'center' : 'left',
                 }}
               >
-                By registering in your recognize that you are in agreement to our <span style={{ color: '#0276FF' }}>Terms of Service</span> as-well as being over the age of <span style={{ color: '#0276FF' }}>18+</span>.
+                By registering in your recognize that you are in agreement to our <span style={{ color: '#C77DFF' }}>Terms of Service</span> as-well as being over the age of <span style={{ color: '#C77DFF' }}>18+</span>.
               </span>
           </div>
         </>
@@ -727,7 +727,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                             fontWeight: 600,
                             fontSize: isMobile ? '14px' : '16px',
                             lineHeight: '18px',
-                            color: '#006EFF',
+                            color: '#A855F7',
                             flex: 'none',
                             order: 1,
                             alignSelf: 'stretch',
@@ -915,7 +915,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                       height: isMobile ? 'auto' : '54px',
                       left: isMobile ? '0' : '294px',
                       top: isMobile ? '0' : '388px',
-                      background: '#0276FF',
+                      background: '#C77DFF',
                       borderRadius: '15px',
                       marginTop: isMobile ? '10px' : '0',
                     }}
@@ -1072,7 +1072,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 style={{
                   width: '27px',
                   height: '27px',
-                  background: 'rgba(2, 118, 255, 0.24)',
+                  background: 'rgba(199, 125, 255, 0.24)',
                   borderRadius: '77px',
                   flex: 'none',
                   order: 0,
@@ -1095,7 +1095,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     fontWeight: 600,
                     fontSize: '15px',
                     lineHeight: '22px',
-                    color: '#0276FF',
+                    color: '#C77DFF',
                   }}
                 >
                   1
@@ -1106,7 +1106,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 style={{
                   width: '27px',
                   height: '27px',
-                  background: 'rgba(2, 118, 255, 0.24)',
+                  background: 'rgba(199, 125, 255, 0.24)',
                   borderRadius: '77px',
                   flex: 'none',
                   order: 1,
@@ -1129,7 +1129,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     fontWeight: 600,
                     fontSize: '15px',
                     lineHeight: '22px',
-                    color: '#0276FF',
+                    color: '#C77DFF',
                   }}
                 >
                   2
@@ -1140,7 +1140,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 style={{
                   width: '27px',
                   height: '27px',
-                  background: 'rgba(2, 118, 255, 0.24)',
+                  background: 'rgba(199, 125, 255, 0.24)',
                   borderRadius: '77px',
                   flex: 'none',
                   order: 2,
@@ -1163,7 +1163,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                     fontWeight: 600,
                     fontSize: '15px',
                     lineHeight: '22px',
-                    color: '#0276FF',
+                    color: '#C77DFF',
                   }}
                 >
                   3
@@ -1343,7 +1343,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 fontWeight: 600,
                 fontSize: isMobile ? '11px' : '12px',
                 lineHeight: '18px',
-                color: '#0276FF',
+                color: '#C77DFF',
               }}
             >
               Open your Roblox Profile and paste the words into your bio
@@ -1445,7 +1445,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
               height: isMobile ? 'auto' : '54px',
               left: isMobile ? '0' : '294px',
               top: isMobile ? '0' : '413px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '15px',
               marginTop: isMobile ? '10px' : '0',
             }}

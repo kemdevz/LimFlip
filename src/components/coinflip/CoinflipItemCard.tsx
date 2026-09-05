@@ -131,7 +131,7 @@ export default function CoinflipItemCard({ imageSrc, itemName = 'Gingerscope', i
           fontWeight: '600',
           fontSize: '13px',
           lineHeight: '20px',
-          color: '#006EFF',
+          color: '#A855F7',
         }}
       >
         {formatValue(itemValue)}

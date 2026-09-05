@@ -172,7 +172,7 @@ export default function MessageChat({
                   fontWeight: 600,
                   fontSize: '16px',
                   lineHeight: '24px',
-                  color: role === 'Owner' ? '#FFD700' : role === 'Moderator' ? '#FF4444' : isWhale ? '#006EFF' : '#FFFFFF',
+                  color: role === 'Owner' ? '#FFD700' : role === 'Moderator' ? '#FF4444' : isWhale ? '#A855F7' : '#FFFFFF',
                   flex: 'none',
                   order: 0,
                   flexGrow: 0,

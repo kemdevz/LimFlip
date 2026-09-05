@@ -112,7 +112,7 @@ export default function JackpotWheel() {
             right: '0%',
             top: '0%',
             bottom: '0%',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '15px',
           }}
         />
@@ -198,8 +198,8 @@ export default function JackpotWheel() {
           <path d="M9.5 2C5.26205 1.99984 1.99996 5.37499 2 9.50002C2.00005 13.325 5.03178 17 9.5 17C13.6568 17 17 13.625 17 9.50002" stroke="url(#paint0_linear)" strokeWidth="4" strokeLinecap="round"/>
           <defs>
             <linearGradient id="paint0_linear" x1="9.5" y1="18.25" x2="17" y2="17" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#1983FF"/>
-              <stop offset="1" stopColor="#1983FF" stopOpacity="0"/>
+              <stop stopColor="#C77DFF"/>
+              <stop offset="1" stopColor="#C77DFF" stopOpacity="0"/>
             </linearGradient>
           </defs>
         </svg>
@@ -210,7 +210,7 @@ export default function JackpotWheel() {
             fontWeight: '600',
             fontSize: '20px',
             lineHeight: '30px',
-            background: 'linear-gradient(90deg, #0276FF 0%, #308FFF 100%)',
+            background: 'linear-gradient(90deg, #C77DFF 0%, #308FFF 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -354,7 +354,7 @@ export default function JackpotWheel() {
                 fontWeight: '600',
                 fontSize: '15px',
                 lineHeight: '22px',
-                background: 'linear-gradient(178.3deg, #DCE5FF -96.52%, #999999 104.91%)',
+                background: 'linear-gradient(178.3deg, #E5D5FF -96.52%, #999999 104.91%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -519,7 +519,7 @@ export default function JackpotWheel() {
                 fontWeight: '700',
                 fontSize: '20px',
                 lineHeight: '30px',
-                color: '#0276FF',
+                color: '#C77DFF',
               }}
             >
               B$466k
@@ -617,7 +617,7 @@ export default function JackpotWheel() {
                 fontSize: '16px',
                 lineHeight: '24px',
                 textAlign: 'center',
-                background: 'linear-gradient(178.3deg, #DCE5FF -96.52%, #999999 104.91%), #0276FF',
+                background: 'linear-gradient(178.3deg, #E5D5FF -96.52%, #999999 104.91%), #C77DFF',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -652,7 +652,7 @@ export default function JackpotWheel() {
                   fontWeight: '700',
                   fontSize: '20px',
                   lineHeight: '30px',
-                  color: '#0276FF',
+                  color: '#C77DFF',
                 }}
               >
                 B$466k

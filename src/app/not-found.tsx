@@ -37,7 +37,7 @@ export default function NotFound() {
           height: '372px',
           left: '1652px',
           bottom: '702px',
-          background: '#006EFF',
+          background: '#A855F7',
           opacity: '0.08',
           filter: 'blur(114px)',
           borderRadius: '344.22px',
@@ -50,7 +50,7 @@ export default function NotFound() {
           height: '372px',
           left: '241px',
           bottom: '702px',
-          background: '#006EFF',
+          background: '#A855F7',
           opacity: '0.08',
           filter: 'blur(114px)',
           borderRadius: '344.22px',
@@ -139,7 +139,7 @@ export default function NotFound() {
               height: '36px',
               left: '0px',
               top: '0px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '15px',
             }}
           />

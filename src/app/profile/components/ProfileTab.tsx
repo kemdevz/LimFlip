@@ -151,7 +151,7 @@ export default function ProfileTab() {
                 style={{
                   width: '73px',
                   height: '34px',
-                  background: '#0276FF',
+                  background: '#C77DFF',
                   borderRadius: '15px',
                   display: 'flex',
                   alignItems: 'center',
@@ -351,7 +351,7 @@ export default function ProfileTab() {
           style={{
             width: '100%',
             height: '57px',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
@@ -427,7 +427,7 @@ export default function ProfileTab() {
             style={{
               width: '100%',
               height: '57px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '15px',
               display: 'flex',
               alignItems: 'center',

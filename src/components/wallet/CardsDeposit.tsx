@@ -331,7 +331,7 @@ export default function CardsDeposit({ onClose }: { onClose: () => void }) {
           height: '54px',
           left: '28px',
           top: '229px',
-          background: '#0276FF',
+          background: '#C77DFF',
           borderRadius: '15px',
           cursor: 'pointer',
         }}

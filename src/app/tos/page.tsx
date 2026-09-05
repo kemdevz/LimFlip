@@ -33,7 +33,7 @@ export default function TOSPage() {
           height: '704px',
           left: '241px',
           bottom: '702px',
-          background: '#006EFF',
+          background: '#A855F7',
           opacity: '0.08',
           filter: 'blur(114px)',
           borderRadius: '344.22px',
@@ -73,13 +73,13 @@ export default function TOSPage() {
             lineHeight: '30px',
           }}
         >
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Welcome to MM2Stake! This Privacy Policy (the "Policies") govern your privacy of the MM2Stake website and its related services (the "Service"). By accessing or using our Service, you agree to comply with these Policies. Please read them carefully.
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           Last Updated: 9/04/2024
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Information We Collect
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
@@ -97,37 +97,37 @@ export default function TOSPage() {
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           Third-Party Data: We may collect information from third-party sources, such as social media platforms, if you allow us to do so.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           How We Use Your Information
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           We may use your personal information for the following purposes: To provide and improve our services. To personalize your experience. To communicate with you. To process transactions. For marketing purposes. For analytics and research. To comply with legal obligations.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Data Usage for Marketing Purposes
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           We may use your information to tailor advertisements to your interests and preferences, display ads to you on other websites based on your previous interactions with our services, and contact you with marketing communications. You have the right to opt out of your marketing communications at any time.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Your Rights
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           You have the right to: Access and correct your personal information. Request the deletion of your personal information. Opt out of your marketing communications. Object to certain processing of your personal information. Request a copy of your personal information in a structured, commonly used, and machine-readable format. Withdraw your consent to data processing.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Data Security
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           We implement reasonable security measures to protect your personal information from unauthorized access, disclosure, alteration, or destruction.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Children's Privacy
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>
           MM2Stake is for mature audiences. We do not knowingly collect personal information or allow individuals under the age of 18. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us.
         </p>
-        <p style={{ marginBottom: '20px', color: '#0276FF' }}>
+        <p style={{ marginBottom: '20px', color: '#C77DFF' }}>
           Contact
         </p>
         <p style={{ marginBottom: '20px', color: '#FFFFFF' }}>

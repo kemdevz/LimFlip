@@ -19,7 +19,7 @@ export default function PlayerCard() {
           top: '0px',
           border: '3px solid transparent',
           borderRadius: '15px',
-          background: 'linear-gradient(to bottom, #0075FF 66%, #000000 100%) border-box',
+          background: 'linear-gradient(to bottom, #C77DFF 66%, #000000 100%) border-box',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -59,7 +59,7 @@ export default function PlayerCard() {
             height: '34px',
             left: '44px',
             top: '227px',
-            background: '#0276FF',
+            background: '#C77DFF',
             opacity: 0.44,
             filter: 'blur(49.5px)',
             zIndex: 1,

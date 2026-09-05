@@ -395,7 +395,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     fontSize: '15px',
                     lineHeight: '22px',
                     color: '#FFFFFF',
-                    textShadow: '0px 0px 28.9px rgba(47, 143, 255, 0.25)',
+                    textShadow: '0px 0px 28.9px rgba(199, 125, 255, 0.25)',
                   }}
                 >
                   bash
@@ -629,7 +629,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#0276FF',
+                    backgroundColor: '#C77DFF',
                     borderRadius: '12px',
                     padding: '10px 15px',
                     boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
@@ -792,7 +792,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#0276FF',
+                    backgroundColor: '#C77DFF',
                     borderRadius: '15px',
                     padding: '12px 19px',
                     boxShadow: '0px 8.08px 17px rgba(0, 0, 0, 0.12)',
@@ -869,10 +869,10 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   position: 'relative',
                   backgroundColor: '#191D29',
                   boxShadow: selectedItems.has(listing._id) 
-                    ? 'inset 0px 4px 111.6px rgba(2, 118, 255, 0.2)' 
+                    ? 'inset 0px 4px 111.6px rgba(199, 125, 255, 0.2)' 
                     : '0px 4px 56.6px rgba(0, 0, 0, 0.035)',
                   borderRadius: '15px',
-                  border: selectedItems.has(listing._id) ? '1px solid #0276FF' : 'none',
+                  border: selectedItems.has(listing._id) ? '1px solid #C77DFF' : 'none',
                   cursor: 'pointer',
                 }}
               >
@@ -1007,7 +1007,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                       fontSize: '20px',
                       lineHeight: '30px',
                       color: '#FFFFFF',
-                      textShadow: '0px 0px 28.9px rgba(47, 143, 255, 0.25)',
+                      textShadow: '0px 0px 28.9px rgba(199, 125, 255, 0.25)',
                     }}
                   >
                     bash
@@ -1069,7 +1069,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   fontWeight: '600',
                   fontSize: '13px',
                   lineHeight: '20px',
-                  color: '#0276FF',
+                  color: '#C77DFF',
                 }}
               >
                 {listing.item.value > 0 ? `${(listing.price / listing.item.value * 1000).toFixed(2)}/1k` : ''}
@@ -1083,7 +1083,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   height: '6px',
                   left: '64px',
                   top: '226px',
-                  background: '#0276FF',
+                  background: '#C77DFF',
                   borderRadius: '4px 4px 0px 0px',
                   transform: 'matrix(-1, 0, 0, 1, 0, 0)',
                 }}
@@ -1106,7 +1106,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     height: '32px',
                     left: '6px',
                     top: '6.5px',
-                    background: '#0276FF',
+                    background: '#C77DFF',
                     borderRadius: '9px',
                     cursor: 'pointer',
                     display: 'flex',
@@ -1548,7 +1548,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     fontSize: '14px',
                     lineHeight: '21px',
                     letterSpacing: '-0.02em',
-                    color: '#0276FF',
+                    color: '#C77DFF',
                   }}
                 >
                   Items In Cart
@@ -1564,7 +1564,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                     fontSize: '14px',
                     lineHeight: '21px',
                     letterSpacing: '-0.02em',
-                    color: '#0276FF',
+                    color: '#C77DFF',
                   }}
                 >
                   {cartItems.length}
@@ -1638,7 +1638,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                 gap: '9.16px',
                 width: isMobile ? '100%' : '314px',
                 height: isMobile ? '50px' : '40px',
-                backgroundColor: isPurchasing || cartItems.length === 0 ? '#404763' : '#0276FF',
+                backgroundColor: isPurchasing || cartItems.length === 0 ? '#404763' : '#C77DFF',
                 boxShadow: '0px 10.9967px 23.9177px rgba(0, 0, 0, 0.22)',
                 borderRadius: '15px',
                 border: 'none',
@@ -1723,7 +1723,7 @@ export default function MarketplaceContent({ onMyListingsClick }: MarketplaceCon
                   fontWeight: '600',
                   fontSize: '16px',
                   lineHeight: '24px',
-                  color: cartTotal > userBalance ? '#EF4444' : '#006EFF',
+                  color: cartTotal > userBalance ? '#EF4444' : '#A855F7',
                 }}
               >
                 ${userBalance.toFixed(2)}

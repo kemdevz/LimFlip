@@ -443,7 +443,7 @@ export default function CryptoDepositModal({ isOpen, onClose, cryptoType = 'BTC'
                 height: '34px',
                 left: '54px',
                 top: '0px',
-                background: '#0276FF',
+                background: '#C77DFF',
                 borderRadius: '0px 15px 15px 0px',
                 cursor: 'pointer',
               }}
@@ -537,7 +537,7 @@ export default function CryptoDepositModal({ isOpen, onClose, cryptoType = 'BTC'
               height: '118px',
               left: '540.95px',
               top: '7px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '5px',
             }}
           />

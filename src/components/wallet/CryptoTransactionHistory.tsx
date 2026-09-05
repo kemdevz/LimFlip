@@ -130,7 +130,7 @@ export default function CryptoTransactionHistory({ cryptoType = 'BTC' }: CryptoT
               style={{
                 width: '20px',
                 height: '16px',
-                background: '#0276FF',
+                background: '#C77DFF',
               }}
             />
             <span
@@ -211,7 +211,7 @@ export default function CryptoTransactionHistory({ cryptoType = 'BTC' }: CryptoT
               height: '34px',
               right: '4px',
               top: '4px',
-              background: tx.status === 'Pending' ? '#0276FF' : tx.status === 'Completed' ? '#4CAF50' : '#FF6B6B',
+              background: tx.status === 'Pending' ? '#C77DFF' : tx.status === 'Completed' ? '#4CAF50' : '#FF6B6B',
               borderRadius: '15px',
             }}
           >

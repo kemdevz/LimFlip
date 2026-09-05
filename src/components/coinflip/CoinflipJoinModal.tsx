@@ -243,7 +243,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
               flexGrow: 0,
             }}
           >
-            Selected: <span style={{ color: isValidBet ? '#006EFF' : '#EF4444' }}>{formatAmount(animatedAmount)}</span>
+            Selected: <span style={{ color: isValidBet ? '#A855F7' : '#EF4444' }}>{formatAmount(animatedAmount)}</span>
           </span>
           <span
             style={{
@@ -261,7 +261,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
               whiteSpace: 'nowrap',
             }}
           >
-            Target: <span style={{ color: '#006EFF' }}>{formatAmount(gameValue)}</span>
+            Target: <span style={{ color: '#A855F7' }}>{formatAmount(gameValue)}</span>
           </span>
           <span
             style={{
@@ -271,7 +271,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
               fontWeight: 600,
               fontSize: isMobile ? '14px' : '18px',
               lineHeight: '27px',
-              color: isValidBet ? '#006EFF' : '#EF4444',
+              color: isValidBet ? '#A855F7' : '#EF4444',
               flex: 'none',
               order: 2,
               flexGrow: 0,
@@ -530,7 +530,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
             height: '44px',
             left: isMobile ? '16px' : '875px',
             top: isMobile ? 'calc(100% - 60px)' : '638px',
-            background: isValidBet ? '#006EFF' : '#EF4444',
+            background: isValidBet ? '#A855F7' : '#EF4444',
             borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
@@ -714,7 +714,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
                 fontSize: '15px',
-                color: '#006EFF',
+                color: '#A855F7',
               }}
             >
               Balance: {formatAmount(user?.balance || 0)}
@@ -770,7 +770,7 @@ const CoinflipJoinModal: React.FC<CoinflipJoinModalProps> = ({ isOpen, onClose, 
                           height: isMobile ? 'auto' : '185px',
                           left: '0px',
                           top: '0px',
-                          border: '1px solid #006EFF',
+                          border: '1px solid #A855F7',
                           borderRadius: '7.91501px',
                           zIndex: 10,
                           transition: 'opacity 0.2s ease',

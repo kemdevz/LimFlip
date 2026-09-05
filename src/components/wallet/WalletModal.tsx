@@ -123,7 +123,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             >
               <path
                 d="M4.6 19.7251C3.335 19.7251 2.25208 19.2423 1.35125 18.2766C0.450417 17.3109 0 16.15 0 14.7939V4.93128C0 3.57518 0.450417 2.41427 1.35125 1.44856C2.25208 0.482855 3.335 0 4.6 0H18.4C19.665 0 20.7479 0.482855 21.6488 1.44856C22.5496 2.41427 23 3.57518 23 4.93128V14.7939C23 16.15 22.5496 17.3109 21.6488 18.2766C20.7479 19.2423 19.665 19.7251 18.4 19.7251H4.6ZM4.6 4.93128H18.4C18.8217 4.93128 19.2242 4.98265 19.6075 5.08539C19.9908 5.18812 20.355 5.3525 20.7 5.57851V4.93128C20.7 4.25323 20.475 3.67298 20.0249 3.19054C19.5749 2.7081 19.0333 2.46646 18.4 2.46564H4.6C3.9675 2.46564 3.42623 2.70727 2.9762 3.19054C2.52617 3.67381 2.30077 4.25405 2.3 4.93128V5.57851C2.645 5.3525 3.00917 5.18812 3.3925 5.08539C3.77583 4.98265 4.17833 4.93128 4.6 4.93128ZM2.4725 8.93795L15.2662 12.2666C15.4387 12.3077 15.6113 12.3077 15.7838 12.2666C15.9563 12.2255 16.1192 12.1433 16.2725 12.02L20.2687 8.44482C20.0579 8.13662 19.7896 7.88512 19.4637 7.69034C19.1379 7.49555 18.7833 7.39775 18.4 7.39693H4.6C4.10167 7.39693 3.66582 7.53582 3.29245 7.81362C2.91908 8.09142 2.64577 8.46619 2.4725 8.93795Z"
-                fill="#006EFF"
+                fill="#A855F7"
               />
             </svg>
             <span
@@ -508,7 +508,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   height: '34px',
                   left: '298px',
                   top: '1px',
-                  background: '#0276FF',
+                  background: '#C77DFF',
                   borderRadius: '0px 15px 15px 0px',
                   display: 'flex',
                   flexDirection: 'row',
@@ -1107,7 +1107,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       height: '34px',
                       left: '446px',
                       top: '0px',
-                      background: '#0276FF',
+                      background: '#C77DFF',
                       borderRadius: '0px 15px 15px 0px',
                       display: 'flex',
                       flexDirection: 'row',
@@ -1241,7 +1241,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                     height: '40px',
                     left: '28px',
                     top: '303px',
-                    background: '#0276FF',
+                    background: '#C77DFF',
                     borderRadius: '15px',
                     cursor: 'pointer',
                   }}
@@ -1299,7 +1299,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       height: '118px',
                       left: '540.95px',
                       top: '7px',
-                      background: '#0276FF',
+                      background: '#C77DFF',
                       borderRadius: '5px',
                     }}
                   />
@@ -1422,7 +1422,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   width: '100%',
                   marginTop: '20px',
                   padding: '14px',
-                  background: '#0276FF',
+                  background: '#C77DFF',
                   border: 'none',
                   borderRadius: '10px',
                   color: '#FFFFFF',
@@ -1716,7 +1716,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                   height: '54px',
                   left: '0px',
                   top: '0px',
-                  background: '#0276FF',
+                  background: '#C77DFF',
                   borderRadius: '15px',
                 }}
               />
@@ -2583,7 +2583,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                 left: '5px',
                 top: '4px',
                 background: 'url(/assets/wallet/giftcards.svg)',
-                filter: 'drop-shadow(0px 0px 41.8px rgba(2, 118, 255, 0.25))',
+                filter: 'drop-shadow(0px 0px 41.8px rgba(199, 125, 255, 0.25))',
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',

@@ -85,7 +85,7 @@ export default function ProfileHeader({ user, isMobile }: ProfileHeaderProps) {
               height: '51px',
               right: '0px',
               top: '26px',
-              background: '#0276FF',
+              background: '#C77DFF',
               borderRadius: '14px',
               display: 'flex',
               alignItems: 'center',

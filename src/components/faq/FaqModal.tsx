@@ -166,47 +166,47 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose }) => {
             }}
           >
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>What is MM2Stake?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>What is MM2Stake?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>MM2Stake is a provably fair gambling platform where you can play coinflip games and win Robux items.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>How do I deposit?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>How do I deposit?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>You can deposit through our supported payment methods including crypto, gift cards, and Roblox items. Go to the wallet section to see all options.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Is it safe to play?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Is it safe to play?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>Yes, all games are provably fair using cryptographic algorithms. You can verify the fairness of each game through our Verify Fairness feature.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>How old do I need to be?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>How old do I need to be?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>You must be at least 13 years old to use MM2Stake. Users under 18 should have parental supervision.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>How do I withdraw?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>How do I withdraw?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>Withdrawals are available through Roblox items or crypto. Go to the wallet section and click on withdraw to see available options.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>What is provably fair?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>What is provably fair?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>Provably fair means you can verify that each game's outcome was random and not manipulated. We use cryptographic hashes to ensure transparency.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>How do I contact support?</span>
-              <p style={{ marginTop: '8px', marginBottom: '0' }}>Join our Discord server at <span style={{ color: '#0276FF' }}>https://discord.gg/MM2Stake</span> or use our on-site support system for assistance.</p>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>How do I contact support?</span>
+              <p style={{ marginTop: '8px', marginBottom: '0' }}>Join our Discord server at <span style={{ color: '#C77DFF' }}>https://discord.gg/MM2Stake</span> or use our on-site support system for assistance.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Can I have multiple accounts?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Can I have multiple accounts?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>No, creating multiple accounts to abuse bonuses or promotions is strictly prohibited and may result in a permanent ban.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>What happens if I disconnect during a game?</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>What happens if I disconnect during a game?</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>If you disconnect, the game will continue and the outcome will be determined fairly. Your winnings will be credited to your account automatically.</p>
             </div>
           </div>

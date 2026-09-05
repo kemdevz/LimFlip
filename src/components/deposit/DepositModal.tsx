@@ -243,7 +243,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose }) => {
               style={{
                 width: '100%',
                 padding: '14px',
-                background: '#006EFF',
+                background: '#A855F7',
                 border: 'none',
                 borderRadius: '8px',
                 color: '#FFFFFF',

@@ -51,6 +51,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
   const [isMounted, setIsMounted] = useState(false);
   const [giveaway, setGiveaway] = useState<GiveawayData | undefined>();
   const [newMessageIds, setNewMessageIds] = useState<Set<string>>(new Set());
+  const messageIdCounter = useRef(0);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -114,10 +115,10 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       const response = await fetch('http://localhost:3001/messages/recent');
       const data = await response.json();
       if (Array.isArray(data)) {
-        setMessages(data);
+        setMessages(data.map((msg: Message) => ({ ...msg, _uid: messageIdCounter.current++ })));
         // Add all loaded messages to new message IDs for animation
         data.forEach((msg: Message, index: number) => {
-          const messageId = `${msg.username}-${msg.message}-${msg.time}`;
+          const messageId = `${msg.username}-${msg.message}-${msg.time}-${messageIdCounter.current - data.length + index}`;
           setNewMessageIds(prev => new Set(prev).add(messageId));
           
           // Remove from new messages after animation completes
@@ -163,9 +164,10 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
     if (!isMounted || !socket) return;
 
     socket.on('chat-message', (data: Message) => {
-      const messageId = `${data.username}-${data.message}-${data.time}`;
+      const uid = messageIdCounter.current++;
+      const messageId = `${data.username}-${data.message}-${data.time}-${uid}`;
       setNewMessageIds(prev => new Set(prev).add(messageId));
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => [...prev, { ...data, _uid: uid }]);
       
       // Remove from new messages after animation completes
       setTimeout(() => {
@@ -269,7 +271,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
             height: '91px',
             left: '-266px',
             top: '42px',
-            background: 'rgba(2, 118, 255, 0.12)',
+            background: 'rgba(199, 125, 255, 0.12)',
             filter: 'blur(25.4292px)',
             borderRadius: '36.7651px',
           }}
@@ -283,7 +285,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
             height: '91px',
             left: '243px',
             top: '-31px',
-            background: 'rgba(2, 118, 255, 0.12)',
+            background: 'rgba(199, 125, 255, 0.12)',
             filter: 'blur(25.4292px)',
             borderRadius: '36.7651px',
           }}
@@ -515,7 +517,7 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
       >
         <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '11px' }}>
           {messages.map((msg, index) => {
-            const messageId = `${msg.username}-${msg.message}-${msg.time}`;
+            const messageId = `${msg.username}-${msg.message}-${msg.time}-${msg._uid ?? index}`;
             const isNew = newMessageIds.has(messageId);
             return (
               <MessageChat

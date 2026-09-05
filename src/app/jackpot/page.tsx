@@ -89,48 +89,8 @@ export default function JackpotPage() {
             position: 'relative',
           }}
         >
-          {/* Coming Soon Overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-              backgroundColor: 'rgba(19, 22, 33, 0.9)',
-            }}
-          >
-            <div
-              style={{
-                textAlign: 'center',
-                color: '#FFFFFF',
-              }}
-            >
-              <h1
-                style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: isMobile ? '32px' : '48px',
-                  fontWeight: 700,
-                  marginBottom: '16px',
-                }}
-              >
-                Coming Soon
-              </h1>
-              <p
-                style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: isMobile ? '16px' : '20px',
-                  color: '#8B95A3',
-                }}
-              >
-                Jackpot is currently under development. Check back later!
-              </p>
-            </div>
-          </div>
-
-          {/* Original Components (hidden behind overlay) */}
-          <div style={{ visibility: 'hidden', pointerEvents: 'none' }}>
+          {/* Jackpot Components */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
             <JackpotStats />
             <JackpotContainer />
             <JackpotWheel />

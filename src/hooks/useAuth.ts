@@ -70,5 +70,6 @@ export const useAuth = () => {
     loading,
     error,
     fetchUser,
+    refresh: fetchUser,
   };
 };

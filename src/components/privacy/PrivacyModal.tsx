@@ -163,12 +163,12 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             }}
           >
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Welcome to MM2Stake!</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Welcome to MM2Stake!</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>This Privacy Policy governs your privacy of the MM2Stake website and its related services. By accessing or using our Service, you agree to comply with these Policies.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Information We Collect</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Information We Collect</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>We may collect the following types of personal information:</p>
               <ul style={{ marginTop: '8px', paddingLeft: '20px', marginBottom: '0' }}>
                 <li>Account Information: Information you provide when you create an account</li>
@@ -180,33 +180,33 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>How We Use Your Information</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>How We Use Your Information</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>We may use your personal information for: providing and improving services, personalizing your experience, communication, processing transactions, marketing, analytics, and legal compliance.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Data Usage for Marketing</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Data Usage for Marketing</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>We may use your information to tailor advertisements and marketing communications. You have the right to opt out at any time.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Your Rights</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Your Rights</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>You have the right to access, correct, delete, and opt out of marketing communications regarding your personal information.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Data Security</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Data Security</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>We implement reasonable security measures to protect your personal information from unauthorized access.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Children's Privacy</span>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Children's Privacy</span>
               <p style={{ marginTop: '8px', marginBottom: '0' }}>MM2Stake is for mature audiences. We do not knowingly collect personal information from individuals under 18.</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <span style={{ color: '#0276FF', fontWeight: 600 }}>Contact</span>
-              <p style={{ marginTop: '8px', marginBottom: '0' }}>For any inquiries, please contact us at <span style={{ color: '#0276FF' }}>https://discord.gg/MM2Stake</span> or through our on-site support system.</p>
+              <span style={{ color: '#C77DFF', fontWeight: 600 }}>Contact</span>
+              <p style={{ marginTop: '8px', marginBottom: '0' }}>For any inquiries, please contact us at <span style={{ color: '#C77DFF' }}>https://discord.gg/MM2Stake</span> or through our on-site support system.</p>
             </div>
           </div>
         </div>

@@ -94,7 +94,7 @@ function LoadingScreen({ isFadingOut }: { isFadingOut: boolean }) {
           position: 'absolute',
           width: '276px',
           height: '65px',
-          background: 'rgba(2, 118, 255, 0.13)',
+          background: 'rgba(199, 125, 255, 0.13)',
           filter: 'blur(45.65px)',
           borderRadius: '66px',
         }}

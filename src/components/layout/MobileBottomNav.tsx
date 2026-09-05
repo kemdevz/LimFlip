@@ -138,8 +138,8 @@ export default function MobileBottomNav() {
               left: '0px',
               top: menuIndicatorStyle.top || '50%',
               transform: 'translateY(-50%) rotate(90deg)',
-              background: '#006EFF',
-              boxShadow: '0px 0px 4px rgba(0, 110, 255, 0.25)',
+              background: '#A855F7',
+              boxShadow: '0px 0px 4px rgba(168, 85, 247, 0.25)',
               borderRadius: '40px 8px 0px 0px',
               transition: 'top 0.3s ease',
             }}
@@ -176,7 +176,7 @@ export default function MobileBottomNav() {
                 fontSize: '15px',
                 lineHeight: '18px',
                 color: activeMenuItem === 0 ? '#286DFF' : '#535C7A',
-                textShadow: activeMenuItem === 0 ? '0px 0px 4px rgba(0, 110, 255, 0.25)' : 'none',
+                textShadow: activeMenuItem === 0 ? '0px 0px 4px rgba(168, 85, 247, 0.25)' : 'none',
                 textAlign: 'left',
               }}
             >
@@ -202,7 +202,7 @@ export default function MobileBottomNav() {
                 fontSize: '15px',
                 lineHeight: '18px',
                 color: activeMenuItem === 1 ? '#286DFF' : '#535C7A',
-                textShadow: activeMenuItem === 1 ? '0px 0px 4px rgba(0, 110, 255, 0.25)' : 'none',
+                textShadow: activeMenuItem === 1 ? '0px 0px 4px rgba(168, 85, 247, 0.25)' : 'none',
                 textAlign: 'left',
               }}
             >
@@ -228,7 +228,7 @@ export default function MobileBottomNav() {
                 fontSize: '15px',
                 lineHeight: '18px',
                 color: activeMenuItem === 2 ? '#286DFF' : '#535C7A',
-                textShadow: activeMenuItem === 2 ? '0px 0px 4px rgba(0, 110, 255, 0.25)' : 'none',
+                textShadow: activeMenuItem === 2 ? '0px 0px 4px rgba(168, 85, 247, 0.25)' : 'none',
                 textAlign: 'left',
               }}
             >
@@ -254,7 +254,7 @@ export default function MobileBottomNav() {
                 fontSize: '15px',
                 lineHeight: '18px',
                 color: activeMenuItem === 3 ? '#286DFF' : '#535C7A',
-                textShadow: activeMenuItem === 3 ? '0px 0px 4px rgba(0, 110, 255, 0.25)' : 'none',
+                textShadow: activeMenuItem === 3 ? '0px 0px 4px rgba(168, 85, 247, 0.25)' : 'none',
                 textAlign: 'left',
               }}
             >
@@ -302,7 +302,7 @@ export default function MobileBottomNav() {
                 position: 'absolute',
                 height: '4px',
                 bottom: '0px',
-                background: '#0276FF',
+                background: '#C77DFF',
                 borderRadius: '40px 8px 0px 0px',
                 transition: 'left 0.3s ease',
                 ...underlineStyle,
@@ -390,7 +390,7 @@ export default function MobileBottomNav() {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M1 7.5H18M1 1H18M1 14H18" stroke="#0276FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M1 7.5H18M1 1H18M1 14H18" stroke="#C77DFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
@@ -420,7 +420,7 @@ export default function MobileBottomNav() {
             position: 'absolute',
             height: '4px',
             bottom: '0px',
-            background: '#0276FF',
+            background: '#C77DFF',
             borderRadius: '40px 8px 0px 0px',
             transition: 'left 0.3s ease',
             ...underlineStyle,
@@ -509,7 +509,7 @@ export default function MobileBottomNav() {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M1 7.5H18M1 1H18M1 14H18" stroke={menuOpen ? '#0276FF' : 'white'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 7.5H18M1 1H18M1 14H18" stroke={menuOpen ? '#C77DFF' : 'white'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>

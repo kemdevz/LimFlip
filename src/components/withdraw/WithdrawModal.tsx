@@ -120,10 +120,10 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, withdraw
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <circle cx="32" cy="32" r="30" stroke="#006EFF" strokeWidth="3" />
+                <circle cx="32" cy="32" r="30" stroke="#A855F7" strokeWidth="3" />
                 <path
                   d="M32 20V32M32 44V44.01"
-                  stroke="#006EFF"
+                  stroke="#A855F7"
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
@@ -169,7 +169,7 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, withdraw
                   fontFamily: 'Poppins, sans-serif',
                   fontSize: isMobile ? '14px' : '16px',
                   fontWeight: 600,
-                  color: '#006EFF',
+                  color: '#A855F7',
                   margin: '0',
                 }}
               >
@@ -192,7 +192,7 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, withdraw
               style={{
                 width: '100%',
                 padding: '14px',
-                background: '#006EFF',
+                background: '#A855F7',
                 border: 'none',
                 borderRadius: '8px',
                 color: '#FFFFFF',

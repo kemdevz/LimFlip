@@ -276,7 +276,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
               flexGrow: 0,
             }}
           >
-            Selected: <span style={{ color: '#006EFF' }}>{formatAmount(animatedAmount)}</span>
+            Selected: <span style={{ color: '#A855F7' }}>{formatAmount(animatedAmount)}</span>
           </span>
           <span
             style={{
@@ -294,7 +294,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
               whiteSpace: 'nowrap',
             }}
           >
-            Inventory Value: <span style={{ color: '#006EFF' }}>{formatAmount(inventory?.totalValue || 0)}</span>
+            Inventory Value: <span style={{ color: '#A855F7' }}>{formatAmount(inventory?.totalValue || 0)}</span>
           </span>
           <span
             style={{
@@ -304,7 +304,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
               fontWeight: 600,
               fontSize: isMobile ? '14px' : '18px',
               lineHeight: '27px',
-              color: '#006EFF',
+              color: '#A855F7',
               flex: 'none',
               order: 2,
               flexGrow: 0,
@@ -528,7 +528,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
                       height: '203.81px',
                       left: '0px',
                       top: '0px',
-                      border: '1px solid #006EFF',
+                      border: '1px solid #A855F7',
                       borderRadius: '7.91501px',
                       zIndex: 10,
                     }}
@@ -564,7 +564,7 @@ const MM2WithdrawModal: React.FC<MM2WithdrawModalProps> = ({ isOpen, onClose }) 
             disabled={isWithdrawing || selectedItems.size === 0}
             style={{
               padding: '12px 32px',
-              background: isWithdrawing || selectedItems.size === 0 ? '#202634' : '#0276FF',
+              background: isWithdrawing || selectedItems.size === 0 ? '#202634' : '#C77DFF',
               border: 'none',
               borderRadius: '15px',
               color: '#FFFFFF',

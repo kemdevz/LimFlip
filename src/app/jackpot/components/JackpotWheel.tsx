@@ -247,17 +247,6 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
             >
               {latestEntry?.username}
             </div>
-            <div
-              style={{
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                fontSize: '14px',
-                lineHeight: '21px',
-                color: '#656F86',
-              }}
-            >
-              Joined
-            </div>
           </div>
 
           
@@ -320,7 +309,7 @@ export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelP
               position: 'absolute',
               width: '311.07px',
               height: '65px',
-              left: '190px',
+              left: '210px',
               top: '17px',
             }}
           >

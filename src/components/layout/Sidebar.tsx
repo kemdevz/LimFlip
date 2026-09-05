@@ -304,31 +304,12 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
         }}
       >
         
-        <span
-          style={{
-            position: 'absolute',
-            width: '43px',
-            height: '26px',
-            left: '0px',
-            top: '5px',
-            fontFamily: 'Poppins',
-            fontStyle: 'normal',
-            fontWeight: 600,
-            fontSize: '17px',
-            lineHeight: '26px',
-            color: '#FFFFFF',
-          }}
-        >
-          Chat
-        </span>
-
-        
         <div
           style={{
             position: 'absolute',
-            width: '150px',
+            width: '327px',
             height: '34px',
-            left: '177px',
+            left: '0px',
             top: '0px',
             display: 'flex',
             flexDirection: 'row',
@@ -345,7 +326,8 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
               flex: 'none',
               order: 0,
               flexGrow: 0,
-              position: 'relative',
+              position: 'absolute',
+              right: '0px',
             }}
           >
             <div
@@ -423,7 +405,8 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
               flex: 'none',
               order: 1,
               flexGrow: 0,
-              position: 'relative',
+              position: 'absolute',
+              left: '0px',
               cursor: 'pointer',
             }}
           >
@@ -460,7 +443,8 @@ export default function Sidebar({ onProfileClick, onGiftClick, onRulesClick }: S
               flex: 'none',
               order: 2,
               flexGrow: 0,
-              position: 'relative',
+              position: 'absolute',
+              left: '40px',
               cursor: 'pointer',
             }}
           >

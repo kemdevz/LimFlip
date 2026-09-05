@@ -18,7 +18,11 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
   const [step, setStep] = useState(1); // 1 = enter username, 2 = confirm account, 3 = update description
   const [robloxUserId, setRobloxUserId] = useState<number | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [verificationToken, setVerificationToken] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const robloxProfileUrl = robloxUserId
+    ? `https://www.roblox.com/users/${robloxUserId}/profile`
+    : `https://www.roblox.com/search/users?keyword=${encodeURIComponent(username.trim())}`;
 
   useEffect(() => {
     if (isOpen) {
@@ -59,6 +63,7 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
           const userId = data.userId || data.robloxUserId;
           setRobloxUserId(userId);
           setVerificationCode(data.verificationCode || '');
+          setVerificationToken(data.verificationToken || '');
           
           console.log('Step 1 - User found:', { userId, verificationCode: data.verificationCode });
           
@@ -89,7 +94,11 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
       } else {
         // Step 3: Verify description and login/signup
         const endpoint = 'http://localhost:3001/auth/verify-description';
-        const body = { username, robloxUserId: robloxUserId?.toString() };
+        const body = {
+          username,
+          robloxUserId: robloxUserId?.toString(),
+          verificationToken
+        };
 
         console.log('Sending to verify-description:', { username, robloxUserId });
 
@@ -1346,7 +1355,15 @@ export default function SignUpModal({ isOpen = false, onClose }: SignUpModalProp
                 color: '#C77DFF',
               }}
             >
-              Open your Roblox Profile and paste the words into your bio
+              <a
+                href={robloxProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'inherit', textDecoration: 'underline' }}
+              >
+                Open your public Roblox profile
+              </a>{' '}
+              and paste the words into your bio
             </span>
             <span
               style={{

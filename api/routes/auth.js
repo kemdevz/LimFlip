@@ -98,7 +98,18 @@ router.post('/check-username', async (req, res) => {
     if (result.exists) {
       const verificationCode = generateRandomWords(10);
       verificationCodes[result.userId] = verificationCode;
-      res.json({ exists: true, message: 'Username found', userId: result.userId, verificationCode });
+      const verificationToken = jwt.sign({
+        purpose: 'roblox-bio-verification',
+        robloxUserId: String(result.userId),
+        verificationCode
+      }, JWT_SECRET, { expiresIn: '15m' });
+      res.json({
+        exists: true,
+        message: 'Username found',
+        userId: result.userId,
+        verificationCode,
+        verificationToken
+      });
     } else {
       res.status(404).json({ exists: false, message: 'Username not found' });
     }
@@ -164,16 +175,47 @@ router.post('/login', async (req, res) => {
 
 router.post('/verify-description', async (req, res) => {
   try {
-    const { username, robloxUserId } = req.body;
+    const { username, robloxUserId, verificationToken } = req.body;
 
     if (!username || !robloxUserId) {
       return res.status(400).json({ error: 'Username and Roblox ID are required' });
     }
 
+    if (!/^\d+$/.test(String(robloxUserId))) {
+      return res.status(400).json({ error: 'A valid Roblox ID is required' });
+    }
+
+    const profileUrl = `https://www.roblox.com/users/${robloxUserId}/profile`;
+
     console.log(`Verifying description for ${username} (Roblox ID: ${robloxUserId})`);
 
-    const verificationCode = verificationCodes[robloxUserId] || generateRandomWords(10);
-    verificationCodes[robloxUserId] = verificationCode;
+    let verificationCode = verificationCodes[robloxUserId];
+
+    if (verificationToken) {
+      try {
+        const challenge = jwt.verify(verificationToken, JWT_SECRET);
+        if (
+          challenge.purpose !== 'roblox-bio-verification' ||
+          challenge.robloxUserId !== String(robloxUserId) ||
+          !challenge.verificationCode
+        ) {
+          throw new Error('Invalid verification challenge');
+        }
+        verificationCode = challenge.verificationCode;
+      } catch (error) {
+        return res.status(400).json({
+          error: 'Your verification session expired. Please restart verification to get a new code.',
+          profileUrl
+        });
+      }
+    }
+
+    if (!verificationCode) {
+      return res.status(400).json({
+        error: 'Your verification session expired. Please restart verification to get a new code.',
+        profileUrl
+      });
+    }
     
     // Fetch actual user description from Roblox
     let userDescription = '';
@@ -183,15 +225,21 @@ router.post('/verify-description', async (req, res) => {
       console.log(`Fetched user description: "${userDescription}"`);
     } catch (error) {
       console.error('Error fetching user description:', error);
-      return res.status(500).json({ error: 'Failed to fetch Roblox profile description' });
+      return res.status(502).json({
+        error: 'Failed to fetch Roblox profile description. Open your public profile and try again.',
+        profileUrl
+      });
     }
     
     // Check if verification code is in the description
     if (!userDescription.includes(verificationCode)) {
       return res.status(400).json({
-        error: 'Verification failed. Please add this code to your Roblox profile description: ' + verificationCode
+        error: 'Verification failed. Please add this code to your Roblox profile description: ' + verificationCode,
+        profileUrl
       });
     }
+
+    delete verificationCodes[robloxUserId];
     
     let user = await User.findOne({ username });
 

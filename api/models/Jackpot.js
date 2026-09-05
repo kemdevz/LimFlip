@@ -95,4 +95,7 @@ jackpotSchema.pre('save', function(next) {
   next();
 });
 
+jackpotSchema.index({ status: 1, createdAt: -1 });
+jackpotSchema.index({ completedAt: -1 });
+
 module.exports = mongoose.model('Jackpot', jackpotSchema);

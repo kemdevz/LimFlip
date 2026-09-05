@@ -9,7 +9,7 @@ const authRoutes = require('./routes/auth');
 const robloxRoutes = require('./routes/roblox');
 const { router: inventoryRoutes, setIo: setInventoryIo } = require('./routes/inventory');
 const { router: coinflipRoutes, setIo: setCoinflipIo } = require('./routes/coinflip');
-const { router: jackpotRoutes, setIo: setJackpotIo } = require('./routes/jackpot');
+const { router: jackpotRoutes, setIo: setJackpotIo, resumeJackpotTimers } = require('./routes/jackpot');
 const { router: trackTimerRoutes, setIo: setTrackTimerIo } = require('./routes/trackTimer');
 const userStatsRoutes = require('./routes/userStats');
 const { router: marketplaceRoutes, setIo: setMarketplaceIo } = require('./routes/marketplace');
@@ -24,8 +24,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-connectDB();
 
 const server = http.createServer(app);
 
@@ -45,9 +43,6 @@ setMarketplaceIo(io);
 setDepositIo(io);
 setGiveawayIo(io);
 setUpgraderIo(io);
-
-// Start giveaway checker
-startGiveawayChecker();
 
 let onlineUsers = 9; // Start with 9 fake online users
 
@@ -149,6 +144,13 @@ app.use('/messages', messagesRoutes);
 app.use('/crypto', cryptoRoutes);
 app.use('/upgrader', upgraderRoutes);
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const startServer = async () => {
+  await connectDB();
+  await resumeJackpotTimers();
+  startGiveawayChecker();
+  server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+startServer();

@@ -1,7 +1,7 @@
-import PlayerCard from './PlayerCard';
 import WaitingCard from './WaitingCard';
+import { JackpotEntry } from '@/types';
 
-export default function JackpotContainer() {
+export default function JackpotContainer({ entries }: { entries: JackpotEntry[] }) {
   return (
     <div
       style={{
@@ -101,36 +101,12 @@ export default function JackpotContainer() {
             animation: 'scrollRight 30s linear infinite',
           }}
         >
-          <PlayerCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <PlayerCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
-          <WaitingCard />
+          {Array.from({ length: 28 }, (_, index) => (
+            <WaitingCard
+              key={entries[index]?._id || `waiting-${index}`}
+              entry={entries[index]}
+            />
+          ))}
         </div>
       </div>
     </div>

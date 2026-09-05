@@ -1,4 +1,6 @@
-export default function WaitingCard() {
+import { JackpotEntry } from '@/types';
+
+export default function WaitingCard({ entry }: { entry?: JackpotEntry }) {
   return (
     <div
       style={{
@@ -89,8 +91,8 @@ export default function WaitingCard() {
           }}
         />
         <img
-          src="/assets/jackpot/waiting.png"
-          alt="Waiting"
+          src={entry?.avatarUrl || '/assets/jackpot/waiting.png'}
+          alt={entry?.username || 'Waiting'}
           style={{
             position: 'absolute',
             width: '84px',
@@ -118,7 +120,7 @@ export default function WaitingCard() {
           color: '#FFFFFF',
         }}
       >
-        Waiting...
+        {entry?.username || 'Waiting...'}
       </span>
       
       <div
@@ -169,7 +171,7 @@ export default function WaitingCard() {
             color: '#FFFFFF',
           }}
         >
-          B$0.00
+          {entry ? `B$${Math.round(entry.totalValue).toLocaleString()}` : 'B$0.00'}
         </span>
       </div>
       </div>

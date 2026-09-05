@@ -1,4 +1,15 @@
-export default function JackpotStats() {
+interface JackpotStatsProps {
+  jackpotValue: number;
+  userWager: number;
+  userChance: number;
+  timeRemaining: number | null;
+}
+
+const formatValue = (value: number) => value >= 1000
+  ? `B$${(value / 1000).toFixed(1)}K`
+  : `B$${Math.round(value)}`;
+
+export default function JackpotStats({ jackpotValue, userWager, userChance, timeRemaining }: JackpotStatsProps) {
   return (
     <div
       style={{
@@ -120,7 +131,7 @@ export default function JackpotStats() {
                 color: '#C77DFF',
               }}
             >
-              B$48.3K
+              {formatValue(jackpotValue)}
             </span>
             <span
               style={{
@@ -165,7 +176,7 @@ export default function JackpotStats() {
             color: '#FFFFFF',
           }}
         >
-          B$0
+          {formatValue(userWager)}
         </span>
         <span
           style={{
@@ -209,7 +220,7 @@ export default function JackpotStats() {
             color: '#FFFFFF',
           }}
         >
-          0.00%
+          {userChance.toFixed(2)}%
         </span>
         <span
           style={{
@@ -253,7 +264,9 @@ export default function JackpotStats() {
             color: '#FFFFFF',
           }}
         >
-          Waiting..
+          {timeRemaining === null
+            ? 'Waiting..'
+            : `${Math.floor(timeRemaining / 60)}:${String(timeRemaining % 60).padStart(2, '0')}`}
         </span>
         <span
           style={{

@@ -1,9 +1,13 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const Jackpot = require('../models/Jackpot');
 const Inventory = require('../models/Inventory');
 const Item = require('../models/Item');
 const User = require('../models/User');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const jackpotTimers = new Map();
 
 // Get io instance from server (will be set by server.js)
 let io;
@@ -12,15 +16,13 @@ const setIo = (socketIo) => {
   io = socketIo;
 };
 
-module.exports = { router, setIo };
-
 // Helper function to populate item details
 const populateItemDetails = async (items) => {
   return await Promise.all(items.map(async (item) => {
     const itemDef = await Item.findOne({ itemId: item.itemId });
     if (itemDef) {
       return {
-        ...item,
+        ...(item.toObject ? item.toObject() : item),
         name: itemDef.name,
         image: itemDef.image,
         rarity: itemDef.rarity,
@@ -30,6 +32,52 @@ const populateItemDetails = async (items) => {
     }
     return item;
   }));
+};
+
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Authentication required' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
+
+const populateJackpot = (jackpotId) => Jackpot.findById(jackpotId)
+  .populate('entries.userId', 'username avatarUrl')
+  .populate('winner', 'username avatarUrl');
+
+const scheduleJackpot = (jackpotId, timerEndsAt) => {
+  const id = jackpotId.toString();
+  const existingTimer = jackpotTimers.get(id);
+  if (existingTimer) clearTimeout(existingTimer);
+  const delay = Math.max(0, new Date(timerEndsAt).getTime() - Date.now());
+  const timer = setTimeout(async () => {
+    try {
+      jackpotTimers.delete(id);
+      const jackpot = await Jackpot.findById(id);
+      if (!jackpot || !['waiting', 'active'].includes(jackpot.status)) return;
+      if (jackpot.entries.length >= 2) await completeJackpot(id);
+      else await refundJackpot(id);
+    } catch (error) {
+      console.error('Error resolving jackpot timer:', error);
+    }
+  }, delay);
+  jackpotTimers.set(id, timer);
+};
+
+const resumeJackpotTimers = async () => {
+  const jackpots = await Jackpot.find({ status: { $in: ['waiting', 'active'] } });
+  for (const jackpot of jackpots) {
+    if (!jackpot.timerEndsAt) {
+      jackpot.timerEndsAt = new Date(Date.now() + 60000);
+      await jackpot.save();
+    }
+    scheduleJackpot(jackpot._id, jackpot.timerEndsAt);
+  }
 };
 
 // Get active jackpot
@@ -71,22 +119,28 @@ router.get('/:jackpotId', async (req, res) => {
 });
 
 // Join jackpot
-router.post('/join', async (req, res) => {
+router.post('/join', authenticateToken, async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const { userId, uniqueIds } = req.body;
+    const { uniqueIds } = req.body;
+    const userId = req.userId;
     
-    if (!userId || !uniqueIds || uniqueIds.length === 0) {
+    if (!Array.isArray(uniqueIds) || uniqueIds.length === 0) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    if (new Set(uniqueIds).size !== uniqueIds.length) {
+      return res.status(400).json({ error: 'Duplicate items are not allowed' });
+    }
+    session.startTransaction();
     
     // Get user
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).session(session);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     
     // Get user's inventory
-    const inventory = await Inventory.findOne({ userId });
+    const inventory = await Inventory.findOne({ userId }).session(session);
     if (!inventory) {
       return res.status(404).json({ error: 'Inventory not found' });
     }
@@ -102,11 +156,14 @@ router.post('/join', async (req, res) => {
       }
       const item = inventory.items[itemIndex];
       selectedItems.push(item);
-      totalValue += item.value || 0;
+    }
+
+    if (selectedItems.some((item) => item.wagered || item.listedInMarketplace)) {
+      return res.status(400).json({ error: 'Listed or wagered items cannot be added' });
     }
     
     // Get or create active jackpot
-    let jackpot = await Jackpot.findOne({ status: { $in: ['waiting', 'active'] } });
+    let jackpot = await Jackpot.findOne({ status: { $in: ['waiting', 'active'] } }).session(session);
     
     if (!jackpot) {
       // Create new jackpot
@@ -119,6 +176,13 @@ router.post('/join', async (req, res) => {
     
     // Populate item details for selected items
     const populatedItems = await populateItemDetails(selectedItems);
+    if (populatedItems.some((item) => typeof item.value !== 'number')) {
+      return res.status(400).json({ error: 'One or more selected item definitions are missing' });
+    }
+    totalValue = populatedItems.reduce((sum, item) => sum + item.value, 0);
+    if (totalValue <= 0) {
+      return res.status(400).json({ error: 'Selected items have no wager value' });
+    }
     
     // Add entry to jackpot
     jackpot.entries.push({
@@ -130,18 +194,29 @@ router.post('/join', async (req, res) => {
       joinedAt: new Date()
     });
     
-    await jackpot.save();
+    if (jackpot.entries.length === 1) jackpot.timerEndsAt = new Date(Date.now() + 60000);
+    if (jackpot.entries.length >= 3 && jackpot.status === 'waiting') {
+      jackpot.status = 'active';
+      jackpot.startedAt = new Date();
+      jackpot.timerEndsAt = new Date(Date.now() + 10000);
+    }
+    await jackpot.save({ session });
     
     // Remove items from user's inventory by uniqueId
     const updatedInventory = await Inventory.findOneAndUpdate(
-      { userId },
-      { $pull: { items: { uniqueId: { $in: uniqueIds } } } },
-      { new: true }
+      { userId, 'items.uniqueId': { $all: uniqueIds } },
+      {
+        $pull: { items: { uniqueId: { $in: uniqueIds } } },
+        $inc: { totalValue: -totalValue },
+        $set: { updatedAt: new Date() }
+      },
+      { new: true, session }
     );
     
     if (!updatedInventory) {
-      return res.status(500).json({ error: 'Failed to update inventory' });
+      return res.status(409).json({ error: 'Inventory changed while joining; please try again' });
     }
+    await session.commitTransaction();
     
     // Populate jackpot data before emitting
     const populatedJackpot = await Jackpot.findById(jackpot._id)
@@ -165,62 +240,18 @@ router.post('/join', async (req, res) => {
       io.emit('jackpot-joined', { jackpot: populatedJackpot });
     }
     
-    // Check if this is the first player joining
-    if (jackpot.entries.length === 1) {
-      // Start 1-minute timer
-      jackpot.timerEndsAt = new Date(Date.now() + 60000); // 1 minute from now
-      await jackpot.save();
-      
-      // Schedule refund if no one else joins
-      setTimeout(async () => {
-        try {
-          const currentJackpot = await Jackpot.findById(jackpot._id);
-          if (currentJackpot && currentJackpot.status === 'waiting' && currentJackpot.entries.length === 1) {
-            // Refund the single player
-            await refundJackpot(currentJackpot._id);
-          }
-        } catch (error) {
-          console.error('Error in jackpot timer:', error);
-        }
-      }, 60000);
-      
-      const updatedJackpot = await Jackpot.findById(jackpot._id)
-        .populate('entries.userId', 'username avatarUrl')
-        .populate('winner', 'username avatarUrl');
-      
-      if (io) {
-        io.emit('jackpot-timer-started', { jackpot: updatedJackpot });
-      }
-    }
-    
-    // Check if jackpot should start (e.g., after 3 players)
-    if (jackpot.entries.length >= 3) {
-      jackpot.status = 'active';
-      jackpot.startedAt = new Date();
-      await jackpot.save();
-      
-      // Schedule jackpot completion after countdown (10 seconds)
-      setTimeout(async () => {
-        try {
-          await completeJackpot(jackpot._id);
-        } catch (error) {
-          console.error('Error completing jackpot:', error);
-        }
-      }, 10000);
-      
-      const activeJackpot = await Jackpot.findById(jackpot._id)
-        .populate('entries.userId', 'username avatarUrl')
-        .populate('winner', 'username avatarUrl');
-      
-      if (io) {
-        io.emit('jackpot-started', { jackpot: activeJackpot });
-      }
-    }
+    scheduleJackpot(jackpot._id, jackpot.timerEndsAt);
+    if (io && jackpot.entries.length === 1) io.emit('jackpot-timer-started', { jackpot: populatedJackpot });
+    if (io && jackpot.status === 'active') io.emit('jackpot-started', { jackpot: populatedJackpot });
     
     res.json({ message: 'Joined jackpot', jackpot: populatedJackpot });
   } catch (error) {
+    if (session.inTransaction()) await session.abortTransaction();
     console.error('Error joining jackpot:', error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    if (session.inTransaction()) await session.abortTransaction();
+    await session.endSession();
   }
 });
 
@@ -429,3 +460,5 @@ async function refundJackpot(jackpotId) {
     console.error('Error refunding jackpot:', error);
   }
 }
+
+module.exports = { router, setIo, resumeJackpotTimers };

@@ -30,6 +30,31 @@ export interface Inventory {
   updatedAt: string;
 }
 
+export interface JackpotItem extends InventoryItem {}
+
+export interface JackpotEntry {
+  _id?: string;
+  userId: string | { _id: string; username?: string; avatarUrl?: string };
+  username: string;
+  avatarUrl?: string;
+  items: JackpotItem[];
+  totalValue: number;
+  joinedAt: string;
+}
+
+export interface Jackpot {
+  _id: string;
+  status: 'waiting' | 'active' | 'completed' | 'refunded';
+  entries: JackpotEntry[];
+  totalValue: number;
+  winner?: string | { _id: string; username?: string; avatarUrl?: string };
+  winningPercentage?: number;
+  timerEndsAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  createdAt: string;
+}
+
 export interface Message {
   username: string;
   message: string;

@@ -3,34 +3,55 @@
 import React, { useState, useEffect } from 'react';
 import CoinflipItemCard from '@/components/coinflip/CoinflipItemCard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/Toast';
+import { Jackpot } from '@/types';
 
 interface JoinJackpotModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onJackpotJoined?: (jackpot: Jackpot) => void;
 }
 
-const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) => {
-  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose, onJackpotJoined }) => {
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const { inventory, loading, error } = useInventory(user?.id || null);
 
-  const toggleItemSelection = (index: number) => {
+  const toggleItemSelection = (uniqueId: string) => {
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
+      if (newSet.has(uniqueId)) {
+        newSet.delete(uniqueId);
       } else {
-        newSet.add(index);
+        newSet.add(uniqueId);
       }
       return newSet;
     });
   };
 
-  const ITEM_VALUE = 43.8;
-  const totalSelectedAmount = selectedItems.size * ITEM_VALUE;
-  const formatAmount = (amount: number) => `B$${amount.toFixed(1)}k`;
+  const totalSelectedAmount = Array.from(selectedItems).reduce((sum, uniqueId) => {
+    const item = inventory?.items.find((inventoryItem) => inventoryItem.uniqueId === uniqueId);
+    return sum + (item?.value || 0);
+  }, 0);
+
+  const formatAmount = (amount: number) => {
+    if (amount >= 1000000) return `B$${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `B$${(amount / 1000).toFixed(1)}K`;
+    return `B$${amount.toFixed(0)}`;
+  };
+
+  const sortedItems = inventory?.items
+    ? [...inventory.items]
+        .filter((item) => !item.listedInMarketplace)
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
+    : [];
 
   useEffect(() => {
     const duration = 300;
@@ -56,6 +77,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
     if (isOpen) {
       setIsVisible(true);
       setIsAnimatingOut(false);
+      setSelectedItems(new Set());
     } else {
       setIsAnimatingOut(true);
       const timer = setTimeout(() => {
@@ -133,10 +155,11 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
         <div
           style={{
             display: isMobile ? 'flex' : 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
+            flexDirection: 'row',
             alignItems: isMobile ? 'flex-start' : 'flex-start',
             padding: '0px',
-            gap: isMobile ? '8px' : '213px',
+            gap: '0px',
+            justifyContent: 'space-between',
             position: 'absolute',
             width: isMobile ? 'calc(100% - 32px)' : '1019px',
             height: isMobile ? 'auto' : '27px',
@@ -176,24 +199,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
               flexGrow: 0,
             }}
           >
-            Inventory Value: <span style={{ color: '#A855F7' }}>B$1.2m</span>
-          </span>
-          <span
-            style={{
-              width: isMobile ? 'auto' : '168px',
-              height: '27px',
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: 600,
-              fontSize: isMobile ? '14px' : '18px',
-              lineHeight: '27px',
-              color: '#A855F7',
-              flex: 'none',
-              order: 2,
-              flexGrow: 0,
-            }}
-          >
-            B$43.8K - B$44.6k
+            Inventory Value: <span style={{ color: '#A855F7' }}>{formatAmount(inventory?.totalValue || 0)}</span>
           </span>
         </div>
 
@@ -391,9 +397,34 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
 
         
         <div
-          onClick={() => {
-            if (selectedItems.size > 0) {
-              console.log('Joining jackpot with items:', Array.from(selectedItems));
+          onClick={async () => {
+            if (selectedItems.size === 0 || !user?.id || isJoining) return;
+
+            setIsJoining(true);
+            try {
+              const response = await fetch('http://localhost:3001/jackpot/join', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+                },
+                body: JSON.stringify({
+                  uniqueIds: Array.from(selectedItems),
+                }),
+              });
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.error || 'Failed to join jackpot');
+              }
+
+              toast.success('Joined jackpot!');
+              onJackpotJoined?.(data.jackpot);
+              onClose();
+            } catch (joinError) {
+              toast.error(joinError instanceof Error ? joinError.message : 'Failed to join jackpot');
+            } finally {
+              setIsJoining(false);
             }
           }}
           style={{
@@ -407,8 +438,8 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: selectedItems.size > 0 ? 'pointer' : 'not-allowed',
-            opacity: selectedItems.size > 0 ? 1 : 0.5,
+            cursor: selectedItems.size > 0 && user?.id && !isJoining ? 'pointer' : 'not-allowed',
+            opacity: selectedItems.size > 0 && user?.id && !isJoining ? 1 : 0.5,
           }}
         >
           <span
@@ -425,7 +456,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
               whiteSpace: 'nowrap',
             }}
           >
-            Join Jackpot {formatAmount(animatedAmount)}
+            {isJoining ? 'Joining...' : `Join Jackpot ${formatAmount(animatedAmount)}`}
           </span>
         </div>
 
@@ -497,6 +528,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
 
         
         <div
+          className="hide-scrollbar"
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -514,23 +546,15 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
           }}
         >
           
-          {[
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-            '/assets/images/coinflip/gun.png',
-            '/assets/images/coinflip/candy.png',
-            '/assets/images/coinflip/knife.png',
-            '/assets/images/coinflip/chroma.png',
-            '/assets/images/coinflip/luger.png',
-          ].map((imageSrc, index) => (
+          {loading ? (
+            <span style={{ color: '#6B7289' }}>Loading inventory...</span>
+          ) : error ? (
+            <span style={{ color: '#EF4444' }}>Error loading inventory</span>
+          ) : sortedItems.length > 0 ? (
+            sortedItems.map((item, index) => (
             <div
-              key={index}
-              onClick={() => toggleItemSelection(index)}
+              key={`${item.uniqueId}_${index}`}
+              onClick={() => toggleItemSelection(item.uniqueId)}
               style={{
                 position: 'relative',
                 width: isMobile ? 'calc(50% - 4px)' : '159.29px',
@@ -541,7 +565,7 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
                 flexGrow: 0,
               }}
             >
-              {selectedItems.has(index) && (
+              {selectedItems.has(item.uniqueId) && (
                 <div
                   style={{
                     position: 'absolute',
@@ -555,9 +579,12 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
                   }}
                 />
               )}
-              <CoinflipItemCard imageSrc={imageSrc} />
+              <CoinflipItemCard imageSrc={item.image} itemName={item.name} itemValue={item.value} />
             </div>
-          ))}
+            ))
+          ) : (
+            <span style={{ color: '#6B7289' }}>No items in inventory</span>
+          )}
         </div>
 
         
@@ -581,19 +608,6 @@ const JoinJackpotModal: React.FC<JoinJackpotModalProps> = ({ isOpen, onClose }) 
         )}
 
         
-        {!isMobile && (
-          <div
-            style={{
-              position: 'absolute',
-              width: '7px',
-              height: '183px',
-              left: '1078px',
-              top: '210px',
-              background: '#13141B',
-              borderRadius: '41px',
-            }}
-          />
-        )}
       </div>
     </div>
     </>

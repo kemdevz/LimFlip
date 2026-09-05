@@ -1,28 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import JoinJackpotModal from './JoinJackpotModal';
 import ValidateFairnessModal from '@/components/coinflip/ValidateFairnessModal';
-
-interface Player {
-  id: string;
-  username: string;
-  avatar: string;
-  items: string[];
-  totalValue: number;
-  percentage: number;
-}
+import { Jackpot } from '@/types';
 
 interface Card {
   image: string;
   playerId: string;
 }
 
-export default function JackpotWheel() {
+interface JackpotWheelProps {
+  jackpot: Jackpot | null;
+  onJackpotJoined: (jackpot: Jackpot) => void;
+}
+
+export default function JackpotWheel({ jackpot, onJackpotJoined }: JackpotWheelProps) {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [cards, setCards] = useState<Card[]>([]);
+  const latestEntry = jackpot?.entries[jackpot.entries.length - 1];
   
   // Default waiting cards
   const waitingCards = [
@@ -33,54 +29,13 @@ export default function JackpotWheel() {
     '/assets/jackpot/gingerscope.png',
   ];
 
-  // Calculate card distribution based on player percentages
-  useEffect(() => {
-    if (players.length === 0) {
-      // Show waiting cards
-      setCards(waitingCards.map(img => ({ image: img, playerId: 'waiting' })));
-      return;
-    }
-
-    const totalCards = 36;
-    const newCards: Card[] = [];
-    let cardIndex = 0;
-
-    players.forEach(player => {
-      const playerCardCount = Math.round((player.percentage / 100) * totalCards);
-      for (let i = 0; i < playerCardCount; i++) {
-        if (cardIndex < totalCards) {
-          const itemIndex = cardIndex % player.items.length;
-          newCards.push({
-            image: player.items[itemIndex],
-            playerId: player.id,
-          });
-          cardIndex++;
-        }
-      }
-    });
-
-    // Fill remaining with waiting cards if needed
-    while (newCards.length < totalCards) {
-      newCards.push({
-        image: waitingCards[newCards.length % waitingCards.length],
-        playerId: 'waiting',
-      });
-    }
-
-    setCards(newCards);
-  }, [players]);
-
-  // Handle player join
-  const handlePlayerJoin = (newPlayer: Player) => {
-    setPlayers(prevPlayers => {
-      const totalValue = [...prevPlayers, newPlayer].reduce((sum, p) => sum + p.totalValue, 0);
-      
-      return [...prevPlayers, newPlayer].map(player => ({
-        ...player,
-        percentage: (player.totalValue / totalValue) * 100,
-      }));
-    });
-  };
+  const cards: Card[] = latestEntry
+    ? latestEntry.items.map((item) => ({ image: item.image, playerId: String(latestEntry._id || latestEntry.username) }))
+    : waitingCards.map((image) => ({ image, playerId: 'waiting' }));
+  const itemCount = jackpot?.entries.reduce((sum, entry) => sum + entry.items.length, 0) || 0;
+  const latestChance = latestEntry && jackpot?.totalValue
+    ? (latestEntry.totalValue / jackpot.totalValue) * 100
+    : 0;
 
   return (
     <div
@@ -97,7 +52,7 @@ export default function JackpotWheel() {
           position: 'absolute',
           width: '141px',
           height: '42px',
-          left: '860px',
+          left: '0px',
           top: '2px',
           display: 'flex',
           alignItems: 'center',
@@ -135,9 +90,9 @@ export default function JackpotWheel() {
       <div
         style={{
           position: 'absolute',
-          width: '132px',
+          width: '72px',
           height: '22px',
-          left: '780px',
+          left: '930px',
           top: '8px',
         }}
       >
@@ -155,8 +110,8 @@ export default function JackpotWheel() {
         <div
           style={{
             position: 'absolute',
-            left: '26.52%',
-            right: '0%',
+            left: '35px',
+            width: '37px',
             top: '4.55%',
             bottom: '27.27%',
             fontFamily: 'Poppins, sans-serif',
@@ -167,57 +122,7 @@ export default function JackpotWheel() {
             color: '#FFFFFF',
           }}
         >
-          36
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          width: '215px',
-          height: '30px',
-          left: '0px',
-          top: '7px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        <svg
-          width="19"
-          height="19"
-          viewBox="0 0 19 19"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            width: '19px',
-            height: '19px',
-            animation: 'spin 1s linear infinite',
-          }}
-        >
-          <path d="M9.5 2C5.26205 1.99984 1.99996 5.37499 2 9.50002C2.00005 13.325 5.03178 17 9.5 17C13.6568 17 17 13.625 17 9.50002" stroke="url(#paint0_linear)" strokeWidth="4" strokeLinecap="round"/>
-          <defs>
-            <linearGradient id="paint0_linear" x1="9.5" y1="18.25" x2="17" y2="17" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#C77DFF"/>
-              <stop offset="1" stopColor="#C77DFF" stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div
-          style={{
-            fontFamily: 'Poppins, sans-serif',
-            fontStyle: 'normal',
-            fontWeight: '600',
-            fontSize: '20px',
-            lineHeight: '30px',
-            background: 'linear-gradient(90deg, #C77DFF 0%, #308FFF 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Round #54cd4439
+          {itemCount}
         </div>
       </div>
 
@@ -245,11 +150,15 @@ export default function JackpotWheel() {
           height: '96px',
           left: '0px',
           top: '61px',
+          background: '#191D29',
+          border: '2px solid #1B1F2D',
+          borderRadius: '15px',
         }}
       >
         
         <div
           style={{
+            visibility: latestEntry ? 'visible' : 'hidden',
             width: '1057px',
             height: '96px',
             background: '#191D29',
@@ -302,8 +211,8 @@ export default function JackpotWheel() {
                   }}
                 >
                   <img
-                    src="/assets/images/coinflip/item_1side.png"
-                    alt="Avatar"
+                    src={latestEntry?.avatarUrl || '/assets/images/coinflip/item_1side.png'}
+                    alt={latestEntry?.username || 'Waiting'}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -360,7 +269,7 @@ export default function JackpotWheel() {
                 backgroundClip: 'text',
               }}
             >
-              84.48%
+              {latestChance.toFixed(2)}%
             </div>
           </div>
 
@@ -445,52 +354,6 @@ export default function JackpotWheel() {
           </div>
 
           
-          <div
-            style={{
-              position: 'absolute',
-              width: '137px',
-              height: '50px',
-              left: '70px',
-              top: '27px',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                width: '109.03px',
-                height: '26px',
-                left: '0px',
-                top: '0px',
-                fontFamily: 'Poppins, sans-serif',
-                fontStyle: 'normal',
-                fontWeight: '600',
-                fontSize: '17px',
-                lineHeight: '26px',
-                textAlign: 'center',
-                color: '#FFFFFF',
-              }}
-            >
-              jakep
-            </div>
-            <div
-              style={{
-                position: 'absolute',
-                width: '109px',
-                height: '25px',
-                left: '28px',
-                top: '25px',
-                fontFamily: 'Poppins, sans-serif',
-                fontStyle: 'normal',
-                fontWeight: '600',
-                fontSize: '14px',
-                lineHeight: '21px',
-                color: '#656F86',
-              }}
-            >
-              Joined
-            </div>
-          </div>
-
           
           <div
             style={{
@@ -522,7 +385,7 @@ export default function JackpotWheel() {
                 color: '#C77DFF',
               }}
             >
-              B$466k
+              B${Math.round(latestEntry?.totalValue || 0).toLocaleString()}
             </div>
           </div>
         </div>
@@ -623,7 +486,7 @@ export default function JackpotWheel() {
                 backgroundClip: 'text',
               }}
             >
-              Round #54cd4439
+              {jackpot ? `Round #${jackpot._id.slice(-8)}` : 'Waiting for round'}
             </div>
 
             
@@ -655,7 +518,7 @@ export default function JackpotWheel() {
                   color: '#C77DFF',
                 }}
               >
-                B$466k
+                B${Math.round(jackpot?.totalValue || 0).toLocaleString()}
               </div>
             </div>
 
@@ -701,84 +564,13 @@ export default function JackpotWheel() {
           </div>
 
           
-          <div
-            style={{
-              position: 'absolute',
-              width: '52.93px',
-              height: '56px',
-              left: '21px',
-              top: '106px',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                width: '52.16px',
-                height: '54.47px',
-                left: '1.53px',
-                top: '1.53px',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '51.4px',
-                  height: '54.47px',
-                  left: '0px',
-                  top: '0px',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: '50.63px',
-                    height: '50.63px',
-                    left: '0.77px',
-                    top: '3.84px',
-                    borderRadius: '101.26px',
-                    background: '#131620',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <img
-                    src="/assets/images/coinflip/item_1side.png"
-                    alt="Avatar"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          
-          <div
-            style={{
-              position: 'absolute',
-              width: '213px',
-              height: '24px',
-              left: '87px',
-              top: '124px',
-              fontFamily: 'Poppins, sans-serif',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              fontSize: '16px',
-              lineHeight: '24px',
-              textAlign: 'center',
-              color: '#FFFFFF',
-            }}
-          >
-            jakep won with a 40.79%
-          </div>
         </div>
       </div>
       
       <JoinJackpotModal
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
+        onJackpotJoined={onJackpotJoined}
       />
       <ValidateFairnessModal
         isOpen={isValidateFairnessOpen}

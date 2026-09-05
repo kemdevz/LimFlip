@@ -1,2 +1,7 @@
 node_modules
 .next
+.DS_Store
+*.backup
+.kiro/
+.env
+api/.env

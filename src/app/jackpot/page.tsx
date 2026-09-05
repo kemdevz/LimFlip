@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import Subnavbar from '@/components/layout/Subnavbar';
@@ -15,12 +15,17 @@ import CreateGiveawayModal from '@/components/giveaway/CreateGiveawayModal';
 import PrivacyModal from '@/components/privacy/PrivacyModal';
 import RulesModal from '@/components/rules/RulesModal';
 import FaqModal from '@/components/faq/FaqModal';
-import { User } from '@/types';
+import { Jackpot } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
+import { useSocket } from '@/context/SocketContext';
 
 export default function JackpotPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
+  const { socket } = useSocket();
+  const [jackpot, setJackpot] = useState<Jackpot | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const [isValidateFairnessOpen, setIsValidateFairnessOpen] = useState(false);
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isCreateGiveawayOpen, setIsCreateGiveawayOpen] = useState(false);
@@ -29,13 +34,50 @@ export default function JackpotPage() {
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    let cancelled = false;
+    fetch('http://localhost:3001/jackpot/active', { cache: 'no-store' })
+      .then((response) => {
+        if (!response.ok) throw new Error('Unable to load jackpot');
+        return response.json();
+      })
+      .then((data) => {
+        if (!cancelled) setJackpot(data.jackpot);
+      })
+      .catch((error) => console.error('Error loading jackpot:', error));
+    const clock = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(clock);
+    };
   }, []);
 
-  const handleProfileClick = (username: string, avatarUrl: string) => {
+  useEffect(() => {
+    if (!socket) return;
+    const update = ({ jackpot: nextJackpot }: { jackpot: Jackpot }) => setJackpot(nextJackpot);
+    socket.on('jackpot-joined', update);
+    socket.on('jackpot-timer-started', update);
+    socket.on('jackpot-started', update);
+    socket.on('jackpot-completed', update);
+    socket.on('jackpot-refunded', update);
+    return () => {
+      socket.off('jackpot-joined', update);
+      socket.off('jackpot-timer-started', update);
+      socket.off('jackpot-started', update);
+      socket.off('jackpot-completed', update);
+      socket.off('jackpot-refunded', update);
+    };
+  }, [socket]);
+
+  const userWager = useMemo(() => jackpot?.entries.reduce((sum, entry) => {
+    const entryUserId = typeof entry.userId === 'string' ? entry.userId : entry.userId._id;
+    return entryUserId === user?.id ? sum + entry.totalValue : sum;
+  }, 0) || 0, [jackpot, user?.id]);
+  const userChance = jackpot?.totalValue ? (userWager / jackpot.totalValue) * 100 : 0;
+  const timeRemaining = jackpot?.timerEndsAt
+    ? Math.max(0, Math.ceil((new Date(jackpot.timerEndsAt).getTime() - now) / 1000))
+    : null;
+
+  const handleProfileClick = (username: string) => {
     console.log('Profile clicked:', username);
   };
 
@@ -91,9 +133,14 @@ export default function JackpotPage() {
         >
           {/* Jackpot Components */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
-            <JackpotStats />
-            <JackpotContainer />
-            <JackpotWheel />
+            <JackpotStats
+              jackpotValue={jackpot?.totalValue || 0}
+              userWager={userWager}
+              userChance={userChance}
+              timeRemaining={timeRemaining}
+            />
+            <JackpotContainer entries={jackpot?.entries || []} />
+            <JackpotWheel jackpot={jackpot} onJackpotJoined={setJackpot} />
           </div>
         </div>
       </div>

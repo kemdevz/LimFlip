@@ -1,5 +1,55 @@
 const https = require('https');
 
+const getResponseBody = (url, headers = {}) => new Promise((resolve, reject) => {
+  const request = https.get(url, { headers }, (response) => {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      response.resume();
+      reject(new Error(`Roblox request failed with status ${response.statusCode}`));
+      return;
+    }
+
+    let body = '';
+    response.setEncoding('utf8');
+    response.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 5 * 1024 * 1024) {
+        request.destroy(new Error('Roblox response exceeded the size limit'));
+      }
+    });
+    response.on('end', () => resolve(body));
+  });
+
+  request.setTimeout(10000, () => request.destroy(new Error('Roblox request timed out')));
+  request.on('error', reject);
+});
+
+const decodeHtmlEntities = (value) => value
+  .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+  .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+  .replace(/&quot;/gi, '"')
+  .replace(/&#39;|&apos;/gi, "'")
+  .replace(/&lt;/gi, '<')
+  .replace(/&gt;/gi, '>')
+  .replace(/&amp;/gi, '&');
+
+const getPublicProfileDescription = async (userId) => {
+  if (!/^\d+$/.test(String(userId))) {
+    throw new Error('Invalid Roblox user ID');
+  }
+
+  const profileUrl = `https://www.roblox.com/users/${userId}/profile`;
+  const html = await getResponseBody(profileUrl, {
+    Accept: 'text/html',
+    'Cache-Control': 'no-cache',
+    'User-Agent': 'Bloxbashh/1.0'
+  });
+  const descriptionMeta = html.match(
+    /<meta\s+(?:name|property)=["'](?:description|og:description)["']\s+content=["']([\s\S]*?)["']\s*\/?>/i
+  );
+
+  return descriptionMeta ? decodeHtmlEntities(descriptionMeta[1]).trim() : '';
+};
+
 const mockRobloxUsers = [
   { username: 'RobloxDev', avatar: 'https://tr.rbxcdn.com/38c6edcb506ec7e0e3a6b2f8c7b3e5c0/420/420/Hat/Png', id: '1' },
   { username: 'Builderman', avatar: 'https://tr.rbxcdn.com/38c6edcb506ec7e0e3a6b2f8c7b3e5c0/420/420/Hat/Png', id: '2' },
@@ -192,54 +242,26 @@ const checkUsernameExists = async (username) => {
 const getUserDescription = async (userId) => {
   try {
     const robloxApiUrl = `https://users.roblox.com/v1/users/${userId}`;
-
-    return new Promise((resolve, reject) => {
-      https.get(robloxApiUrl, (robloxRes) => {
-        let data = '';
-
-        robloxRes.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        robloxRes.on('end', () => {
-          try {
-            const robloxData = JSON.parse(data);
-            
-            if (robloxData.description) {
-              resolve({ description: robloxData.description });
-            } else {
-              resolve({ description: '' });
-            }
-          } catch (parseError) {
-            console.error('Error parsing Roblox API response:', parseError);
-            // Fallback to mock description
-            const mockUser = mockRobloxUsers.find(u => u.id === userId);
-            if (mockUser) {
-              resolve({ description: 'Mock user description for testing' });
-            } else {
-              reject(new Error('Error fetching user description'));
-            }
-          }
-        });
-      }).on('error', (err) => {
-        console.error('Error calling Roblox API:', err);
-        // Fallback to mock description
-        const mockUser = mockRobloxUsers.find(u => u.id === userId);
-        if (mockUser) {
-          resolve({ description: 'Mock user description for testing' });
-        } else {
-          reject(new Error('Error fetching user description'));
-        }
-      });
+    const body = await getResponseBody(robloxApiUrl, {
+      Accept: 'application/json',
+      'Cache-Control': 'no-cache',
+      'User-Agent': 'Bloxbashh/1.0'
     });
-  } catch (error) {
-    console.error('Get description error:', error);
-    // Fallback to mock description
-    const mockUser = mockRobloxUsers.find(u => u.id === userId);
-    if (mockUser) {
-      return { description: 'Mock user description for testing' };
+    const robloxData = JSON.parse(body);
+
+    if (robloxData.description) {
+      return { description: robloxData.description, source: 'users-api' };
     }
-    throw new Error('Internal server error');
+  } catch (error) {
+    console.warn('Roblox users API description lookup failed; trying public profile:', error.message);
+  }
+
+  try {
+    const description = await getPublicProfileDescription(userId);
+    return { description, source: 'public-profile' };
+  } catch (error) {
+    console.error('Public Roblox profile description lookup failed:', error.message);
+    throw new Error('Unable to fetch the Roblox profile description');
   }
 };
 
@@ -247,5 +269,6 @@ module.exports = {
   searchRobloxUsers,
   checkUsernameExists,
   getUserDescription,
+  getPublicProfileDescription,
   mockRobloxUsers
 };

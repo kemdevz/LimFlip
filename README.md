@@ -1,5 +1,4 @@
 # LimFlip - Skidded ass site dont reccomend downloading. 
-# BloxPvP & LimFlip Scam & Skid. #
 
 # Questions you may have!
 **Who really is Lucas?** - Well Lucas here has been disguising himself to you all and hiding the fact that he's Zarex, Were not gonna go into depth but the proof is in the screenshots below and I think everyone with common sense can understand this @v9m and @zzz are also keeping this a secret from you so I wouldn't trust them either, Can Lucas develop you may ask? No he uses AI for simply everything he does.
